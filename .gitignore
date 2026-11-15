@@ -1,0 +1,18 @@
+# Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Images are too big for Git history (plan: LFS or a release download)
+data/images/
+
+# Model weights and exports: download or rebuild, don't commit
+models/*
+!models/.gitkeep
+*.pt
+*.ts
+*.onnx
+
+# Ultralytics writes run folders here by default
+runs/
