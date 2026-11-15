@@ -21,6 +21,7 @@ dependencies = [
 [dependency-groups]
 # Training PC: CUDA build of PyTorch (~6 GB, with its NVIDIA libraries) for GPU training and SAM 3.
 train = [
+    "timm==1.0.31",
     "torch==2.14.1",
     "torchvision==0.29.2",
 ]
@@ -52,3 +53,7 @@ torchvision = [{ index = "pytorch-cpu", group = "prod" }]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true   # only used for packages that name it above
+
+[tool.pytest.ini_options]
+pythonpath = ["."]   # so tests can `import src...` from the repo root
+testpaths = ["tests"]

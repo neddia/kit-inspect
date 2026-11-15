@@ -1,7 +1,32 @@
 # Station settings. Sections get filled in as stages need them:
-#   camera:     Stage 1 (locked exposure, focus, white balance)
+#   camera:     Stage 1 (below)
 #   thresholds: Stage 6 (confidence, REVIEW band)
 #   plc:        Stage 7 (below)
+
+camera:
+  device: /dev/video0      # Logitech C510 (USB 046d:081d)
+  width: 1280              # 720p is the sensor's real resolution; bigger sizes are upscaled
+  height: 720
+  fourcc: MJPG             # compressed; YUYV (uncompressed) stalls through WSL USB passthrough
+  fps: 15                  # On WSL, 720p at 30 fps delivers NO frames; 15 fps is steady (tested Nov 15).
+                           # We save single frames, so 15 is plenty. Keep exposure under 1/fps (660 at 15 fps).
+  # The camera FORGETS these on every unplug/reboot, so camera.py applies them
+  # on every open and reads them back. Order matters: switch auto modes off
+  # before setting the manual values, or the camera ignores them.
+  # Exposure and white balance values are placeholders until the rig is built.
+  controls:
+    auto_exposure: 1                 # 1 = manual (3 = auto)
+    exposure_dynamic_framerate: 0    # don't slow the frame rate in dim light
+    white_balance_automatic: 0
+    exposure_time_absolute: 20       # 3-660, in 0.1 ms. Tuned Nov 15 for the desk lamp; retune if the light changes.
+    white_balance_temperature: 4000  # 2800-6500 K. Nov 15: white paper is most neutral at 4000-4400.
+    gain: 16                         # 16-255 in practice: while streaming, anything below 16 snaps to 16
+                                     # (camera claims 0 is the minimum). Digital brightening adds noise; keep low.
+    backlight_compensation: 0
+    zoom_absolute: 2                 # 1-5. Crops the sensor (real detail, unlike a software crop).
+    pan_absolute: 0                  # pan/tilt move the zoomed window around; keep centred
+    tilt_absolute: 0
+  # No focus control: the C510 is fixed-focus. Set the camera height so the tray is sharp.
 
 plc:
   simulated: true          # The PLC is a Python simulator, not real hardware.

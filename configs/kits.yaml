@@ -2,6 +2,6 @@
 # detected counts against these numbers.
 kits:
   KIT-A:
-    bolt: 2
-    nut: 2
-    washer: 4
+    bolt: 3
+    nut: 3
+    screw: 2
