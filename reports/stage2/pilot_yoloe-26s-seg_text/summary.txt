@@ -1,0 +1,13 @@
+Zero-shot baseline: yoloe-26s-seg.pt, text bolt/nut/screw, session pilot (38 images)
+
+ cutoff count acc decision  false pass  false reject   mean count error per part
+   0.01        0%      53%     0 of 20      18 of 18    bolt 2.82  nut 3.63  screw 1.82
+   0.02        0%      53%     0 of 20      18 of 18    bolt 2.82  nut 2.37  screw 1.42
+   0.05        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 1.95  screw 1.53  <- best (optimistic: picked on these images)
+    0.1        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 1.45  screw 1.66
+   0.15        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 1.11  screw 1.74
+    0.2        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 1.24  screw 1.79
+   0.25        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 1.42  screw 1.84  <- default cutoff
+    0.3        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 1.74  screw 1.84
+    0.4        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 2.50  screw 1.89
+    0.5        3%      53%     0 of 20      18 of 18    bolt 2.82  nut 2.74  screw 1.89

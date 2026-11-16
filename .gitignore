@@ -16,3 +16,7 @@ models/*
 
 # Ultralytics writes run folders here by default
 runs/
+
+# Bulk run output: regenerate with the scripts (curate a few for the report later)
+reports/**/wrong/
+reports/explore/
