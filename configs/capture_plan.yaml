@@ -1,0 +1,106 @@
+# The shot list for guided capture (src/capture/guided.py).
+# Sessions run in this order; the script remembers where you are (it reads the
+# manifest), so you can quit and come back. Edit freely BEFORE shooting a session.
+#
+# Each session:
+#   name, split (train/val/test), tier (normal/stress/invalid, default normal)
+#   setup:  what to change before the session starts (shown full-screen, ENTER to begin)
+#   loose:  true = set the tray down loosely (±2 cm, slightly rotated) every shot
+#   hint:   extra instruction shown on every shot
+#   mix:    shots per scenario, IN THIS ORDER (default: default_mix below).
+#           Scenarios: complete, missing_<part>, extra_part, two_faults,
+#           foreign_object, stacked, empty
+#   pauses: {shot number: "what to change"} -- stop mid-session for a change
+#
+# All sessions are shot on one day (Nov 16), so the conditions are made
+# physically different instead of waiting for different days. Note it in the report.
+
+kit: KIT-A
+
+default_mix:          # 40 shots, grouped so you change the parts as rarely as possible
+  complete: 16
+  missing_bolt: 4
+  missing_nut: 3
+  missing_screw: 4
+  extra_part: 4
+  two_faults: 2
+  foreign_object: 4
+  stacked: 2
+  empty: 1
+
+stress_mix:           # 15 shots
+  complete: 6
+  missing_bolt: 2
+  missing_nut: 2
+  missing_screw: 2
+  extra_part: 2
+  two_faults: 1
+
+sessions:
+  - name: train01
+    split: train
+    setup: "BASELINE: room lights ON, fixture lamp at its normal level, window closed"
+
+  - name: train02
+    split: train
+    setup: "ROOM LIGHTS OFF: fixture lamp only"
+
+  - name: train03
+    split: train
+    setup: "DAYLIGHT: open the window/blinds, room lights off, lamp normal"
+    loose: true
+
+  - name: train04
+    split: train
+    setup: "BRIGHTER: turn the fixture lamp UP, room lights on, window closed"
+    loose: true
+
+  - name: train05
+    split: train
+    setup: "CAMERA MOVED: tilt the camera a few degrees (don't touch settings), lamp normal"
+    loose: true
+
+  - name: val01
+    split: val
+    setup: "VALIDATION, mixed: camera back to roughly normal, room lights on, lamp normal"
+    loose: true
+    pauses:
+      14: "Room lights OFF (lamp only)"
+      27: "Window open / daylight, lamp a bit brighter"
+
+  # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
+  - name: stress_side
+    split: test
+    tier: stress
+    setup: "STRESS: move the lamp off to one side (hard shadows)"
+    mix: stress
+  - name: stress_offset
+    split: test
+    tier: stress
+    setup: "STRESS: tray placed 5 cm off its mark; some shots partly out of frame"
+    mix: stress
+  - name: stress_dim
+    split: test
+    tier: stress
+    setup: "STRESS: dim light: room lights off, lamp at its lowest"
+    mix: stress
+  - name: stress_upright
+    split: test
+    tier: stress
+    setup: "STRESS: normal light; parts standing up"
+    hint: "stand 1-2 bolts on their heads and/or a nut on its edge"
+    mix: stress
+  - name: invalid01
+    split: test
+    tier: invalid
+    setup: "INVALID SCENES: normal light"
+    mix: {complete: 10, empty: 5}
+    pauses:
+      1: "HAND IN FRAME: keep a hand over the tray for each shot"
+      6: "LENS PARTLY COVERED: hold a finger or paper over part of the lens"
+      11: "NO TRAY: take the tray (and parts) out of view"
+  - name: stress_wrong_size
+    split: test
+    tier: stress
+    setup: "STRESS, WRONG SIZE: normal light. Have the smaller screws and nuts from the same pack ready"
+    mix: {complete: 5, swap_screw: 5, swap_nut: 5}   # complete = control shots
