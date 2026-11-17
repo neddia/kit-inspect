@@ -52,15 +52,19 @@ inspection:                # Stage 6. Every number here is chosen on train/val d
 
 plc:
   simulated: true         # The PLC is a Python simulator, not real hardware.
+  host: 127.0.0.1          # where the PLC (simulator) listens; EtherNet/IP port 44818
+  port: 44818
   timeout_s: 2.0           # No Insp_Done within this time = FAIL. Tune once latency is measured.
   heartbeat_ms: 500        # Vision_Heartbeat toggle period.
+  heartbeat_timeout_s: 2.0 # PLC side: no heartbeat toggle for this long = vision fault, block release.
+  poll_ms: 10              # how often each side checks the tags
   tags:
     trigger: Insp_Trigger
     cycle_id: Insp_CycleID
     busy: Insp_Busy
     result: Insp_Result              # 1 = PASS, 2 = FAIL, 3 = REVIEW
     result_cycle_id: Insp_ResultCycleID
-    kit_id: Insp_KitID
+    kit_id: Insp_KitID               # DINT code, mapped in kits.yaml `codes` (1 = KIT-A)
     done: Insp_Done
     ack: Insp_Ack
     heartbeat: Vision_Heartbeat

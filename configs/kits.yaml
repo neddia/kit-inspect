@@ -5,3 +5,14 @@ kits:
     bolt: 3
     nut: 3
     screw: 2
+  KIT-B:            # a second recipe, for the "same tray, different kit" demo (no photos of it)
+    bolt: 2
+    nut: 4
+    screw: 2
+
+# The PLC sends the kit as a number (Insp_KitID, DINT), like a PLC "recipe number".
+# cpppo can't take STRING writes, and number codes are what real lines use anyway.
+# 0 or a code not listed here -> REVIEW.
+codes:
+  1: KIT-A
+  2: KIT-B
