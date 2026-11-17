@@ -62,7 +62,15 @@ def note_for(scenario):
     if scenario.startswith("swap_"):
         part = scenario.removeprefix("swap_")
         return f"swap one {part} for its SMALLER sibling (the small one counts as 'other')"
+    if scenario.startswith("lookalike_"):
+        part = scenario.removeprefix("lookalike_")
+        return f"REPLACE one {part} with a LOOK-ALIKE that isn't one (coin cell, washer, coin): counts as 'other'"
     return NOTES.get(scenario)
+
+
+def is_swap(scenario):
+    """One real part out, something else in its place: the counts can look complete."""
+    return scenario.startswith(("swap_", "lookalike_"))
 
 
 # ---------- the plan: turn a mix into an ordered shot list ----------
@@ -97,11 +105,11 @@ def build_shots(mix, spec, parts):
                 a, b = kit_parts[i % len(kit_parts)], kit_parts[(i + 1) % len(kit_parts)]
                 counts[a] -= 1                                       # even: two missing,
                 counts[b] += -1 if i % 2 == 0 else 1                 # odd: one missing + one extra
-            elif scenario.startswith("swap_"):
-                # A wrong-size part: one real part out, its smaller sibling in. The model
-                # will likely count the small one as the real part, so counts "match":
-                # this is the false-pass case a size check would catch.
-                part = scenario.removeprefix("swap_")
+            elif is_swap(scenario):
+                # One real part out, something in its place: its smaller sibling (swap_) or a
+                # look-alike such as a coin cell for a nut (lookalike_). If the model counts the
+                # stand-in as the real part, the counts "match": the false-pass case.
+                part = scenario.split("_", 1)[1]
                 if part not in kit_parts:
                     raise SystemExit(f"Plan asks for {scenario}, but {part!r} isn't in the kit {kit_parts}")
                 counts[part] -= 1
@@ -115,7 +123,7 @@ def build_shots(mix, spec, parts):
             else:
                 raise SystemExit(f"Unknown scenario {scenario!r} in the capture plan")
             got = scenario_for(counts, spec, stacked)
-            want = "two_faults" if scenario.startswith("swap_") else scenario  # what the rules call a swap
+            want = "two_faults" if is_swap(scenario) else scenario  # what the rules call a swap
             if got != want or min(counts.values()) < 0:
                 raise SystemExit(f"Plan asks for {scenario} but that tray would be {got}: {counts}")
             shots.append({"scenario": scenario, "counts": counts, "stacked": stacked})
@@ -174,6 +182,8 @@ def main():
     parser.add_argument("--start", help="session to do first (the rest follow in plan order)")
     parser.add_argument("--list", action="store_true", help="print the plan and progress, no camera")
     parser.add_argument("--show", metavar="SESSION", help="print every shot of one session, no camera")
+    parser.add_argument("--verdict", action="store_true",
+                        help="after each shot, show what the current model decides (find what fools it)")
     args = parser.parse_args()
 
     plan = yaml.safe_load(Path(args.plan).read_text())
@@ -221,6 +231,12 @@ def main():
 
     prepare_manifest(MANIFEST, columns)
     quiet_jpeg_warnings()
+    inspector = None
+    if args.verdict:
+        from src.inspection.draw import draw
+        from src.inspection.pipeline import Inspector
+        inspector = Inspector()
+        verdict_window = "model's verdict on the last shot"
     cam_cfg = load_camera_config()
     cap = open_camera(cam_cfg)
     cap.set(cv2.CAP_PROP_CONVERT_RGB, 0)  # the camera's own JPEG bytes
@@ -274,7 +290,7 @@ def main():
         plan_shot = shots[name][k]
         scenario = scenario_for(counts, spec, stacked)
         as_planned = counts == plan_shot["counts"] and stacked == plan_shot["stacked"]
-        if as_planned and plan_shot["scenario"].startswith("swap_"):
+        if as_planned and is_swap(plan_shot["scenario"]):
             scenario = plan_shot["scenario"]  # the rules can't tell a swap from two faults; the plan can
         expected = expected_for(counts, spec, tier, stacked)
         brightness, clipped, _ = measure(frame)
@@ -304,11 +320,12 @@ def main():
                 layout += "; tray down LOOSE (±2 cm, slightly turned)"
             lines = [f"SHOT: {plan_shot['scenario'].replace('_', ' ').upper()}   ->  {tray_text(plan_shot['counts'], parts)}"]
             note = note_for(plan_shot["scenario"])
-            extra = note or session.get("hint")
             if change:
                 lines.append(f"CHANGE PARTS: {change}")
-            if extra:
-                lines.append(extra.upper() if note else extra)
+            if note:
+                lines.append(note.upper())
+            if session.get("hint"):
+                lines.append(session["hint"])
             lines.append(f"layout: {layout}   ...shake, hands out, SPACE")
             out = banner(out, lines, YELLOW if change or note else GREEN)
         cv2.imshow(window, out)
@@ -340,6 +357,18 @@ def main():
             saved.append((image, name))
             done[name] = done.get(name, 0) + 1
             status, status_until = f"SAVED {image} ({scenario}, {expected})", time.time() + 2
+            if inspector:
+                photo = cv2.imdecode(fresh, cv2.IMREAD_COLOR)
+                result = inspector.inspect(photo, kit_id)
+                dec = result["decision"]
+                if expected == "PASS":
+                    note = {"PASS": "", "REVIEW": "  (sent a good kit to review)", "FAIL": "  <-- FALSE REJECT"}[dec.result]
+                else:
+                    note = "  <-- FALSE PASS!" if dec.result == "PASS" else ""
+                status += f"   MODEL: {dec.result}{note}"
+                status_until = time.time() + 4
+                shown = draw(photo, result, inspector.cfg["decision"]["high"])
+                cv2.imshow(verdict_window, cv2.resize(shown, (shown.shape[1] * 3 // 4, shown.shape[0] * 3 // 4)))
             print(status)
             pos = position(order, shots, done)
             if pos is None:

@@ -9,7 +9,7 @@ import pytest
 import yaml
 
 from src.capture.capture import scenario_for
-from src.capture.guided import build_shots, change_text, position, session_mix
+from src.capture.guided import build_shots, change_text, position, session_mix, is_swap
 
 SPEC = {"bolt": 3, "nut": 3, "screw": 2}
 PARTS = ["bolt", "nut", "screw"]
@@ -22,7 +22,7 @@ def test_every_planned_session_builds_and_matches_its_scenarios():
         shots = build_shots(mix, SPEC, PARTS)
         assert len(shots) == sum(mix.values())
         for shot in shots:
-            want = "two_faults" if shot["scenario"].startswith("swap_") else shot["scenario"]
+            want = "two_faults" if is_swap(shot["scenario"]) else shot["scenario"]
             assert scenario_for(shot["counts"], SPEC, shot["stacked"]) == want
 
 
@@ -66,3 +66,9 @@ def test_swap_puts_a_smaller_part_in_place_of_a_real_one():
     shots = build_shots({"swap_screw": 1}, SPEC, PARTS)
     assert shots[0]["scenario"] == "swap_screw"
     assert shots[0]["counts"] == {"bolt": 3, "nut": 3, "screw": 1, "other": 1}
+
+
+def test_lookalike_replaces_a_part_with_something_that_counts_as_other():
+    shots = build_shots({"lookalike_nut": 1}, SPEC, PARTS)
+    assert shots[0]["scenario"] == "lookalike_nut"
+    assert shots[0]["counts"]["nut"] == SPEC["nut"] - 1 and shots[0]["counts"]["other"] == 1

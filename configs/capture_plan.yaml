@@ -9,7 +9,8 @@
 #   hint:   extra instruction shown on every shot
 #   mix:    shots per scenario, IN THIS ORDER (default: default_mix below).
 #           Scenarios: complete, missing_<part>, extra_part, two_faults,
-#           foreign_object, stacked, empty
+#           foreign_object, stacked, empty, swap_<part> (smaller sibling),
+#           lookalike_<part> (a look-alike in its place, e.g. a coin cell for a nut)
 #   pauses: {shot number: "what to change"} -- stop mid-session for a change
 #
 # All sessions are shot on one day (Nov 16), so the conditions are made
@@ -67,6 +68,29 @@ sessions:
     pauses:
       14: "Room lights OFF (lamp only)"
       27: "Window open / daylight, lamp a bit brighter"
+
+  # ---- Hard cases (Nov 17): what the live station got wrong or nearly wrong ----
+  # Shoot with: uv run python -m src.capture.guided --verdict   (shows the model's answer each shot)
+  - name: hard01
+    split: train
+    setup: "HARD CASES 1, LOOK-ALIKES: normal light. Have coin cells, coins, washers, the bead ready"
+    hint: "junk = mostly LOOK-ALIKES (coin cell, coin, washer); sometimes touching a part"
+    mix: {foreign_object: 40, complete: 10}
+  - name: hard02
+    split: train
+    setup: "HARD CASES 2, ODD POSES: normal light, no junk"
+    hint: "1-2 parts in an ODD POSE: bolt standing on its head, nut on its edge. A shorter bolt/screw may stand in for one (it still counts as that part)"
+    mix: {complete: 30}
+  - name: hard03
+    split: train
+    setup: "HARD CASES 3, OVERLAP: normal light, no junk"
+    hint: "parts OVERLAPPING and touching, but every part countable by eye (if you'd hesitate, it's 'stacked': redo)"
+    mix: {complete: 30}
+  - name: hardval
+    split: val
+    setup: "HARD CASES CHECK SET (never trained on): normal light; mix odd poses, overlaps and look-alikes"
+    hint: "mix it up: odd poses, overlaps, look-alikes"
+    mix: {complete: 8, foreign_object: 6, lookalike_nut: 4, missing_nut: 2}
 
   # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
   - name: stress_side
