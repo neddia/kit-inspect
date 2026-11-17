@@ -14,6 +14,7 @@ What counts as right (expected comes from the manifest):
 Run from the repo root:
     uv run python -m src.eval.decision_eval                       # val01
     uv run python -m src.eval.decision_eval --session val01 --name v1
+    uv run python -m src.eval.decision_eval --name int8 --model models/kit_yolo26n_640_v1_int8_openvino_model
 
 Writes reports/stage6/<name>/: summary.txt, per_image.csv, and images/ with an
 annotated picture of every tray that wasn't a clean right answer.
@@ -65,6 +66,7 @@ def main():
     parser = argparse.ArgumentParser(description="Score the full PASS/FAIL/REVIEW decision")
     parser.add_argument("--session", nargs="+", default=["val01"])
     parser.add_argument("--name", default="val01")
+    parser.add_argument("--model", help="model to use instead of station.yaml's (e.g. an OpenVINO export folder)")
     args = parser.parse_args()
 
     quiet_jpeg_warnings()
@@ -73,7 +75,11 @@ def main():
     out_dir = REPO / "reports" / "stage6" / args.name
     (out_dir / "images").mkdir(parents=True, exist_ok=True)
 
-    inspector = Inspector()
+    model = None
+    if args.model:
+        from ultralytics import YOLO
+        model = YOLO(args.model, task="detect")
+    inspector = Inspector(model=model)
     results, by_scenario, times = [], {}, []
     for row in rows:
         frame = cv2.imread(str(DATA / "images" / row["image"]))
@@ -92,7 +98,8 @@ def main():
     faulty = [r for r in results if r["expected"] != "PASS"]
     tally = Counter(r["outcome"] for r in results)
     reviews = sum(r["result"] == "REVIEW" for r in results)
-    lines = [f"Full decision on {', '.join(args.session)} ({n} trays). Settings: configs/station.yaml", "",
+    model_name = args.model or inspector.cfg["model"]
+    lines = [f"Full decision on {', '.join(args.session)} ({n} trays). Model: {model_name}. Settings: configs/station.yaml", "",
              f"False passes:    {tally['FALSE PASS']} of {len(faulty)} faulty trays   <- the headline number",
              f"False rejects:   {tally['false reject']} of {len(good)} good trays (FAIL on a good kit)",
              f"Good kits sent to REVIEW: {tally['review']} of {len(good)}",

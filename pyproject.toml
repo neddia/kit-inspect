@@ -23,6 +23,7 @@ dependencies = [
 train = [
     "anomalib==2.7.1",
     "clip",
+    "nncf==3.4.0",           # INT8 quantization for the OpenVINO export (export runs on the PC)
     "timm==1.0.31",
     "torch==2.14.1",
     "torchvision==0.29.2",
