@@ -46,7 +46,8 @@ inspection:                # Stage 6. Every number here is chosen on train/val d
   leftovers:               # OpenCV unknown-object check (src/inspection/leftovers.py). Chosen over PatchCore Nov 17 (speed)
     neighbourhood: 82
     darker_by: 35
-    saturation: 60
+    saturation: 45         # was 60: a pale green bead (saturation ~55) slipped through on the live station, Nov 17.
+                           # White floor is 22-34; 45 = mid-gap. No new false alarms on 252 train/val trays.
     box_margin: 20
     min_area: 150
 

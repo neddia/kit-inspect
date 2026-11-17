@@ -1,0 +1,41 @@
+image,scenario,expected,result,outcome,reasons
+val01/val01_0001.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0002.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0003.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0004.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0005.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0006.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0007.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0008.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0009.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0010.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0011.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0012.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0013.jpg,complete,PASS,REVIEW,review,1 unknown object on the tray
+val01/val01_0014.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0015.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0016.jpg,complete,PASS,PASS,right,counts match KIT-A
+val01/val01_0017.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+val01/val01_0018.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+val01/val01_0019.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+val01/val01_0020.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+val01/val01_0021.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut
+val01/val01_0022.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut
+val01/val01_0023.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut; also: 1 unknown object on the tray
+val01/val01_0024.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+val01/val01_0025.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+val01/val01_0026.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+val01/val01_0027.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+val01/val01_0028.jpg,extra_part,FAIL,FAIL,right,1 extra bolt
+val01/val01_0029.jpg,extra_part,FAIL,FAIL,right,1 extra nut
+val01/val01_0030.jpg,extra_part,FAIL,FAIL,right,1 extra screw
+val01/val01_0031.jpg,extra_part,FAIL,FAIL,right,1 extra bolt
+val01/val01_0032.jpg,two_faults,FAIL,FAIL,right,missing 1 bolt; missing 1 nut
+val01/val01_0033.jpg,two_faults,FAIL,FAIL,right,missing 1 nut; 1 extra screw
+val01/val01_0034.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+val01/val01_0035.jpg,foreign_object,NOT_PASS,REVIEW,right,unsure about 1 bolt (0.52); 1 unknown object on the tray
+val01/val01_0036.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+val01/val01_0037.jpg,foreign_object,NOT_PASS,REVIEW,right,"unsure about 1 nut (0.31); unsure about 2 screws (0.59, 0.28); 6 unknown objects on the tray"
+val01/val01_0038.jpg,stacked,NOT_PASS,FAIL,right,missing 1 nut
+val01/val01_0039.jpg,stacked,NOT_PASS,FAIL,right,missing 1 bolt
+val01/val01_0040.jpg,empty,FAIL,FAIL,right,missing 3 bolts; missing 3 nuts; missing 2 screws

@@ -18,15 +18,19 @@ Tuned on all train + val images (Nov 17): catches 23 of 26 foreign objects,
 false alarms on 4% of other trays. Known misses: a white disc on the white floor
 (no contrast: a tray-colour problem), and a small object inside crowded part
 boxes (blanking whole boxes hides it). Objects on the sloped wall aren't checked.
+Nov 17, live station: a pale green bead (saturation ~55) was caught in only 3 of 7
+photos at saturation 60; at 45 all 7, with no new false alarms (white floor: 22-34).
+Big objects need colour or the darker test misses them: black-hat only finds things
+smaller than its neighbourhood window.
 """
 
 import cv2
 import numpy as np
 
-DEFAULTS = dict(neighbourhood=82, darker_by=35, saturation=60, box_margin=20, min_area=150)
+DEFAULTS = dict(neighbourhood=82, darker_by=35, saturation=45, box_margin=20, min_area=150)
 
 
-def find_leftovers(frame, floor, boxes, neighbourhood=82, darker_by=35, saturation=60, box_margin=20, min_area=150):
+def find_leftovers(frame, floor, boxes, neighbourhood=82, darker_by=35, saturation=45, box_margin=20, min_area=150):
     """List of unknown objects on the floor: dicts with box [x1, y1, x2, y2] and area (pixels)."""
     h, w = frame.shape[:2]
     on_floor = np.zeros((h, w), np.uint8)
