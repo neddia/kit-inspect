@@ -28,10 +28,12 @@ def test_mark_undo_and_harvest_once(tmp_path, monkeypatch):
     h.record(result(4, 150), train=True)          # same tray as cycle 3: a near-duplicate
     h.record(result(5, 200), train=True)          # a slip...
     assert h.marked() == 4
-    assert h.unmark_last() == 5                   # ...undone
+    assert h.unmark_last()["cycle_id"] == 5      # ...undone
     assert h.marked() == 3
     h.record({"cycle_id": 6, "kit_id": "KIT-A", "error": "camera unplugged"}, train=True)
     assert h.marked() == 3                        # faults are never saved for training
+    images = [r["image"] for r in h.recent()]
+    assert len(set(i for i in images if i)) == 5  # every photo its own file, even in the same second
 
     data = tmp_path / "data"
     (data / "images").mkdir(parents=True)

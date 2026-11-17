@@ -5,7 +5,7 @@ confidence, rising REVIEW rate), and because the station's own photos are the
 best future training data (they're exactly the line's conditions).
 
     data/history/history.db                     one row per inspection (or fault)
-    data/history/images/2026-11-17/143012_c42.jpg   the raw photo (annotations can be redrawn)
+    data/history/images/2026-11-17/143012_250_c42.jpg   the raw photo (annotations can be redrawn)
 
 SQLite is a database in one file, built into Python. WAL mode lets the dashboard
 read while the station writes.
@@ -25,7 +25,7 @@ ROOT = REPO / "data" / "history"
 COLUMNS = """
     id INTEGER PRIMARY KEY,
     time TEXT,            -- local time, ISO format
-    cycle_id INTEGER,     -- the PLC's Insp_CycleID
+    cycle_id INTEGER,     -- the PLC's Insp_CycleID (empty for a bench inspection: SPACE in the window)
     kit_id TEXT,          -- kit name (from the PLC's code)
     result TEXT,          -- PASS / FAIL / REVIEW, or FAULT
     reasons TEXT,         -- JSON list, e.g. ["missing 1 nut"]
@@ -65,7 +65,8 @@ class History:
         now = datetime.now()
         image = None
         if r.get("frame") is not None:
-            image = Path("images") / now.strftime("%Y-%m-%d") / f"{now:%H%M%S}_c{r['cycle_id']}.jpg"
+            image = Path("images") / now.strftime("%Y-%m-%d") / (f"{now:%H%M%S}_{now.microsecond // 1000:03d}_"   # ms: two quick inspections never share a name
+                + (f"c{r['cycle_id']}" if r["cycle_id"] is not None else "bench") + ".jpg")
             (self.root / image).parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(self.root / image), r["frame"])
         row = {"time": now.isoformat(timespec="milliseconds"), "cycle_id": r["cycle_id"], "kit_id": r["kit_id"],
@@ -92,7 +93,7 @@ class History:
         return cur.lastrowid
 
     def unmark_last(self):
-        """Undo: the newest photo marked for training (not yet harvested) is unmarked. Returns its cycle_id or None."""
+        """Undo: the newest photo marked for training (not yet harvested) is unmarked. Returns its row or None."""
         with self.lock:
             row = self.db.execute("SELECT id, cycle_id FROM inspections WHERE train = 1 AND harvested IS NULL "
                                   "ORDER BY id DESC LIMIT 1").fetchone()
@@ -100,7 +101,7 @@ class History:
                 return None
             self.db.execute("UPDATE inspections SET train = 0 WHERE id = ?", (row["id"],))
             self.db.commit()
-            return row["cycle_id"]
+            return dict(row)
 
     def marked(self):
         """How many photos are marked for training and not harvested yet."""

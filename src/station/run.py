@@ -4,7 +4,8 @@
     PLC trigger ─────────────>├─> fresh photo -> inspect -> Result/Done to the PLC -> history
                               │                                   (src/station/history.py)
     --show: live view + last result in a window (for development; part 5 adds a web dashboard)
-            keys: t = save for training on/off, u = undo the last saved photo, q = quit
+            keys: SPACE = inspect now (bench test, no PLC needed), t = save for training on/off,
+                  u = undo the last saved photo, q or the window's X = quit
 
 Run, with the simulated PLC running (uv run python -m src.plc.tags):
     uv run python -m src.station.run                        # the camera
@@ -96,17 +97,18 @@ def fit(img, width):
     return cv2.resize(img, (width, int(img.shape[0] * width / img.shape[1])))
 
 
-def status_panel(width, collect, marked, note):
-    """Under the live view: is "save for training" on, how many are saved, the keys."""
-    panel = np.zeros((170, width, 3), np.uint8)
+def status_panel(width, collect, marked, note, plc):
+    """Under the live view: is "save for training" on, how many are saved, PLC link, the keys."""
+    panel = np.zeros((200, width, 3), np.uint8)
     on = (60, 200, 60) if collect else (110, 110, 110)
     cv2.putText(panel, f"SAVE FOR TRAINING: {'ON' if collect else 'OFF'}", (12, 40), cv2.FONT_HERSHEY_SIMPLEX,
                 0.9, on, 2, cv2.LINE_AA)
     cv2.putText(panel, f"{marked} photos saved for training", (12, 78), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
                 (255, 255, 255), 1, cv2.LINE_AA)
     cv2.putText(panel, note, (12, 112), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 1, cv2.LINE_AA)
-    cv2.putText(panel, "t = on/off   u = undo last   q = quit", (12, 152), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
-                (170, 170, 170), 1, cv2.LINE_AA)
+    cv2.putText(panel, plc, (12, 146), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (170, 170, 170), 1, cv2.LINE_AA)
+    cv2.putText(panel, "SPACE = inspect now   t = save on/off   u = undo   q = quit", (12, 182),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
     return panel
 
 
@@ -127,6 +129,7 @@ def main():
     parser.add_argument("--show", action="store_true", help="window with the live view and the last result")
     parser.add_argument("--no-history", action="store_true", help="don't record inspections")
     parser.add_argument("--collect", action="store_true", help='start with "save for training" on (t toggles)')
+    parser.add_argument("--kit", default="KIT-A", help="kit for bench inspections (SPACE); the PLC sends its own")
     args = parser.parse_args()
     sys.stdout.reconfigure(line_buffering=True)
     quiet_jpeg_warnings()
@@ -142,7 +145,12 @@ def main():
         frames = FolderFrames(args.images)        # start the folder from its first photo
     history = None if args.no_history else History()
     last = {"img": None}
-    state = {"collect": args.collect and history is not None, "note": ""}
+    state = {"collect": args.collect and history is not None, "note": "", "plc": "PLC: connecting..."}
+    inspect_lock = threading.Lock()               # PLC triggers and SPACE can't run the model at the same time
+
+    def inspect(frame, kit_id):
+        with inspect_lock:
+            return inspector.inspect(frame, kit_id)
 
     def on_result(r):
         if history:
@@ -150,16 +158,39 @@ def main():
                 history.record(r, model, train=state["collect"])
             except Exception as e:                # a full disk must not stop the line: warn, keep inspecting
                 print(f"WARNING: history not saved: {e}")
+        label = f"cycle {r['cycle_id']:>4}" if r["cycle_id"] is not None else "bench     "
         if "error" in r:
-            print(f"cycle {r['cycle_id']:>4}  FAULT   {r['error']}")
+            print(f"{label}  FAULT   {r['error']}")
             return
         d = r["decision"]
-        print(f"cycle {r['cycle_id']:>4}  {frames.name:<16} {r['kit_id'] or '-':<7} {d.result:<7} "
+        print(f"{label}  {frames.name:<16} {r['kit_id'] or '-':<7} {d.result:<7} "
               f"photo {r['ms_frame']:>4.0f} ms  total {r['ms']:>4.0f} ms  {'; '.join(d.reasons)}")
         if args.show:
             last["img"] = draw(r["frame"], r["out"], high)
 
-    station = VisionSide(inspector.inspect, frames.get, on_result=on_result)
+    def bench():
+        """SPACE: inspect the tray now, without the PLC (no release; recorded like any other)."""
+        t0 = time.monotonic()
+        try:
+            frame = frames.get(t0)
+            ms_frame = round((time.monotonic() - t0) * 1000, 1)
+            out = inspect(frame, args.kit)
+        except Exception as e:
+            on_result({"cycle_id": None, "kit_id": args.kit, "error": f"{type(e).__name__}: {e}"})
+            return
+        on_result({"cycle_id": None, "kit_id": args.kit, "decision": out["decision"], "out": out, "frame": frame,
+                   "ms_frame": ms_frame, "ms": round((time.monotonic() - t0) * 1000, 1)})
+
+    station = VisionSide(inspect, frames.get, on_result=on_result)
+
+    def serve_plc():
+        """Answer PLC triggers; without a PLC the window still works (bench only)."""
+        state["plc"] = "PLC: connected, answering triggers"
+        try:
+            station.run()
+        except Exception as e:
+            state["plc"] = f"PLC: not connected ({type(e).__name__}) - SPACE still works"
+            print(state["plc"])
     source = args.images or "camera"
     print(f"Station ready. Model {model}, photos from {source}"
           f"{', history in data/history/' if history else ''}. Waiting for PLC triggers; Ctrl+C to stop.")
@@ -167,16 +198,18 @@ def main():
         if not args.show:
             station.run()
         else:
-            worker = threading.Thread(target=station.run, daemon=True)
+            worker = threading.Thread(target=serve_plc, daemon=True)
             worker.start()
             cv2.namedWindow(WINDOW, cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
             marked = history.marked() if history else 0
-            while worker.is_alive():
-                panel = status_panel(560, state["collect"], marked, state["note"])
+            while True:
+                panel = status_panel(560, state["collect"], marked, state["note"], state["plc"])
                 cv2.imshow(WINDOW, side_by_side(frames.latest()[0], last["img"], panel))
                 key = cv2.waitKey(50) & 0xFF
                 if key == ord("q") or window_closed():
                     break
+                if key == ord(" "):
+                    bench()
                 if not history:
                     continue
                 if key == ord("t"):
@@ -184,8 +217,10 @@ def main():
                     state["note"] = f"saving {'ON' if state['collect'] else 'OFF'} from the next kit"
                     print(state["note"])
                 elif key == ord("u"):
-                    cycle = history.unmark_last()
-                    state["note"] = f"undone: cycle {cycle} won't be used" if cycle else "nothing to undo"
+                    row = history.unmark_last()
+                    what = "nothing to undo" if row is None else (
+                        f"cycle {row['cycle_id']}" if row["cycle_id"] is not None else f"bench photo {row['id']}")
+                    state["note"] = what if row is None else f"undone: {what} won't be used"
                     print(state["note"])
                 marked = history.marked()
     except KeyboardInterrupt:
