@@ -8,6 +8,7 @@ the last photo (a slip: missing part, hand in view). Then:
     uv run python -m src.station.harvest                          # how many are saved
     uv run python -m src.station.harvest --session live01         # take the saved ones
     uv run python -m src.station.harvest --from-id 58 --session live01   # or an id range, saved or not
+    uv run python -m src.station.harvest --session liveval --split val   # a check set: never trained on
 
 copies those photos to data/images/live01/ and adds manifest rows: KIT-A, 3/3/2
 (the full-kit rule), split train, scenario "live", other = -1 and expected = ""
@@ -47,6 +48,8 @@ def main():
     parser.add_argument("--from-id", type=int, help="take an id range instead of the saved photos")
     parser.add_argument("--to-id", type=int, help="last history id to take (default: the newest)")
     parser.add_argument("--session", help="new session name, e.g. live01")
+    parser.add_argument("--split", default="train", choices=["train", "val"],
+                        help="val = a check set the model never trains on")
     args = parser.parse_args()
 
     db = History().db                               # (adds the train/harvested columns to old history files)
@@ -89,7 +92,7 @@ def main():
     for i, r in enumerate(kept, 1):
         name = f"{args.session}_{i:04d}.jpg"
         shutil.copy2(ROOT / r["image"], out_dir / name)
-        new.append({"image": f"{args.session}/{name}", "session": args.session, "split": "train", "tier": "normal",
+        new.append({"image": f"{args.session}/{name}", "session": args.session, "split": args.split, "tier": "normal",
                     "kit_id": "KIT-A", "bolts": 3, "nuts": 3, "screws": 2, "other": -1, "expected": "",
                     "scenario": "live"})
     with (DATA / "manifest.csv").open("a", newline="") as f:
