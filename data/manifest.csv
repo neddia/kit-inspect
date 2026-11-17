@@ -32,9 +32,9 @@ pilot/pilot_0030.jpg,pilot,train,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 pilot/pilot_0031.jpg,pilot,train,normal,KIT-A,3,3,1,0,FAIL,missing_screw
 pilot/pilot_0032.jpg,pilot,train,normal,KIT-A,3,3,1,0,FAIL,missing_screw
 pilot/pilot_0033.jpg,pilot,train,normal,KIT-A,3,3,1,0,FAIL,missing_screw
-pilot/pilot_0034.jpg,pilot,train,normal,KIT-A,4,3,2,0,FAIL,extra_part
-pilot/pilot_0035.jpg,pilot,train,normal,KIT-A,4,3,2,0,FAIL,extra_part
-pilot/pilot_0036.jpg,pilot,train,normal,KIT-A,4,3,2,0,FAIL,extra_part
+pilot/pilot_0034.jpg,pilot,train,normal,KIT-A,4,3,1,0,FAIL,two_faults
+pilot/pilot_0035.jpg,pilot,train,normal,KIT-A,4,3,1,0,FAIL,two_faults
+pilot/pilot_0036.jpg,pilot,train,normal,KIT-A,4,3,1,0,FAIL,two_faults
 pilot/pilot_0037.jpg,pilot,train,normal,KIT-A,3,3,3,0,FAIL,extra_part
 pilot/pilot_0038.jpg,pilot,train,normal,KIT-A,0,0,0,0,FAIL,empty
 train01/train01_0001.jpg,train01,train,normal,KIT-A,3,3,2,0,PASS,complete
@@ -149,7 +149,7 @@ train03/train03_0029.jpg,train03,train,normal,KIT-A,3,4,2,0,FAIL,extra_part
 train03/train03_0030.jpg,train03,train,normal,KIT-A,3,3,3,0,FAIL,extra_part
 train03/train03_0031.jpg,train03,train,normal,KIT-A,4,3,2,0,FAIL,extra_part
 train03/train03_0032.jpg,train03,train,normal,KIT-A,2,2,2,0,FAIL,two_faults
-train03/train03_0033.jpg,train03,train,normal,KIT-A,3,2,3,0,FAIL,two_faults
+train03/train03_0033.jpg,train03,train,normal,KIT-A,3,2,2,0,FAIL,missing_nut
 train03/train03_0034.jpg,train03,train,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 train03/train03_0035.jpg,train03,train,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 train03/train03_0036.jpg,train03,train,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
@@ -274,6 +274,6 @@ val01/val01_0034.jpg,val01,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 val01/val01_0035.jpg,val01,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 val01/val01_0036.jpg,val01,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 val01/val01_0037.jpg,val01,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
-val01/val01_0038.jpg,val01,val,normal,KIT-A,3,3,2,0,NOT_PASS,stacked
+val01/val01_0038.jpg,val01,val,normal,KIT-A,3,2,2,0,NOT_PASS,stacked
 val01/val01_0039.jpg,val01,val,normal,KIT-A,3,3,2,0,NOT_PASS,stacked
 val01/val01_0040.jpg,val01,val,normal,KIT-A,0,0,0,0,FAIL,empty

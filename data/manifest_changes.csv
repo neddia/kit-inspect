@@ -1,0 +1,10 @@
+when,image,field,old,new,reason
+2026-11-16T21:09:21,pilot/pilot_0034.jpg,screws,2,1,review: miscounted at capture
+2026-11-16T21:09:21,pilot/pilot_0034.jpg,scenario,extra_part,two_faults,review: miscounted at capture
+2026-11-16T21:09:44,pilot/pilot_0035.jpg,screws,2,1,review: miscounted at capture
+2026-11-16T21:09:44,pilot/pilot_0035.jpg,scenario,extra_part,two_faults,review: miscounted at capture
+2026-11-16T21:09:51,pilot/pilot_0036.jpg,screws,2,1,review: miscounted at capture
+2026-11-16T21:09:51,pilot/pilot_0036.jpg,scenario,extra_part,two_faults,review: miscounted at capture
+2026-11-16T21:24:06,train03/train03_0033.jpg,screws,3,2,review: miscounted at capture
+2026-11-16T21:24:06,train03/train03_0033.jpg,scenario,two_faults,missing_nut,review: miscounted at capture
+2026-11-16T21:35:57,val01/val01_0038.jpg,nuts,3,2,review: miscounted at capture
