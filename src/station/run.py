@@ -82,6 +82,14 @@ class CameraFrames:
         return self.feed.latest()
 
 
+def window_closed():
+    """True once the window's X button was clicked. (The Qt build raises instead of returning 0 for a gone window.)"""
+    try:
+        return cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1
+    except cv2.error:
+        return True
+
+
 def fit(img, width):
     if img is None:
         return np.zeros((int(width * 9 / 16), width, 3), np.uint8)
@@ -167,8 +175,7 @@ def main():
                 panel = status_panel(560, state["collect"], marked, state["note"])
                 cv2.imshow(WINDOW, side_by_side(frames.latest()[0], last["img"], panel))
                 key = cv2.waitKey(50) & 0xFF
-                closed = cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1   # the window's X button
-                if key == ord("q") or closed:
+                if key == ord("q") or window_closed():
                     break
                 if not history:
                     continue
