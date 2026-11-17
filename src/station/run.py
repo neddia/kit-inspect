@@ -80,10 +80,10 @@ class CameraFrames:
         return self.feed.latest()
 
 
-def side_by_side(live, result, width=640):
-    """Live view | last result, each scaled to `width`."""
+def side_by_side(live, result, widths=(560, 900)):
+    """Live view | last result (bigger, so the labels are readable)."""
     tiles = []
-    for img in (live, result):
+    for img, width in zip((live, result), widths):
         if img is None:
             img = np.zeros((360, width, 3), np.uint8)
         tiles.append(cv2.resize(img, (width, int(img.shape[0] * width / img.shape[1]))))
