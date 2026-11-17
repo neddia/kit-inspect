@@ -40,7 +40,7 @@ inspection:                # Stage 6. Every number here is chosen on train/val d
     min_brightness: 140    # flat-floor median brightness; train/val range was 150-248
     max_brightness: 252
     max_floor_outside: 0.10  # tray off position if more than 10% of the floor radius is outside the photo
-  leftovers:               # OpenCV unknown-object check (src/inspection/leftovers.py)
+  leftovers:               # OpenCV unknown-object check (src/inspection/leftovers.py). Chosen over PatchCore Nov 17 (speed)
     neighbourhood: 82
     darker_by: 35
     saturation: 60

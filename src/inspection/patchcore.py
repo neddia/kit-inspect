@@ -1,4 +1,8 @@
-"""PatchCore unknown-object check. Stage 6 experiment: NOT in the pipeline yet.
+"""PatchCore unknown-object check. Stage 6 experiment, NOT used by the station.
+
+Decided Nov 17: the station uses the OpenCV check (leftovers.py). PatchCore caught
+more on val (25/26 vs 23/26) but takes ~2 s per tray on 2 CPU cores (OpenCV: 9 ms)
+and +515 MB RAM. See experiments.md.
 
 The OpenCV check (leftovers.py) looks for "darker than its surroundings or
 strongly coloured". PatchCore instead learns what a NORMAL tray looks like from
