@@ -32,9 +32,10 @@ inspection:                # Stage 6. Every number here is chosen on train/val d
   model: models/kit_yolo26n_640_v1.pt
   imgsz: 640               # must match training
   decision:
-    low: 0.25              # detections below this are noise (ignored)
-    high: 0.6              # at or above: SURE. Between low and high: UNSURE (REVIEW if it could change the answer)
-                           # Placeholders until the confidence band is chosen from val01.
+    low: 0.2               # detections below this are noise (ignored)
+    high: 0.7              # at or above: SURE. Between low and high: UNSURE (REVIEW if it could change the answer)
+                           # Chosen Nov 17 from val01: noise <= 0.11, shakiest real part 0.27, worst false 0.57,
+                           # weakest real part on a normal tray 0.81. Each line sits mid-gap for margin.
     overlap_iou: 0.6       # a detection overlapping a more confident one this much counts as unsure
   scene:
     min_brightness: 140    # flat-floor median brightness; train/val range was 150-248
