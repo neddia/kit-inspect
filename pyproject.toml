@@ -21,6 +21,7 @@ dependencies = [
 [dependency-groups]
 # Training PC: CUDA build of PyTorch (~6 GB, with its NVIDIA libraries) for GPU training and SAM 3.
 train = [
+    "anomalib==2.7.1",
     "clip",
     "timm==1.0.31",
     "torch==2.14.1",
@@ -43,6 +44,10 @@ default-groups = ["train", "dev"]
 conflicts = [[{ group = "train" }, { group = "prod" }]]
 # Both machines run x86-64 Linux (PC: WSL2 Ubuntu, laptop: Omarchy).
 environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+# anomalib asks for opencv-python-headless (OpenCV without windows). Installed next to
+# opencv-python it can overwrite it and break the capture/review windows, so never
+# install it; opencv-python provides the same cv2 module.
+override-dependencies = ["opencv-python-headless; sys_platform == 'never'"]
 
 [tool.uv.sources]
 # train group: no entry here, so it comes from PyPI, whose Linux build of

@@ -28,8 +28,27 @@ camera:
     tilt_absolute: 0
   # No focus control: the C510 is fixed-focus. Set the camera height so the tray is sharp.
 
+inspection:                # Stage 6. Every number here is chosen on train/val data; freeze before the test sessions.
+  model: models/kit_yolo26n_640_v1.pt
+  imgsz: 640               # must match training
+  decision:
+    low: 0.25              # detections below this are noise (ignored)
+    high: 0.6              # at or above: SURE. Between low and high: UNSURE (REVIEW if it could change the answer)
+                           # Placeholders until the confidence band is chosen from val01.
+    overlap_iou: 0.6       # a detection overlapping a more confident one this much counts as unsure
+  scene:
+    min_brightness: 140    # flat-floor median brightness; train/val range was 150-248
+    max_brightness: 252
+    max_floor_outside: 0.10  # tray off position if more than 10% of the floor radius is outside the photo
+  leftovers:               # OpenCV unknown-object check (src/inspection/leftovers.py)
+    neighbourhood: 82
+    darker_by: 35
+    saturation: 60
+    box_margin: 20
+    min_area: 150
+
 plc:
-  simulated: true          # The PLC is a Python simulator, not real hardware.
+  simulated: true         # The PLC is a Python simulator, not real hardware.
   timeout_s: 2.0           # No Insp_Done within this time = FAIL. Tune once latency is measured.
   heartbeat_ms: 500        # Vision_Heartbeat toggle period.
   tags:
