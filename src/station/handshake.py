@@ -11,25 +11,20 @@ If anything fails (camera gone, model error), the station sets Vision_Fault, sto
 the heartbeat and never sets Done. The PLC then times out and holds the kit.
 Silence is always a hold; only a PASS for the current cycle releases.
 
-Part 2 (no camera yet): photos come from a folder, one per trigger.
-    uv run python -m src.station.handshake --images data/images/val01
+Run the station with: uv run python -m src.station.run   (see run.py)
 """
 
-import argparse
-import itertools
 import threading
-import sys
 import time
-from pathlib import Path
-
-import cv2
 
 from src.plc.tags import RESULT_CODES, Tags, load_config
 
 
 class VisionSide:
     def __init__(self, inspect, get_frame, cfg=None, codes=None, port=None, on_result=print):
-        """inspect(frame, kit_id) -> dict with "decision" (Inspector.inspect); get_frame() -> BGR image."""
+        """inspect(frame, kit_id) -> dict with "decision" (Inspector.inspect).
+        get_frame(after) -> BGR image taken after time.monotonic() value `after` (the trigger).
+        on_result(dict) is called after Done is written, so saving history doesn't delay the PLC."""
         loaded_cfg, loaded_codes = load_config()
         self.cfg = cfg or loaded_cfg
         self.codes = codes if codes is not None else loaded_codes
@@ -52,14 +47,17 @@ class VisionSide:
         t.write("busy", True)
         cycle_id, code = t.read("cycle_id"), t.read("kit_id")
         kit_id = self.codes.get(code, f"code {code}" if code else "")
+        frame, ms_frame = None, None
         try:
-            frame = self.get_frame()
+            frame = self.get_frame(t0)                 # a photo taken AFTER the trigger, never an older one
+            ms_frame = round((time.monotonic() - t0) * 1000, 1)
             out = self.inspect(frame, kit_id)
         except Exception as e:                     # camera gone, model error: fault, no answer -> PLC holds
             self.faulted = True
             t.write("fault", True)
             t.write("busy", False)
-            self.on_result({"cycle_id": cycle_id, "kit_id": kit_id, "error": f"{type(e).__name__}: {e}"})
+            self.on_result({"cycle_id": cycle_id, "kit_id": kit_id, "frame": frame, "ms_frame": ms_frame,
+                            "error": f"{type(e).__name__}: {e}"})
             return
         decision = out["decision"]
         t.write("result", RESULT_CODES[decision.result])
@@ -69,8 +67,8 @@ class VisionSide:
             t.write("fault", False)
         t.write("done", True)
         t.write("busy", False)
-        self.on_result({"cycle_id": cycle_id, "kit_id": kit_id, "decision": decision, "out": out,
-                        "ms": round((time.monotonic() - t0) * 1000)})
+        self.on_result({"cycle_id": cycle_id, "kit_id": kit_id, "decision": decision, "out": out, "frame": frame,
+                        "ms_frame": ms_frame, "ms": round((time.monotonic() - t0) * 1000, 1)})
 
     def run(self):
         """Serve triggers until self.stop is set."""
@@ -94,51 +92,3 @@ class VisionSide:
                 self.stop.set()
                 beat.join()
 
-
-def folder_frames(folder):
-    """Endless photos from a folder, in order (stands in for the camera in part 2)."""
-    paths = sorted(Path(folder).glob("*.jpg"))
-    if not paths:
-        raise SystemExit(f"no .jpg files in {folder}")
-    names = itertools.cycle(paths)
-    state = {}
-
-    def get_frame():
-        state["path"] = next(names)
-        return cv2.imread(str(state["path"]))
-    return get_frame, state
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Vision station: answer PLC triggers (SIMULATED PLC)")
-    parser.add_argument("--images", required=True, help="folder of tray photos used in place of the camera")
-    args = parser.parse_args()
-    sys.stdout.reconfigure(line_buffering=True)   # print each line at once, even into a log file
-
-    from src.capture.camera import quiet_jpeg_warnings
-    from src.inspection.pipeline import Inspector
-
-    quiet_jpeg_warnings()
-    inspector = Inspector()
-    get_frame, state = folder_frames(args.images)
-    inspector.inspect(get_frame(), "KIT-A")        # warm-up: the first inspection is slow
-    get_frame, state = folder_frames(args.images)
-
-    def show(r):
-        name = state["path"].name if "path" in state else "-"
-        if "error" in r:
-            print(f"cycle {r['cycle_id']:>4}  {name:<16} FAULT   {r['error']}")
-            return
-        d = r["decision"]
-        print(f"cycle {r['cycle_id']:>4}  {name:<16} {r['kit_id']:<6} {d.result:<7} {r['ms']:>4} ms  {'; '.join(d.reasons)}")
-
-    station = VisionSide(inspector.inspect, get_frame, on_result=show)
-    print(f"Vision station ready ({inspector.cfg['model']}). Waiting for triggers; Ctrl+C to stop.")
-    try:
-        station.run()
-    except KeyboardInterrupt:
-        station.stop.set()
-
-
-if __name__ == "__main__":
-    main()

@@ -26,3 +26,6 @@ data/yolo/
 
 # Bowl crops for PatchCore (rebuilt by `python -m src.inspection.patchcore prep`)
 data/anomaly/
+
+# Station history: every inspection (SQLite + raw photos). Local data, not code.
+data/history/

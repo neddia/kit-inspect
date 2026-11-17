@@ -39,7 +39,7 @@ class Station:
 
     def __init__(self, inspect, cls=VisionSide):
         self.seen = []
-        self.side = cls(inspect, lambda: "frame", cfg=CFG, codes=CODES, port=PORT, on_result=self.seen.append)
+        self.side = cls(inspect, lambda after: "frame", cfg=CFG, codes=CODES, port=PORT, on_result=self.seen.append)
         self.thread = threading.Thread(target=self.side.run, daemon=True)
 
     def __enter__(self):
