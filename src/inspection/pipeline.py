@@ -40,7 +40,7 @@ class Inspector:
         self.kits = kits or loaded_kits
         if model is None:
             from ultralytics import YOLO
-            model = YOLO(str(REPO / self.cfg["model"]))
+            model = YOLO(str(REPO / self.cfg["model"]), task="detect")   # task needed for exported models
         self.model = model
 
     def inspect(self, frame, kit_id):

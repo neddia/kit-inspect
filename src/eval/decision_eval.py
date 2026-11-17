@@ -104,7 +104,7 @@ def main():
              f"False rejects:   {tally['false reject']} of {len(good)} good trays (FAIL on a good kit)",
              f"Good kits sent to REVIEW: {tally['review']} of {len(good)}",
              f"Review rate:     {reviews} of {n} trays ({reviews / n:.0%})   target: under 5%",
-             f"Time per tray:   median {sorted(times)[n // 2]:.0f} ms (GPU PC; laptop measured in Stage 7)", "",
+             f"Time per tray:   median {sorted(times)[n // 2]:.0f} ms (this PC; laptop measured in Stage 7)", "",
              f"{'scenario':<16}{'trays':>6}{'PASS':>6}{'FAIL':>6}{'REVIEW':>8}"]
     for s, c in sorted(by_scenario.items()):
         lines.append(f"{s:<16}{sum(c.values()):>6}{c['PASS']:>6}{c['FAIL']:>6}{c['REVIEW']:>8}")
