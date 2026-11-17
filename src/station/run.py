@@ -167,7 +167,8 @@ def main():
                 panel = status_panel(560, state["collect"], marked, state["note"])
                 cv2.imshow(WINDOW, side_by_side(frames.latest()[0], last["img"], panel))
                 key = cv2.waitKey(50) & 0xFF
-                if key == ord("q"):
+                closed = cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1   # the window's X button
+                if key == ord("q") or closed:
                     break
                 if not history:
                     continue
