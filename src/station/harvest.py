@@ -1,11 +1,13 @@
 """Turn the station's history photos into a training session (the "hard cases" loop).
 
-Free-flow capture: run the station, keep a FULL kit on the tray, add 0-2 pieces of
-junk (coin cells, coins, washers...), move something, press ENTER in the PLC
-terminal, repeat. Then:
+Free-flow capture: run the station with --show, press t ("save for training" ON),
+keep a FULL kit on the tray, add 0-2 pieces of junk (coin cells, coins, washers...),
+move something, press ENTER in the PLC terminal, repeat. u in the window un-saves
+the last photo (a slip: missing part, hand in view). Then:
 
-    uv run python -m src.station.harvest                          # what's in the history
-    uv run python -m src.station.harvest --from-id 51 --session live01
+    uv run python -m src.station.harvest                          # how many are saved
+    uv run python -m src.station.harvest --session live01         # take the saved ones
+    uv run python -m src.station.harvest --from-id 58 --session live01   # or an id range, saved or not
 
 copies those photos to data/images/live01/ and adds manifest rows: KIT-A, 3/3/2
 (the full-kit rule), split train, scenario "live", other = -1 and expected = ""
@@ -19,13 +21,12 @@ tray teach nothing new and make the scores look better than they are.
 import argparse
 import csv
 import shutil
-import sqlite3
 from pathlib import Path
 
 import cv2
 import numpy as np
 
-from src.station.history import ROOT
+from src.station.history import ROOT, History
 
 REPO = Path(__file__).resolve().parents[2]
 DATA = REPO / "data"
@@ -43,22 +44,29 @@ def thumb(path):
 
 def main():
     parser = argparse.ArgumentParser(description="Copy station history photos into a training session")
-    parser.add_argument("--from-id", type=int, help="first history id to take (see the listing)")
+    parser.add_argument("--from-id", type=int, help="take an id range instead of the saved photos")
     parser.add_argument("--to-id", type=int, help="last history id to take (default: the newest)")
-    parser.add_argument("--session", default="live01")
+    parser.add_argument("--session", help="new session name, e.g. live01")
     args = parser.parse_args()
 
-    db = sqlite3.connect(ROOT / "history.db")
-    db.row_factory = sqlite3.Row
-    rows = [dict(r) for r in db.execute("SELECT id, time, cycle_id, result, image FROM inspections "
-                                        "WHERE image IS NOT NULL AND result != 'FAULT' ORDER BY id")]
-    if args.from_id is None:
-        print(f"{len(rows)} photos in the history, ids {rows[0]['id']}-{rows[-1]['id']}" if rows else "history is empty")
-        for r in rows[-5:]:
-            print(f"  id {r['id']:>4}  {r['time'][:19]}  {r['result']}")
-        print("Take a range with: --from-id N [--to-id M] --session live01")
+    db = History().db                               # (adds the train/harvested columns to old history files)
+    rows = [dict(r) for r in db.execute("SELECT id, time, cycle_id, result, image, train FROM inspections "
+                                        "WHERE image IS NOT NULL AND result != 'FAULT' AND harvested IS NULL "
+                                        "ORDER BY id")]
+    if not args.session:
+        saved = [r for r in rows if r["train"]]
+        print(f"{len(saved)} photos saved for training, not harvested yet"
+              + (f" (ids {saved[0]['id']}-{saved[-1]['id']})" if saved else ""))
+        print(f"{len(rows)} photos in the history not harvested yet"
+              + (f", newest id {rows[-1]['id']}" if rows else ""))
+        print("Take the saved ones with: --session live01   (or an id range: --from-id N [--to-id M] --session live01)")
         return
-    rows = [r for r in rows if r["id"] >= args.from_id and (args.to_id is None or r["id"] <= args.to_id)]
+    if args.from_id is not None:
+        rows = [r for r in rows if r["id"] >= args.from_id and (args.to_id is None or r["id"] <= args.to_id)]
+    else:
+        rows = [r for r in rows if r["train"]]
+    if not rows:
+        raise SystemExit("nothing to take: no saved photos (press t in the station window) and no --from-id")
 
     out_dir = DATA / "images" / args.session
     with (DATA / "manifest.csv").open(newline="") as f:
@@ -86,6 +94,8 @@ def main():
                     "scenario": "live"})
     with (DATA / "manifest.csv").open("a", newline="") as f:
         csv.DictWriter(f, fieldnames=columns).writerows(new)
+    db.executemany("UPDATE inspections SET harvested = ? WHERE id = ?", [(args.session, r["id"]) for r in rows])
+    db.commit()                                     # never taken twice (near-duplicates included)
     print(f"{len(new)} photos -> data/images/{args.session}/ and the manifest "
           f"({skipped} near-duplicates skipped). Next:")
     print("  uv run python -m src.labeling.auto_label")

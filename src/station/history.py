@@ -13,6 +13,7 @@ read while the station writes.
 
 import json
 import sqlite3
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -37,7 +38,9 @@ COLUMNS = """
     ms_inspect REAL,      -- model + checks + rules
     ms_total REAL,        -- trigger seen -> Done written
     model TEXT,           -- model file and version
-    error TEXT            -- what went wrong, for faults
+    error TEXT,           -- what went wrong, for faults
+    train INTEGER DEFAULT 0,  -- 1 = marked "save for training" (station window: t toggles, u undoes)
+    harvested TEXT        -- training session it was copied into (src/station/harvest.py)
 """
 
 
@@ -49,10 +52,16 @@ class History:
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute(f"CREATE TABLE IF NOT EXISTS inspections ({COLUMNS})")
+        have = {r[1] for r in self.db.execute("PRAGMA table_info(inspections)")}
+        for col, kind in (("train", "INTEGER DEFAULT 0"), ("harvested", "TEXT")):   # older history files
+            if col not in have:
+                self.db.execute(f"ALTER TABLE inspections ADD COLUMN {col} {kind}")
         self.db.commit()
+        self.lock = threading.Lock()              # the station thread records, the window thread undoes
 
-    def record(self, r, model=""):
-        """Store one result from the station (see VisionSide.handle_trigger). Returns the row id."""
+    def record(self, r, model="", train=False):
+        """Store one result from the station (see VisionSide.handle_trigger). Returns the row id.
+        train=True marks it for the next training session (faults are never marked)."""
         now = datetime.now()
         image = None
         if r.get("frame") is not None:
@@ -61,7 +70,7 @@ class History:
             cv2.imwrite(str(self.root / image), r["frame"])
         row = {"time": now.isoformat(timespec="milliseconds"), "cycle_id": r["cycle_id"], "kit_id": r["kit_id"],
                "image": str(image) if image else None, "model": model, "ms_frame": r.get("ms_frame"),
-               "ms_total": r.get("ms")}
+               "ms_total": r.get("ms"), "train": int(train and "error" not in r and image is not None)}
         if "error" in r:
             row |= {"result": "FAULT", "error": r["error"]}
         else:
@@ -76,10 +85,27 @@ class History:
                 "scene": json.dumps(out["scene"], default=float),
                 "ms_inspect": out["ms"]["total"],
             }
-        cur = self.db.execute(f"INSERT INTO inspections ({', '.join(row)}) VALUES ({', '.join('?' * len(row))})",
-                              list(row.values()))
-        self.db.commit()
+        with self.lock:
+            cur = self.db.execute(f"INSERT INTO inspections ({', '.join(row)}) VALUES ({', '.join('?' * len(row))})",
+                                  list(row.values()))
+            self.db.commit()
         return cur.lastrowid
+
+    def unmark_last(self):
+        """Undo: the newest photo marked for training (not yet harvested) is unmarked. Returns its cycle_id or None."""
+        with self.lock:
+            row = self.db.execute("SELECT id, cycle_id FROM inspections WHERE train = 1 AND harvested IS NULL "
+                                  "ORDER BY id DESC LIMIT 1").fetchone()
+            if row is None:
+                return None
+            self.db.execute("UPDATE inspections SET train = 0 WHERE id = ?", (row["id"],))
+            self.db.commit()
+            return row["cycle_id"]
+
+    def marked(self):
+        """How many photos are marked for training and not harvested yet."""
+        with self.lock:
+            return self.db.execute("SELECT COUNT(*) FROM inspections WHERE train = 1 AND harvested IS NULL").fetchone()[0]
 
     def recent(self, n=20):
         return [dict(x) for x in self.db.execute("SELECT * FROM inspections ORDER BY id DESC LIMIT ?", (n,))]

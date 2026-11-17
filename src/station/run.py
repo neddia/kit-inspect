@@ -4,10 +4,12 @@
     PLC trigger ─────────────>├─> fresh photo -> inspect -> Result/Done to the PLC -> history
                               │                                   (src/station/history.py)
     --show: live view + last result in a window (for development; part 5 adds a web dashboard)
+            keys: t = save for training on/off, u = undo the last saved photo, q = quit
 
 Run, with the simulated PLC running (uv run python -m src.plc.tags):
     uv run python -m src.station.run                        # the camera
     uv run python -m src.station.run --show                 # + window: live view and last result
+    uv run python -m src.station.run --show --collect       # ...with "save for training" already on
     uv run python -m src.station.run --images data/images/val01   # photos from a folder, no camera
 Then send kits from the PLC side: uv run python -m src.plc.line
 """
@@ -80,15 +82,35 @@ class CameraFrames:
         return self.feed.latest()
 
 
-def side_by_side(live, result, widths=(560, 900)):
-    """Live view | last result (bigger, so the labels are readable)."""
-    tiles = []
-    for img, width in zip((live, result), widths):
-        if img is None:
-            img = np.zeros((360, width, 3), np.uint8)
-        tiles.append(cv2.resize(img, (width, int(img.shape[0] * width / img.shape[1]))))
-    h = max(t.shape[0] for t in tiles)
-    return np.hstack([cv2.copyMakeBorder(t, 0, h - t.shape[0], 0, 0, cv2.BORDER_CONSTANT) for t in tiles])
+def fit(img, width):
+    if img is None:
+        return np.zeros((int(width * 9 / 16), width, 3), np.uint8)
+    return cv2.resize(img, (width, int(img.shape[0] * width / img.shape[1])))
+
+
+def status_panel(width, collect, marked, note):
+    """Under the live view: is "save for training" on, how many are saved, the keys."""
+    panel = np.zeros((170, width, 3), np.uint8)
+    on = (60, 200, 60) if collect else (110, 110, 110)
+    cv2.putText(panel, f"SAVE FOR TRAINING: {'ON' if collect else 'OFF'}", (12, 40), cv2.FONT_HERSHEY_SIMPLEX,
+                0.9, on, 2, cv2.LINE_AA)
+    cv2.putText(panel, f"{marked} photos saved for training", (12, 78), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.putText(panel, note, (12, 112), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 1, cv2.LINE_AA)
+    cv2.putText(panel, "t = on/off   u = undo last   q = quit", (12, 152), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+                (170, 170, 170), 1, cv2.LINE_AA)
+    return panel
+
+
+def side_by_side(live, result, panel=None, widths=(560, 900)):
+    """Live view (+ status panel under it) | last result (bigger, so the labels are readable)."""
+    left = fit(live, widths[0])
+    if panel is not None:
+        left = np.vstack([left, panel])
+    right = fit(result, widths[1])
+    h = max(left.shape[0], right.shape[0])
+    pad = lambda img: cv2.copyMakeBorder(img, 0, h - img.shape[0], 0, 0, cv2.BORDER_CONSTANT)
+    return np.hstack([pad(left), pad(right)])
 
 
 def main():
@@ -96,6 +118,7 @@ def main():
     parser.add_argument("--images", help="use photos from this folder instead of the camera")
     parser.add_argument("--show", action="store_true", help="window with the live view and the last result")
     parser.add_argument("--no-history", action="store_true", help="don't record inspections")
+    parser.add_argument("--collect", action="store_true", help='start with "save for training" on (t toggles)')
     args = parser.parse_args()
     sys.stdout.reconfigure(line_buffering=True)
     quiet_jpeg_warnings()
@@ -111,11 +134,12 @@ def main():
         frames = FolderFrames(args.images)        # start the folder from its first photo
     history = None if args.no_history else History()
     last = {"img": None}
+    state = {"collect": args.collect and history is not None, "note": ""}
 
     def on_result(r):
         if history:
             try:
-                history.record(r, model)
+                history.record(r, model, train=state["collect"])
             except Exception as e:                # a full disk must not stop the line: warn, keep inspecting
                 print(f"WARNING: history not saved: {e}")
         if "error" in r:
@@ -138,10 +162,24 @@ def main():
             worker = threading.Thread(target=station.run, daemon=True)
             worker.start()
             cv2.namedWindow(WINDOW, cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
+            marked = history.marked() if history else 0
             while worker.is_alive():
-                cv2.imshow(WINDOW, side_by_side(frames.latest()[0], last["img"]))
-                if cv2.waitKey(50) & 0xFF == ord("q"):
+                panel = status_panel(560, state["collect"], marked, state["note"])
+                cv2.imshow(WINDOW, side_by_side(frames.latest()[0], last["img"], panel))
+                key = cv2.waitKey(50) & 0xFF
+                if key == ord("q"):
                     break
+                if not history:
+                    continue
+                if key == ord("t"):
+                    state["collect"] = not state["collect"]
+                    state["note"] = f"saving {'ON' if state['collect'] else 'OFF'} from the next kit"
+                    print(state["note"])
+                elif key == ord("u"):
+                    cycle = history.unmark_last()
+                    state["note"] = f"undone: cycle {cycle} won't be used" if cycle else "nothing to undo"
+                    print(state["note"])
+                marked = history.marked()
     except KeyboardInterrupt:
         pass
     finally:
