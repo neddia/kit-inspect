@@ -184,6 +184,8 @@ def main():
               f"photo {r['ms_frame']:>4.0f} ms  total {r['ms']:>4.0f} ms  {'; '.join(d.reasons)}")
         if args.show:
             last["img"] = draw(r["frame"], r["out"], high)
+            state["note"] = (f"last: cycle {r['cycle_id']}, kit {r['kit_id']} from the PLC" if r["cycle_id"] is not None
+                             else f"last: SPACE bench test, kit {r['kit_id']} (--kit, not the PLC)")
 
     def bench():
         """SPACE: inspect the tray now, without the PLC (no release; recorded like any other)."""
