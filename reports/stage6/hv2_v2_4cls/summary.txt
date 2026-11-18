@@ -1,0 +1,19 @@
+Full decision on hardval2 (20 trays). Model: runs/detect/runs/stage5/v2_4cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    0 of 14 faulty trays   <- the headline number
+False rejects:   2 of 6 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 2 of 6
+Review rate:     3 of 20 trays (15%)   target: under 5%
+Time per tray:   median 49 ms (this PC; laptop measured in Stage 7)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete             6     2     2       2
+foreign_object      12     0    11       1
+lookalike_nut        2     0     2       0
+
+Every REVIEW and every wrong answer, with reasons:
+  hardval2/hardval2_0001.jpg complete        REVIEW  review       unsure about 2 nuts (0.43, 0.31)
+  hardval2/hardval2_0002.jpg complete        FAIL    false reject missing 1 nut
+  hardval2/hardval2_0005.jpg complete        REVIEW  review       unsure about 1 bolt (0.23); unsure about 1 nut (0.24)
+  hardval2/hardval2_0006.jpg complete        FAIL    false reject missing 1 nut
+  hardval2/hardval2_0009.jpg foreign_object  REVIEW  right        unsure about 1 nut (0.21)

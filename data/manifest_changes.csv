@@ -55,3 +55,7 @@ when,image,field,old,new,reason
 2026-11-17T23:37:19,hard01/hard01_0031.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
 2026-11-17T23:37:28,hard01/hard01_0035.jpg,screws,2,1,review: miscounted at capture
 2026-11-17T23:37:28,hard01/hard01_0035.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-18T12:23:31,hardval2/hardval2_0017.jpg,nuts,2,3,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"
+2026-11-18T12:23:31,hardval2/hardval2_0017.jpg,scenario,lookalike_nut,foreign_object,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"
+2026-11-18T12:23:31,hardval2/hardval2_0018.jpg,nuts,2,3,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"
+2026-11-18T12:23:31,hardval2/hardval2_0018.jpg,scenario,lookalike_nut,foreign_object,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"

@@ -1,0 +1,21 @@
+image,scenario,expected,result,outcome,reasons
+hardval2/hardval2_0001.jpg,complete,PASS,REVIEW,review,unsure about 1 nut (0.66); unsure about 1 screw (0.48)
+hardval2/hardval2_0002.jpg,complete,PASS,FAIL,false reject,missing 1 nut
+hardval2/hardval2_0003.jpg,complete,PASS,PASS,right,counts match KIT-A
+hardval2/hardval2_0004.jpg,complete,PASS,FAIL,false reject,missing 1 bolt; 1 extra nut
+hardval2/hardval2_0005.jpg,complete,PASS,FAIL,false reject,missing 1 bolt
+hardval2/hardval2_0006.jpg,complete,PASS,FAIL,false reject,missing 1 bolt; missing 1 nut
+hardval2/hardval2_0007.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; 1 extra nut
+hardval2/hardval2_0008.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; 1 extra nut
+hardval2/hardval2_0009.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt
+hardval2/hardval2_0010.jpg,foreign_object,NOT_PASS,REVIEW,right,unsure about 1 nut (0.45); 1 unknown object on the tray
+hardval2/hardval2_0011.jpg,foreign_object,NOT_PASS,FAIL,right,2 extra bolts; also: 2 unknown objects on the tray
+hardval2/hardval2_0012.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; also: 2 unknown objects on the tray
+hardval2/hardval2_0013.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; also: 1 unknown object on the tray
+hardval2/hardval2_0014.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; 1 extra nut
+hardval2/hardval2_0015.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; 1 extra nut; also: 1 unknown object on the tray
+hardval2/hardval2_0016.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; 1 extra nut; also: 2 unknown objects on the tray
+hardval2/hardval2_0017.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; missing 1 screw; also: 10 unknown objects on the tray
+hardval2/hardval2_0018.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 bolt; 2 extra nuts; also: 1 unknown object on the tray
+hardval2/hardval2_0019.jpg,lookalike_nut,NOT_PASS,FAIL,right,missing 1 bolt; 1 extra nut; also: 2 unknown objects on the tray
+hardval2/hardval2_0020.jpg,lookalike_nut,NOT_PASS,FAIL,right,missing 1 bolt; also: 2 unknown objects on the tray
