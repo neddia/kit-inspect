@@ -9,7 +9,8 @@ Steps:
   1. Floor only: inside the measured flat-floor circle (tray.find_floor).
      Outside it the bowl curves up and its shading looks like objects.
   2. "Something here" if a pixel is
-       darker than its own neighbourhood  (black-hat: smooth lighting cancels out), or
+       darker than its own neighbourhood  (black-hat: smooth lighting cancels out)
+         AND darker than the floor itself (below_floor: see Nov 18 below), or
        strongly coloured                  (saturation: catches e.g. a red thread), or
        on a sharp brightness edge         (Canny: catches a silver coin on the white
                                            floor, which is neither darker nor coloured)
@@ -31,17 +32,25 @@ by edge_shrink px for this test only: the floor-to-wall boundary is itself an ed
 On 408 reviewed trays (ideal boxes): junk caught 72 -> 78 of 86, false alarms 9 -> 9.
 Thresholds barely matter (20/40 to 60/120 gave the same), a sign it isn't over-tuned.
 It still can't see junk inside a part's box (the "other" class / masks are for that).
+Nov 18, live: plain floor between three shiny nuts was flagged "unknown object" (4 KIT-B
+photos, a 15 x 39 px sliver, nothing there). Black-hat compares a pixel with the
+BRIGHTEST things near it, so floor surrounded by bright parts looks "darker". Fix: a
+"darker" pixel must also be below the floor's own brightness (median of the free floor)
+by below_floor. Sweep 0-30 on 408 reviewed trays: 5 clears the slivers, 15 starts
+losing real junk; 10 = mid-gap: junk 78/86 kept, false alarms 9 -> 7, slivers 4 -> 0.
+(Tried first: painting the parts out in floor colour. Worse: 30-230 false alarms, the
+parts' shadows and the paint's own edges light up.)
 """
 
 import cv2
 import numpy as np
 
 DEFAULTS = dict(neighbourhood=82, darker_by=35, saturation=45, box_margin=20, min_area=150,
-                edge_low=40, edge_high=80, edge_shrink=25)
+                edge_low=40, edge_high=80, edge_shrink=25, below_floor=10)
 
 
 def find_leftovers(frame, floor, boxes, neighbourhood=82, darker_by=35, saturation=45, box_margin=20, min_area=150,
-                   edge_low=40, edge_high=80, edge_shrink=25):
+                   edge_low=40, edge_high=80, edge_shrink=25, below_floor=10):
     """List of unknown objects on the floor: dicts with box [x1, y1, x2, y2] and area (pixels)."""
     h, w = frame.shape[:2]
     on_floor = np.zeros((h, w), np.uint8)
@@ -52,6 +61,13 @@ def find_leftovers(frame, floor, boxes, neighbourhood=82, darker_by=35, saturati
     k = max(3, neighbourhood // 2) | 1
     blackhat = cv2.morphologyEx(half, cv2.MORPH_BLACKHAT, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
     darker = cv2.resize(blackhat, (w, h)) > darker_by
+    if below_floor:                               # ...and darker than the floor itself, not just than shiny parts
+        parts = np.zeros((h, w), bool)
+        for x1, y1, x2, y2 in boxes:
+            parts[max(0, int(y1) - box_margin):int(y2) + box_margin, max(0, int(x1) - box_margin):int(x2) + box_margin] = True
+        free = (on_floor > 0) & ~parts
+        if free.sum() > 100:
+            darker &= gray < np.median(gray[free]) - below_floor
     coloured = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)[..., 1] > saturation
     stuff = (darker | coloured) & (on_floor > 0)
     if edge_low:                                  # edge_low: 0 turns the edge test off

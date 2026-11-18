@@ -68,6 +68,8 @@ inspection:                # Stage 6. Every number here is chosen on train/val d
     edge_low: 40           # Canny edge test (Nov 18): silver coin on the white floor = no contrast, only a boundary.
     edge_high: 80          # 0 = off. Same results from 20/40 to 60/120. Junk 72 -> 78 of 86, false alarms unchanged.
     edge_shrink: 25        # px: the floor-to-wall boundary is an edge too, so stay this far inside it
+    below_floor: 10        # a 'darker' pixel must also be this far below the floor's brightness (Nov 18: floor
+                           # between shiny nuts looked 'darker'). 5 clears it, 15 loses junk; 10 = mid-gap
 
 plc:
   simulated: true         # The PLC is a Python simulator, not real hardware.

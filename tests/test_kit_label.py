@@ -86,3 +86,33 @@ def test_detections_on_the_label_are_its_letters_not_parts():
     assert on_label([950, 285, 975, 335], [quad])                     # the "I" in KIT, read as a bolt
     assert not on_label([700, 200, 800, 260], [quad])                 # a real part elsewhere
     assert not on_label([1050, 250, 1250, 420], [quad])               # a real part only touching the label
+
+
+def test_a_box_around_the_whole_label_is_the_label():
+    from src.inspection.kit_label import on_label
+    quad = [[900, 280], [1100, 280], [1100, 340], [900, 340]]      # the text
+    assert on_label([880, 250, 1120, 380], [quad])                    # "other 0.78" around the label paper
+    assert not on_label([600, 100, 1300, 700], [quad])                # something far bigger than a label
+
+
+def test_sideways_label_is_found_by_the_turned_pass():
+    """Real sideways labels on the curved wall defeat the first pass (7 of 40 live photos), but a drawn
+    label doesn't, so a stand-in OCR plays that part: it only sees text in the TURNED frame."""
+    import numpy as np
+    from src.inspection.kit_label import read_text
+
+    class Result:
+        def __init__(self, boxes, txts, scores):
+            self.boxes, self.txts, self.scores = boxes, txts, scores
+
+    def ocr(frame):
+        h, w = frame.shape[:2]
+        if h > w:                                   # the turned frame (720 x 1280 -> 1280 tall)
+            # a label at original x 280-320, y 300-420 sits at x' = 719-y, y' = x in the turned frame
+            box = np.array([[299, 280], [419, 280], [419, 320], [299, 320]], float)
+            return Result([box], ["KIT-A"], [0.98])
+        return Result(None, [], [])
+
+    found = read_text(ocr, np.zeros((720, 1280, 3), np.uint8))
+    assert [t["text"] for t in found] == ["KIT-A"]
+    assert found[0]["center"] == [300, 360]          # mapped back to where the label is in the real frame

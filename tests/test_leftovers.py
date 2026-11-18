@@ -39,3 +39,23 @@ def test_anything_inside_a_part_box_is_ignored():
 def test_dark_blob_is_found_without_edges():
     img = floor_with(lambda im: cv2.circle(im, (700, 400), 15, (60, 60, 60), -1))
     assert len(find_leftovers(img, FLOOR, [], **(DEFAULTS | {"edge_low": 0}))) == 1
+
+
+def test_floor_between_shiny_parts_is_not_an_object():
+    """Nov 18 live: plain floor ringed by bright nuts looked 'darker than its neighbourhood'."""
+    def nuts(img):
+        for x, y in ((560, 330), (680, 330), (620, 420)):
+            cv2.circle(img, (x, y), 34, (250, 250, 250), -1)
+    boxes = [[x - 36, y - 36, x + 36, y + 36] for x, y in ((560, 330), (680, 330), (620, 420))]
+    img = floor_with(nuts)
+    img = cv2.GaussianBlur(img, (7, 7), 0)
+    assert find_leftovers(img, FLOOR, boxes, **DEFAULTS) == []
+
+
+def test_dark_junk_next_to_shiny_parts_is_still_found():
+    def scene(img):
+        for x, y in ((560, 330), (680, 330)):
+            cv2.circle(img, (x, y), 34, (250, 250, 250), -1)
+        cv2.circle(img, (620, 420), 14, (70, 70, 70), -1)        # a dark bead near them
+    boxes = [[x - 36, y - 36, x + 36, y + 36] for x, y in ((560, 330), (680, 330))]
+    assert len(find_leftovers(floor_with(scene), FLOOR, boxes, **DEFAULTS)) == 1

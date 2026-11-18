@@ -1,0 +1,51 @@
+image,scenario,expected,result,outcome,reasons
+hard01/hard01_0001.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0002.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0003.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0004.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0005.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0006.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0007.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object; also: 1 unknown object on the tray
+hard01/hard01_0008.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0009.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0010.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0011.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0012.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0013.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0014.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0015.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0016.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0017.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0018.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0019.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0020.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0021.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0022.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0023.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 2 foreign objects
+hard01/hard01_0024.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 2 foreign objects
+hard01/hard01_0025.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0026.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0027.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0028.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0029.jpg,two_faults,NOT_PASS,REVIEW,right,"too dark (floor brightness 122, normal 140+)"
+hard01/hard01_0030.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0031.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0032.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0033.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0034.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0035.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0036.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0037.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0038.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0039.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0040.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0041.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0042.jpg,two_faults,NOT_PASS,REVIEW,right,"too dark (floor brightness 74, normal 140+)"
+hard01/hard01_0043.jpg,two_faults,NOT_PASS,REVIEW,right,"too dark (floor brightness 72, normal 140+)"
+hard01/hard01_0044.jpg,two_faults,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hard01/hard01_0045.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0046.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0047.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0048.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hard01/hard01_0049.jpg,foreign_object,NOT_PASS,REVIEW,right,tray off position (14% of the floor is outside the photo)
+hard01/hard01_0050.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object

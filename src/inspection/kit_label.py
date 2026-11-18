@@ -31,6 +31,8 @@ Real printed labels (glare, perspective, focus) still to be tested.
 import math
 import re
 
+import cv2
+
 LABEL_PREFIX = "KIT"
 LOOKALIKES = str.maketrans({"1": "I", "L": "I", "|": "I", "!": "I", "0": "O"})   # only fixed in the "KIT" part
 
@@ -45,14 +47,32 @@ def make_reader(threads=2):
                             "Global.log_level": "error"})
 
 
-def read_text(reader, frame):
-    """Every piece of text in the photo: dicts with text, conf, center (x, y), box (4 corner points)."""
+def _read(reader, frame):
     r = reader(frame)
     if r.boxes is None:
         return []
-    return [{"text": t, "conf": round(float(s), 3), "center": [round(float(v)) for v in b.mean(0)],
-             "box": [[round(float(x)), round(float(y))] for x, y in b]}
+    return [{"text": t, "conf": round(float(s), 3), "box": [[float(x), float(y)] for x, y in b]}
             for b, t, s in zip(r.boxes, r.txts, r.scores)]
+
+
+def read_text(reader, frame, rotated_fallback=True):
+    """Every piece of text in the photo: dicts with text, conf, center (x, y), box (4 corner points).
+
+    The text DETECTOR misses a label standing on its side (Nov 18: 7 of 40 live photos; turned
+    upright, the same label read 1.00). So if the first pass finds no kit label, read the frame
+    again turned 90 degrees and map the boxes back. Found 4 of the 7; the other 3 had no label in
+    view or one cut off at the photo's edge. Costs ~105 ms, only on those frames."""
+    found = _read(reader, frame)
+    if rotated_fallback and not any(normalize(t["text"]).startswith(LABEL_PREFIX) for t in found):
+        h = frame.shape[0]
+        turned = _read(reader, cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE))
+        for t in turned:                          # rotated (x', y') -> original (y', h - 1 - x')
+            t["box"] = [[y, h - 1 - x] for x, y in t["box"]]
+        found += [t for t in turned if normalize(t["text"]).startswith(LABEL_PREFIX)]
+    for t in found:
+        t["center"] = [round(sum(c) / 4) for c in zip(*t["box"])]
+        t["box"] = [[round(x), round(y)] for x, y in t["box"]]
+    return found
 
 
 def normalize(text):
@@ -62,12 +82,25 @@ def normalize(text):
     return s[:3].translate(LOOKALIKES) + s[3:]
 
 
-def on_label(box, quads, margin=15, share=0.6):
-    """True if at least `share` of a detection box [x1, y1, x2, y2] lies on a kit label (grown by margin px)."""
+def on_label(box, quads, margin=15, share=0.6, label_size=6.0):
+    """Is this detection box [x1, y1, x2, y2] the kit label, not a part? Two ways the detector gets fooled:
+      its LETTERS: at least `share` of the box lies on the label's text (grown by margin px)
+                   ("I"/"T" read as a bolt, "B" as a nut);
+      the WHOLE LABEL: the box holds most of the label's text and is no more than label_size
+                   times the text's area (the white paper around the text: "other 0.78").
+    A part lying next to a label is neither: it doesn't sit on the text or contain it."""
     from shapely.geometry import Polygon, box as rect
 
     b = rect(*box)
-    return b.area > 0 and any(Polygon(q).buffer(margin).intersection(b).area >= share * b.area for q in quads)
+    if b.area <= 0:
+        return False
+    for q in quads:
+        text = Polygon(q)
+        if text.buffer(margin).intersection(b).area >= share * b.area:
+            return True
+        if text.intersection(b).area >= 0.8 * text.area and b.area <= label_size * text.area:
+            return True
+    return False
 
 
 def check_label(texts, rim, expected, kits, min_conf=0.8, near=(0.9, 1.8)):
