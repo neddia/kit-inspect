@@ -39,7 +39,7 @@ COLUMNS = """
     ms_total REAL,        -- trigger seen -> Done written
     model TEXT,           -- model file and version
     error TEXT,           -- what went wrong, for faults
-    train INTEGER DEFAULT 0,  -- 1 = marked "save for training" (station window: t toggles, u undoes)
+    train INTEGER DEFAULT 0,  -- unused since Nov 18 (was the station's "save for training" toggle)
     harvested TEXT,       -- training session it was copied into (src/station/harvest.py)
     label TEXT            -- JSON kit label check {status, reason, text, conf}, empty if the check is off
 """
@@ -58,11 +58,10 @@ class History:
             if col not in have:
                 self.db.execute(f"ALTER TABLE inspections ADD COLUMN {col} {kind}")
         self.db.commit()
-        self.lock = threading.Lock()              # the station thread records, the window thread undoes
+        self.lock = threading.Lock()              # one writer at a time (the station thread; tools may read)
 
-    def record(self, r, model="", train=False):
-        """Store one result from the station (see VisionSide.handle_trigger). Returns the row id.
-        train=True marks it for the next training session (faults are never marked)."""
+    def record(self, r, model=""):
+        """Store one result from the station (see VisionSide.handle_trigger). Returns the row id."""
         now = datetime.now()
         image = None
         if r.get("frame") is not None:
@@ -72,7 +71,7 @@ class History:
             cv2.imwrite(str(self.root / image), r["frame"])
         row = {"time": now.isoformat(timespec="milliseconds"), "cycle_id": r["cycle_id"], "kit_id": r["kit_id"],
                "image": str(image) if image else None, "model": model, "ms_frame": r.get("ms_frame"),
-               "ms_total": r.get("ms"), "train": int(train and "error" not in r and image is not None)}
+               "ms_total": r.get("ms")}
         if "error" in r:
             row |= {"result": "FAULT", "error": r["error"]}
         else:
@@ -97,22 +96,6 @@ class History:
                                   list(row.values()))
             self.db.commit()
         return cur.lastrowid
-
-    def unmark_last(self):
-        """Undo: the newest photo marked for training (not yet harvested) is unmarked. Returns its row or None."""
-        with self.lock:
-            row = self.db.execute("SELECT id, cycle_id FROM inspections WHERE train = 1 AND harvested IS NULL "
-                                  "ORDER BY id DESC LIMIT 1").fetchone()
-            if row is None:
-                return None
-            self.db.execute("UPDATE inspections SET train = 0 WHERE id = ?", (row["id"],))
-            self.db.commit()
-            return dict(row)
-
-    def marked(self):
-        """How many photos are marked for training and not harvested yet."""
-        with self.lock:
-            return self.db.execute("SELECT COUNT(*) FROM inspections WHERE train = 1 AND harvested IS NULL").fetchone()[0]
 
     def recent(self, n=20):
         return [dict(x) for x in self.db.execute("SELECT * FROM inspections ORDER BY id DESC LIMIT ?", (n,))]
