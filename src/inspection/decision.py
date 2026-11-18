@@ -18,6 +18,12 @@ They run in order; the first that applies wins:
         Yes, sure counts match, unknown object on floor -> REVIEW ("unknown object")
         Yes, sure counts match, nothing else            -> PASS
 
+Foreign objects the model knows ("other", the 4th class, Nov 17) need no rule of
+their own: no kit wants any, so step 4 already does the right thing. A sure one
+can't be part of a complete kit -> FAIL ("foreign object"); an unsure one could
+be nothing -> REVIEW ("maybe a foreign object"). The OpenCV unknown-object check
+stays as the backup for junk the model has never seen.
+
 Why "could it be complete" instead of "any doubt -> REVIEW": an unsure detection
 only matters if it could change the answer. A tray clearly missing two bolts is a
 FAIL whatever a shaky nut detection turns out to be. That keeps REVIEW (a human's
@@ -66,8 +72,21 @@ def sort_detections(detections, low, high, overlap_iou):
     return sure, unsure
 
 
+FOREIGN = "other"   # the model's class for junk on the tray
+
+
 def plural(n, part):
     return f"{n} {part}" + ("s" if n != 1 else "")
+
+
+def extra(n, part):
+    return plural(n, "foreign object") if part == FOREIGN else f"{n} extra {part}" + ("s" if n != 1 else "")
+
+
+def unsure_about(n, part, confs):
+    what = "maybe " + ("a foreign object" if n == 1 else f"{n} foreign objects") if part == FOREIGN \
+        else f"unsure about {plural(n, part)}"
+    return f"{what} ({confs})"
 
 
 def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=0.25, high=0.6, overlap_iou=0.6):
@@ -91,7 +110,7 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
             if closest < want[p]:
                 reasons.append(f"missing {plural(want[p] - closest, p)}")
             elif closest > want[p]:
-                reasons.append(f"{closest - want[p]} extra {p}" + ("s" if closest - want[p] != 1 else ""))
+                reasons.append(extra(closest - want[p], p))
         if unknown_objects:
             reasons.append(f"also: {plural(len(unknown_objects), 'unknown object')} on the tray")
         return Decision(FAIL, reasons, sure, unsure, want)
@@ -99,7 +118,7 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
     reasons = []
     for p in parts:
         if unsure[p]:
-            reasons.append(f"unsure about {plural(unsure[p], p)} ({', '.join(f'{d.conf:.2f}' for d in unsure_list if d.cls == p)})")
+            reasons.append(unsure_about(unsure[p], p, ", ".join(f"{d.conf:.2f}" for d in unsure_list if d.cls == p)))
     if unknown_objects:
         reasons.append(f"{plural(len(unknown_objects), 'unknown object')} on the tray")
     if reasons:

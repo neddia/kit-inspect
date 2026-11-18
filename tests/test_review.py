@@ -89,3 +89,4 @@ def test_yolo_line_is_centre_and_size_as_fractions():
     from src.labeling.export_yolo import yolo_line
     assert yolo_line("bolt", [524, 86, 641, 292], [1280, 720]) == "0 0.455078 0.262500 0.091406 0.286111"
     assert yolo_line("screw", [0, 0, 1280, 720], [1280, 720]) == "2 0.500000 0.500000 1.000000 1.000000"
+    assert yolo_line("other", [0, 0, 1280, 720], [1280, 720]).startswith("3 ")   # junk = class 3 (--classes 4)

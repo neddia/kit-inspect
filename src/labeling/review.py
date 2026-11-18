@@ -8,7 +8,12 @@ Run from the repo root:
     uv run python -m src.labeling.review                  # flagged first, then the rest
     uv run python -m src.labeling.review --flagged        # only the flagged ones
     uv run python -m src.labeling.review --session val01  # one session
+    uv run python -m src.labeling.review --junk           # reviewed junk photos with no "other" box yet
 Already-reviewed images are skipped, so you can quit and come back.
+
+Junk (Nov 17: the 4th class): box every foreign object as "other" (key 4), the
+same way as a part: drag a box, SAM outlines it, press 4. A coin cell SAM
+already outlined as a nut: click it, press 4. Junk outside the bowl gets a box too.
 
 Mouse:
     click a part          select it
@@ -24,10 +29,10 @@ Mouse:
                           (or adds a new part if none is selected). For when SAM
                           keeps merging touching parts or cuts off a screw head.
 Keys:
-    1 2 3      set the selected part to bolt / nut / screw
+    1 2 3 4    set the selected part to bolt / nut / screw / other (junk)
     j, then click   JOIN: the selected part and the one you click are one part
                (a screw split in two by a bolt lying across it)
-    d          delete the selected part (junk outline, foreign object, merged pair)
+    d          delete the selected outline (a bad outline, a merged pair; NOT junk: junk is 4)
     o          toggle the selected part inside/outside the bowl
     u          undo the last change on this image
     l          hide/show outlines, to see the photo clearly
@@ -62,7 +67,8 @@ from src.labeling.auto_label import AUTO, PARTS, REPORT, describe, in_tray, shap
 
 REVIEWED = DATA / "labels" / "reviewed"
 CHANGES = DATA / "manifest_changes.csv"
-COLORS = {"bolt": (40, 40, 255), "nut": (40, 200, 40), "screw": (255, 140, 0)}
+CLASSES = PARTS + ["other"]   # "other" = junk / foreign object; keys 1-4
+COLORS = {"bolt": (40, 40, 255), "nut": (40, 200, 40), "screw": (255, 140, 0), "other": (255, 0, 255)}
 GREY = (150, 150, 150)
 PANEL_W = 400
 DRAG_MIN = 8  # px; a smaller mouse movement is a click, not a box
@@ -137,7 +143,26 @@ def hit(objects, x, y):
     return min(hits)[1] if hits else None
 
 
+def junk_queue(session=None):
+    """Reviewed images whose manifest says junk is on the tray, but with no "other" box yet
+    (reviewed before the 4th class existed, when junk was just deleted)."""
+    _, rows = read_manifest()
+    todo = []
+    for r in rows:
+        if r["split"] not in ("train", "val") or r["tier"] != "normal" or int(r["other"]) < 1:
+            continue
+        if session and r["session"] != session:
+            continue
+        reviewed = label_path(REVIEWED, r["image"])
+        if reviewed.exists() and not any(o["cls"] == "other" for o in json.loads(reviewed.read_text())["objects"]):
+            todo.append(r["image"])
+    return todo
+
+
 def queue(args):
+    if args.junk:
+        todo = junk_queue(args.session)
+        return todo, set(todo)
     with REPORT.open(newline="") as f:
         report = list(csv.DictReader(f))
     if args.session:
@@ -198,7 +223,9 @@ def panel_lines(image, n, total, is_flagged, row, objects, selected, status):
              (f"{'':8}{'manifest':>9}{'labelled':>10}", grey)]
     for p in PARTS:
         lines.append((f"{p + 's':8}{manifest[p]:>9}{labelled[p]:>10}", green if manifest[p] == labelled[p] else red))
-    lines += [(f"other   {row['other']:>9}", grey),
+    junk = sum(o["cls"] == "other" for o in objects)
+    lines += [(f"other   {row['other']:>9}{junk:>10}",
+               green if (int(row["other"]) > 0) == (junk > 0) or int(row["other"]) < 0 else red),
               (f"scenario: {row['scenario']}", white),
               (f"expected: {row['expected']}", white),
               ("", white)]
@@ -214,7 +241,8 @@ def panel_lines(image, n, total, is_flagged, row, objects, selected, status):
               ("selected part: R-click NOT this,", grey),
               ("   middle-click INCLUDE this", grey),
               ("   (or n / i, then click)", grey),
-              ("1 bolt 2 nut 3 screw  d delete", grey),
+              ("1 bolt 2 nut 3 screw 4 other(junk)", grey),
+              ("d delete outline", grey),
               ("j then click = join two pieces", grey),
               ("o in/out  u undo  l outlines", grey),
               ("r then drag = your own box", grey),
@@ -231,6 +259,8 @@ def main():
     parser = argparse.ArgumentParser(description="Review and fix auto-labels")
     parser.add_argument("--flagged", action="store_true", help="only images whose counts didn't match")
     parser.add_argument("--session", help="only this session")
+    parser.add_argument("--junk", action="store_true",
+                        help='reopen reviewed junk photos that have no "other" box yet')
     args = parser.parse_args()
 
     import yaml
@@ -361,7 +391,7 @@ def main():
                         obj.update(cls="bolt", source="manual_box", inside=in_tray(obj, label["tray"]))
                         objects.append(obj)
                         selected = len(objects) - 1
-                        status = "new part (your box): press 1/2/3 to set its class"
+                        status = "new part (your box): press 1/2/3/4 to set its class"
                     continue
                 status = "SAM is outlining..."
                 cv2.imshow(window, draw(frame, objects, selected, show, None,
@@ -376,14 +406,14 @@ def main():
                     obj.update(cls=shape_class(obj), source="review_sam", inside=in_tray(obj, label["tray"]))
                     objects.append(obj)
                     selected = len(objects) - 1
-                    status = f"added {obj['cls']}: press 1/2/3 if wrong"
+                    status = f"added {obj['cls']}: press 1/2/3/4 if wrong"
 
             if key in (ord("q"), 27):
                 step = None
                 break
-            elif key in (ord("1"), ord("2"), ord("3")) and selected is not None:
+            elif key in (ord("1"), ord("2"), ord("3"), ord("4")) and selected is not None:
                 history.append(copy.deepcopy(objects))
-                objects[selected]["cls"] = PARTS[key - ord("1")]
+                objects[selected]["cls"] = CLASSES[key - ord("1")]
                 objects[selected]["source"] = objects[selected]["source"].split("+")[0] + "+fixed"
             elif key == ord("d") and selected is not None:
                 history.append(copy.deepcopy(objects))

@@ -32,6 +32,16 @@ def test_extra_part_fails_with_a_reason():
     assert d.result == FAIL and d.reasons == ["1 extra bolt"]
 
 
+def test_sure_foreign_object_fails_even_with_right_counts():
+    d = decide("KIT-A", KITS, tray() + [Detection("other", 0.9, [2000, 0, 2050, 50])])
+    assert d.result == FAIL and d.reasons == ["1 foreign object"]
+
+
+def test_unsure_foreign_object_goes_to_review():
+    d = decide("KIT-A", KITS, tray() + [Detection("other", 0.4, [2000, 0, 2050, 50])])
+    assert d.result == REVIEW and d.reasons == ["maybe a foreign object (0.40)"]
+
+
 def test_part_not_in_the_kit_counts_as_extra():
     kits = {"KIT-C": {"bolt": 3, "nut": 3}}
     d = decide("KIT-C", kits, tray())
