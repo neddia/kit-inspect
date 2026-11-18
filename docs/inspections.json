@@ -1,0 +1,656 @@
+{
+  "source": "Recorded inspections",
+  "records": [
+    {
+      "id": 237,
+      "cycle_id": 10,
+      "kit_id": "KIT-B",
+      "result": "FAIL",
+      "reasons": [
+        "label says KIT-A, PLC expects KIT-B"
+      ],
+      "label": {
+        "status": "mismatch",
+        "reason": "label says KIT-A, PLC expects KIT-B",
+        "text": "KIT-A",
+        "conf": 1.0
+      },
+      "time": "2026-11-18T14:53:24.296",
+      "counts": {
+        "sure": {},
+        "unsure": {},
+        "spec": {}
+      },
+      "detections": [
+        {
+          "cls": "nut",
+          "conf": 0.95,
+          "box": [
+            344,
+            430,
+            425,
+            511
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.947,
+          "box": [
+            507,
+            288,
+            658,
+            486
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.945,
+          "box": [
+            491,
+            540,
+            574,
+            622
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.93,
+          "box": [
+            582,
+            530,
+            662,
+            605
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.928,
+          "box": [
+            624,
+            339,
+            751,
+            542
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.927,
+          "box": [
+            404,
+            425,
+            470,
+            600
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.881,
+          "box": [
+            476,
+            459,
+            690,
+            542
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.872,
+          "box": [
+            730,
+            328,
+            767,
+            499
+          ],
+          "in_bowl": true
+        }
+      ],
+      "unknown_objects": [],
+      "ms_total": 237.7,
+      "image": "frames/237.jpg",
+      "error": null
+    },
+    {
+      "id": 240,
+      "cycle_id": 13,
+      "kit_id": "KIT-B",
+      "result": "FAIL",
+      "reasons": [
+        "missing 1 nut"
+      ],
+      "label": {
+        "status": "ok",
+        "reason": "label KIT-B matches",
+        "text": "KIT-B",
+        "conf": 1.0
+      },
+      "time": "2026-11-18T14:53:45.388",
+      "counts": {
+        "sure": {
+          "bolt": 2,
+          "nut": 3,
+          "screw": 2
+        },
+        "unsure": {
+          "bolt": 0,
+          "nut": 0,
+          "screw": 0
+        },
+        "spec": {
+          "bolt": 2,
+          "nut": 4,
+          "screw": 2
+        }
+      },
+      "detections": [
+        {
+          "cls": "bolt",
+          "conf": 0.947,
+          "box": [
+            603,
+            275,
+            722,
+            483
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.939,
+          "box": [
+            306,
+            318,
+            386,
+            399
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.939,
+          "box": [
+            358,
+            464,
+            435,
+            547
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.932,
+          "box": [
+            385,
+            168,
+            463,
+            246
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.931,
+          "box": [
+            446,
+            488,
+            656,
+            616
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.902,
+          "box": [
+            332,
+            246,
+            500,
+            302
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.794,
+          "box": [
+            493,
+            586,
+            664,
+            629
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.792,
+          "box": [
+            186,
+            417,
+            262,
+            500
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "other",
+          "conf": 0.688,
+          "box": [
+            231,
+            336,
+            358,
+            682
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.655,
+          "box": [
+            272,
+            538,
+            366,
+            642
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.337,
+          "box": [
+            228,
+            466,
+            310,
+            580
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "other",
+          "conf": 0.22,
+          "box": [
+            152,
+            210,
+            353,
+            712
+          ],
+          "in_bowl": false
+        }
+      ],
+      "unknown_objects": [],
+      "ms_total": 265.0,
+      "image": "frames/240.jpg",
+      "error": null
+    },
+    {
+      "id": 242,
+      "cycle_id": 15,
+      "kit_id": "KIT-B",
+      "result": "REVIEW",
+      "reasons": [
+        "unsure about 1 bolt (0.67)",
+        "unsure about 1 nut (0.31)"
+      ],
+      "label": {
+        "status": "ok",
+        "reason": "label KIT-B matches",
+        "text": "KIT-B",
+        "conf": 1.0
+      },
+      "time": "2026-11-18T14:53:55.158",
+      "counts": {
+        "sure": {
+          "bolt": 2,
+          "nut": 3,
+          "screw": 2
+        },
+        "unsure": {
+          "bolt": 1,
+          "nut": 1,
+          "screw": 0
+        },
+        "spec": {
+          "bolt": 2,
+          "nut": 4,
+          "screw": 2
+        }
+      },
+      "detections": [
+        {
+          "cls": "nut",
+          "conf": 0.941,
+          "box": [
+            361,
+            462,
+            439,
+            545
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.941,
+          "box": [
+            614,
+            278,
+            720,
+            485
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.937,
+          "box": [
+            311,
+            316,
+            392,
+            397
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.932,
+          "box": [
+            390,
+            165,
+            468,
+            245
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.927,
+          "box": [
+            450,
+            491,
+            660,
+            614
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.906,
+          "box": [
+            336,
+            246,
+            502,
+            302
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.813,
+          "box": [
+            500,
+            580,
+            670,
+            624
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "other",
+          "conf": 0.73,
+          "box": [
+            236,
+            354,
+            358,
+            668
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.672,
+          "box": [
+            710,
+            282,
+            790,
+            338
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.57,
+          "box": [
+            278,
+            538,
+            368,
+            640
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.496,
+          "box": [
+            188,
+            417,
+            265,
+            498
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "nut",
+          "conf": 0.463,
+          "box": [
+            189,
+            417,
+            264,
+            498
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "nut",
+          "conf": 0.311,
+          "box": [
+            711,
+            282,
+            790,
+            339
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.266,
+          "box": [
+            232,
+            478,
+            331,
+            582
+          ],
+          "in_bowl": false
+        }
+      ],
+      "unknown_objects": [],
+      "ms_total": 252.0,
+      "image": "frames/242.jpg",
+      "error": null
+    },
+    {
+      "id": 243,
+      "cycle_id": 16,
+      "kit_id": "KIT-B",
+      "result": "PASS",
+      "reasons": [
+        "counts match KIT-B"
+      ],
+      "label": {
+        "status": "ok",
+        "reason": "label KIT-B matches",
+        "text": "KIT-B",
+        "conf": 1.0
+      },
+      "time": "2026-11-18T14:54:05.098",
+      "counts": {
+        "sure": {
+          "bolt": 2,
+          "nut": 4,
+          "screw": 2
+        },
+        "unsure": {
+          "bolt": 0,
+          "nut": 0,
+          "screw": 0
+        },
+        "spec": {
+          "bolt": 2,
+          "nut": 4,
+          "screw": 2
+        }
+      },
+      "detections": [
+        {
+          "cls": "bolt",
+          "conf": 0.947,
+          "box": [
+            616,
+            277,
+            724,
+            486
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.942,
+          "box": [
+            323,
+            309,
+            402,
+            388
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.936,
+          "box": [
+            499,
+            466,
+            579,
+            546
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.935,
+          "box": [
+            344,
+            413,
+            424,
+            493
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.921,
+          "box": [
+            461,
+            491,
+            670,
+            618
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "nut",
+          "conf": 0.917,
+          "box": [
+            398,
+            167,
+            476,
+            246
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.89,
+          "box": [
+            336,
+            246,
+            503,
+            298
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "screw",
+          "conf": 0.814,
+          "box": [
+            514,
+            576,
+            681,
+            625
+          ],
+          "in_bowl": true
+        },
+        {
+          "cls": "other",
+          "conf": 0.654,
+          "box": [
+            238,
+            371,
+            384,
+            687
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.566,
+          "box": [
+            188,
+            416,
+            266,
+            497
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.44,
+          "box": [
+            280,
+            536,
+            370,
+            639
+          ],
+          "in_bowl": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.254,
+          "box": [
+            234,
+            492,
+            336,
+            581
+          ],
+          "in_bowl": false
+        }
+      ],
+      "unknown_objects": [],
+      "ms_total": 248.8,
+      "image": "frames/243.jpg",
+      "error": null
+    }
+  ]
+}

@@ -4,6 +4,7 @@ Run the line (two apps, like a real cell):
     kit demo                      PLC operator panel + vision station together
     kit plc                       just the simulated PLC with its operator panel
     kit station [--show]          just the vision station
+    kit dashboard                 browse the latest 100 saved inspections
 
 Improve the model (the data loop):
     kit camera                    set up the rig: live view, camera settings
@@ -31,6 +32,7 @@ REPO = Path(__file__).resolve().parents[1]
 
 COMMANDS = {
     "demo": "src.demo",
+    "dashboard": "src.station.dashboard",
     "plc": "src.plc.panel",
     "station": "src.station.run",
     "camera": "src.capture.preview",

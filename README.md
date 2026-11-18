@@ -1,15 +1,24 @@
-# kit-inspect
+# Fastener Kit Inspection Station
 
 A fixed-camera inspection station for fastener kits. It counts the bolts, nuts and screws on a tray, spots foreign objects, reads the kit label, decides **PASS / FAIL / REVIEW**, and hands the result to a **simulated** Allen-Bradley PLC. The PLC releases the kit only on a PASS for the current cycle; anything else, including silence, holds it.
 
-| Kit | Bolts | Nuts | Screws |
-| --- | --- | --- | --- |
-| KIT-A (code 1) | 3 | 3 | 2 |
-| KIT-B (code 2) | 2 | 4 | 2 |
+[![Three photographed kits replayed through the station, followed by the simulated PLC withdrawing release when the vision heartbeat stops](docs/station-demo.gif)](https://neddia.github.io/kit-inspect/)
 
-> Work in progress. Sections marked *(Stage 8)* get filled in when the test sessions are done.
+**[Explore recorded inspections](https://neddia.github.io/kit-inspect/)** · [How the PLC handshake works](#how-it-works) · [Evaluation results](#inspection-results)
+
+Cycle 10 shows why counting parts alone is insufficient. The PLC ordered KIT-B, but the camera read KIT-A on the tray. Open the viewer to see the frame and the station’s recorded reason for failing that kit. The animation above replays saved photos through the vision station and PLC simulator, then stops vision so you can see the watchdog withdraw release permission.
+
+## Inspection results
+
+On a 20-tray challenge set used for model selection, the four-class detector passed **0 of 14 faulty kits**. Of six good kits, two passed, two went to review and two failed because the station missed a nut. The check evaluated parts and foreign objects with OCR disabled. [Per-tray results](reports/stage6/floorfix_hardval2/per_image.csv) · [Model comparisons](experiments.md)
 
 ## Run the demo
+
+To explore the four public records from a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
+
+To browse the latest 100 records on a station with local history, run `uv run kit dashboard` and open <http://localhost:8010>. Refresh to load new cycles. The station saves a photo, vision verdict and timing under each history ID. Its SQLite rows do not store the PLC release tag.
+
+For the two-window operator demo, install the project dependencies and supply the configured station model from your training/export run. Model weights and the full photo sessions are excluded from Git.
 
 ```bash
 uv sync                          # once (training PC). Station laptop: uv sync --no-default-groups --group prod
@@ -57,9 +66,6 @@ The model reports what it sees; plain code decides (`src/inspection/decision.py`
 
 A candidate becomes the station's model only when you set `inspection.model` in `configs/station.yaml`. Every experiment and decision is logged in `experiments.md`.
 
-## Results
-*(Stage 8)*: every number here will come from a script in this repo, run on test sessions shot after the model and thresholds were frozen.
-
 ## Repo layout
 
 | Folder | What's in it |
@@ -76,8 +82,8 @@ A candidate becomes the station's model only when you set `inspection.model` in 
 | `tests/` | Decision rules, PLC handshake and fail-safes, label check, unknown-object check |
 
 ## Known limits
-*(Stage 8)*
 
+- Final test sessions with frozen model settings and laptop timing are pending.
 - The PLC is simulated (cpppo + pylogix). No real controller was used.
 - Junk the model has never seen relies on the OpenCV check, which can't see objects inside a part's box.
 

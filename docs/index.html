@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore real photographs and inspection decisions from a fastener kit vision station.">
+<title>Inspection history · Fastener Kit Inspection Station</title>
+<link rel="stylesheet" href="style.css"><script defer src="viewer.js"></script>
+</head>
+<body>
+<header><div class="wrap mast"><div class="brand"><span class="nut" aria-hidden="true"></span>Fastener Kit Inspection Station</div><a href="https://github.com/neddia/kit-inspect#readme">GitHub repository</a></div></header>
+<main class="wrap">
+<h1 id="title">Recorded inspections</h1>
+<p id="intro">Select a cycle to inspect its camera frame and the station’s decision.</p>
+<div id="layout" hidden>
+<section class="detail" aria-labelledby="cycle">
+<div class="detailhead"><div><small id="stamp"></small><h2 id="cycle"></h2></div><strong class="badge" id="verdict"></strong></div>
+<div class="photo"><img id="frame" alt=""><canvas id="overlay" aria-hidden="true"></canvas><p id="noFrame" hidden>No camera frame was saved.</p></div>
+<div class="framefoot"><span>Station camera</span><label><input id="boxes" type="checkbox" checked> Show detections</label></div>
+<div class="reading"><small>Inspection decision</small><h3 id="reason"></h3><dl id="facts"></dl><div id="counts"></div></div>
+</section>
+<aside><h2>Inspection history</h2><nav id="records" aria-label="Inspection records"></nav>
+<p class="plcnote"><b>PLC release rule</b>The simulated PLC releases a kit only after a matching PASS for the current cycle. FAIL, REVIEW and loss of heartbeat hold the kit.</p></aside>
+</div><p id="status" role="status">Loading inspections…</p>
+</main></body></html>
