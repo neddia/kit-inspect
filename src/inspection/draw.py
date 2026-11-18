@@ -31,11 +31,14 @@ def draw(frame, out, high=0.7):
         x, y, r = scene["floor"][:3]
         cv2.circle(img, (int(x), int(y)), int(r), (255, 160, 0), thick)
     for d in out["detections"]:
+        if not d.in_bowl and not d.label_ambiguous:
+            continue
         x1, y1, x2, y2 = map(int, d.box)
         color = ((150, 150, 150) if not d.in_bowl else (255, 0, 255) if d.cls == "other"
                  else (60, 200, 60) if d.conf >= high else (0, 200, 255))
         cv2.rectangle(img, (x1, y1), (x2, y2), color, thick)
-        tag(img, f"{d.cls} {d.conf:.2f}" + (" (label)" if d.on_label else ""), x1, y1, color, scale, thick)
+        caption = "check label area" if d.on_label else f"{d.cls} {d.conf:.2f}"
+        tag(img, caption, x1, y1, color, scale, thick)
     for u in out["unknown_objects"]:
         x1, y1, x2, y2 = u["box"]
         cv2.rectangle(img, (x1 - 6, y1 - 6), (x2 + 6, y2 + 6), (255, 0, 255), thick + 1)

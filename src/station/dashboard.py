@@ -45,15 +45,37 @@ def public_record(row, root):
     return data
 
 
-def export(root, ids):
+def export(root, ids, locate_labels=False):
     rows = records(root, ids)
     if len(rows) != len(set(ids)) or not all(photo(root, row) for row in rows):
         raise SystemExit("Each selected history ID must have a row and a photograph.")
     frames = SITE / "frames"
     frames.mkdir(exist_ok=True)
-    for row in rows:
-        shutil.copyfile(photo(root, row), frames / f"{row['id']}.jpg")
-    data = {"source": "Recorded inspections", "records": [public_record(r, root) for r in rows]}
+    reader = None
+    if locate_labels:
+        import cv2
+        from src.inspection.kit_label import inspect_label, make_reader
+        from src.inspection.pipeline import load_settings
+        settings, kits = load_settings()
+        cfg = settings["label"]
+        reader = make_reader(cfg["threads"])
+
+    exported = []
+    for row in reversed(rows):
+        frame_path = photo(root, row)
+        shutil.copyfile(frame_path, frames / f"{row['id']}.jpg")
+        item = public_record(row, root)
+        # Early records saved the read text, but not its polygon. Locate it for
+        # display only when a fresh read agrees with the recorded text and status.
+        label = item["label"]
+        if reader is not None and label and label.get("text") and not label.get("box"):
+            scene = json.loads(row["scene"])
+            _, replay = inspect_label(reader, cv2.imread(str(frame_path)), scene["rim"], row["kit_id"], kits,
+                                      cfg["min_conf"], cfg["near"])
+            if replay["label"] and replay["label"]["text"] == label["text"] and replay["status"] == label["status"]:
+                label.update(box=replay["label"]["box"], located_on_replay=True)
+        exported.append(item)
+    data = {"source": "Recorded inspections", "initial_id": ids[0], "records": exported}
     (SITE / "inspections.json").write_text(json.dumps(data, indent=2) + "\n")
 
 
@@ -80,10 +102,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--export", nargs="+", type=int, metavar="HISTORY_ID",
                         help="write selected inspection records and photographs into docs/")
+    parser.add_argument("--locate-labels", action="store_true", help="locate missing OCR outlines during export")
     parser.add_argument("--port", type=int, default=8010)
     args = parser.parse_args()
     if args.export:
-        export(HISTORY, args.export)
+        export(HISTORY, args.export, args.locate_labels)
     else:
         import uvicorn
         uvicorn.run(application(HISTORY), host="127.0.0.1", port=args.port)

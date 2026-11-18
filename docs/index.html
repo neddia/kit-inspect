@@ -11,14 +11,16 @@
 <main class="wrap">
 <h1 id="title">Recorded inspections</h1>
 <p id="intro">Select a cycle to inspect its camera frame and the station’s decision.</p>
+<dl id="summary" aria-label="Results for the displayed history window" hidden></dl>
 <div id="layout" hidden>
 <section class="detail" aria-labelledby="cycle">
 <div class="detailhead"><div><small id="stamp"></small><h2 id="cycle"></h2></div><strong class="badge" id="verdict"></strong></div>
+<div class="reading"><h3 id="reason"></h3><dl id="facts"></dl></div>
 <div class="photo"><img id="frame" alt=""><canvas id="overlay" aria-hidden="true"></canvas><p id="noFrame" hidden>No camera frame was saved.</p></div>
-<div class="framefoot"><span>Station camera</span><label><input id="boxes" type="checkbox" checked> Show detections</label></div>
-<div class="reading"><small>Inspection decision</small><h3 id="reason"></h3><dl id="facts"></dl><div id="counts"></div></div>
+<div class="framefoot"><span id="frameLegend">Station camera</span><label><input id="boxes" type="checkbox" checked> Show overlays</label></div>
+<div class="reading" id="counts"></div>
 </section>
-<aside><h2>Inspection history</h2><nav id="records" aria-label="Inspection records"></nav>
+<aside><div class="historyhead"><h2>Cycle history</h2><label>Verdict <select id="filter"><option value="">All</option></select></label></div><nav id="records" aria-label="Inspection records"></nav>
 <p class="plcnote"><b>PLC release rule</b>The simulated PLC releases a kit only after a matching PASS for the current cycle. FAIL, REVIEW and loss of heartbeat hold the kit.</p></aside>
 </div><p id="status" role="status">Loading inspections…</p>
 </main></body></html>

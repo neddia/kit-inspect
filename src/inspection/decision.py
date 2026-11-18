@@ -46,7 +46,8 @@ class Detection:
     conf: float
     box: list            # [x1, y1, x2, y2] pixels
     in_bowl: bool = True
-    on_label: bool = False   # lettering on the kit label, read as a part (not counted)
+    on_label: bool = False   # excluded from part counts
+    label_ambiguous: bool = False   # possible object at the label, requires review
 
 
 @dataclass
@@ -103,6 +104,9 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
     if label and label["status"] == "mismatch":
         return Decision(FAIL, [label["reason"]])
     label_doubt = label["reason"] if label and label["status"] == "review" else None
+
+    if label and label.get("object_overlap"):
+        label_doubt = "check possible object at the kit label"
 
     spec = kits[kit_id]
     sure_list, unsure_list = sort_detections(detections, low, high, overlap_iou)

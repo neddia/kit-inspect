@@ -81,7 +81,7 @@ class History:
                 "reasons": json.dumps(d.reasons),
                 "counts": json.dumps({"sure": d.sure, "unsure": d.unsure, "spec": d.spec}),
                 "detections": json.dumps([{"cls": x.cls, "conf": round(x.conf, 3), "box": [round(v) for v in x.box],
-                                           "in_bowl": x.in_bowl} for x in out["detections"]]),
+                                           "in_bowl": x.in_bowl, "on_label": x.on_label, "label_ambiguous": x.label_ambiguous} for x in out["detections"]]),
                 "unknown_objects": json.dumps(out["unknown_objects"], default=int),
                 "scene": json.dumps(out["scene"], default=float),
                 "ms_inspect": out["ms"]["total"],
@@ -90,7 +90,9 @@ class History:
             if lab:
                 row["label"] = json.dumps({"status": lab["status"], "reason": lab["reason"],
                                            "text": lab["label"]["text"] if lab["label"] else None,
-                                           "conf": lab["label"]["conf"] if lab["label"] else None})
+                                           "conf": lab["label"]["conf"] if lab["label"] else None,
+                                           "box": lab["label"]["box"] if lab["label"] else None,
+                                           "passes": lab["passes"], "ms": out["ms"]["label"]})
         with self.lock:
             cur = self.db.execute(f"INSERT INTO inspections ({', '.join(row)}) VALUES ({', '.join('?' * len(row))})",
                                   list(row.values()))

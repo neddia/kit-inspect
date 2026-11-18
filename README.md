@@ -14,7 +14,7 @@ On a 20-tray challenge set used for model selection, the four-class detector pas
 
 ## Run the demo
 
-To explore the four public records from a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
+To explore the 16 cycles from the recorded bench run in a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
 
 To browse the latest 100 records on a station with local history, run `uv run kit dashboard` and open <http://localhost:8010>. Refresh to load new cycles. The station saves a photo, vision verdict and timing under each history ID. Its SQLite rows do not store the PLC release tag.
 
@@ -83,6 +83,7 @@ A candidate becomes the station's model only when you set `inspection.model` in 
 
 ## Known limits
 
+- The carrier label sits on the sloped rim. A small object directly on the printed lettering can still be confused with the label. A dedicated label-obstruction photo set is planned.
 - Final test sessions with frozen model settings and laptop timing are pending.
 - The PLC is simulated (cpppo + pylogix). No real controller was used.
 - Junk the model has never seen relies on the OpenCV check, which can't see objects inside a part's box.

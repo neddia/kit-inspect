@@ -19,9 +19,9 @@ h2,h3{margin:0;letter-spacing:-.025em}
 small,.badge,.framefoot,.recordhead,.facts,dt{font:600 .82rem/1.4 ui-monospace,"Courier New",monospace}
 small,dt{color:#4b5d67}
 .badge{display:inline-block;border-radius:3px;padding:4px 8px;letter-spacing:.035em;background:#dde3e5}
-[data-result="FAIL"],[data-result="FAULT"]{background:#ffe4de;color:#972e20}
-[data-result="REVIEW"]{background:#fff0c8;color:#715000}
-[data-result="PASS"]{background:#d9efdf;color:#215b3a}
+.badge[data-result="FAIL"],.badge[data-result="FAULT"]{background:#ffe4de;color:#972e20}
+.badge[data-result="REVIEW"]{background:#fff0c8;color:#715000}
+.badge[data-result="PASS"]{background:#d9efdf;color:#215b3a}
 .photo{position:relative;background:#182c35;color:white;text-align:center}
 .photo img{width:100%;display:block}.photo canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #noFrame{padding:50px 0;margin:0}
@@ -40,3 +40,17 @@ nav{max-height:530px;overflow:auto}
 #counts{font-size:.91rem;color:#445963}#counts:not(:empty){border-top:1px solid #dce3e5;margin-top:16px;padding-top:12px}
 [hidden]{display:none!important}
 @media(max-width:760px){.mast{gap:14px}.brand{font-size:.93rem;justify-content:start}.nut{flex-shrink:0}header a{font-size:.8rem}.mast a{text-align:right}#layout{grid-template-columns:minmax(0,1fr);gap:14px}h1{margin-top:24px}.reading,.detailhead,aside h2{padding:14px 16px}dl{gap:16px}.framefoot{padding:8px 12px}.record{padding:10px 14px}}
+
+#summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:1px;border:1px solid #becdce;background:#cbd6d7;margin-bottom:18px}
+#summary div{background:#f8fbfb;padding:10px 16px}
+#summary dd{font-size:1.35rem}
+.detailhead{border-bottom:1px solid #dce3e5}.reading h3{margin-top:0}
+.historyhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:12px 15px}.historyhead h2{padding:0}
+.historyhead label{font-size:.87rem}.historyhead select{padding:4px}
+#counts:not(:empty){padding:14px 20px;margin:0}#counts:empty{display:none}
+table{border-collapse:collapse;width:100%;text-align:right}
+caption{text-align:left;font-weight:bold;padding-bottom:8px}th,td{padding:5px;border-bottom:1px solid #e0e7e8}
+th:first-child,td:first-child{text-align:left}
+@media(max-width:600px){#summary{grid-template-columns:repeat(3,1fr)}#summary div{padding:8px}.historyhead,.reading{padding:10px 14px}.detailhead{padding-bottom:10px}}
+
+@media(max-width:600px){#summary>div:nth-child(5):last-child{grid-column:span 2}}

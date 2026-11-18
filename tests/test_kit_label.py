@@ -48,7 +48,7 @@ def test_unreadable_or_unknown_or_two_labels_go_to_review():
     assert check_label([text("KIT-A", *ON_TRAY, conf=0.5)], RIM, "KIT-A", KITS)["status"] == "review"
     assert check_label([text("KIT-8", *ON_TRAY)], RIM, "KIT-A", KITS)["status"] == "review"
     two = [text("KIT-A", *ON_TRAY), text("KIT-B", 600, 300 + 420)]
-    assert "two different" in check_label(two, RIM, "KIT-A", KITS)["reason"]
+    assert "conflicting" in check_label(two, RIM, "KIT-A", KITS)["reason"]
     assert check_label([text("hello", *ON_TRAY)], RIM, "KIT-A", KITS)["status"] == "review"   # not a kit label
 
 
@@ -65,7 +65,7 @@ def test_decision_mismatch_fails_even_with_right_counts_and_doubt_reviews():
 
 def test_ocr_reads_a_rotated_label_on_the_tray():
     pytest.importorskip("rapidocr")
-    from src.inspection.kit_label import make_reader, read_text
+    from src.inspection.kit_label import make_reader, inspect_label
     img = np.full((720, 1280, 3), 200, np.uint8)
     cv2.circle(img, RIM[:2], RIM[2], (150, 150, 150), 3)
     lab = np.full((80, 240, 3), 245, np.uint8)
@@ -76,30 +76,30 @@ def test_ocr_reads_a_rotated_label_on_the_tray():
     img[mask > 0] = cv2.warpAffine(lab, m, (1280, 720))[mask > 0]
     img = cv2.GaussianBlur(img, (3, 3), 0)     # like the camera. (Razor-sharp drawn text upside down read "KT-B" 0.64:
                                                # a dropped letter matches no kit -> REVIEW, the safe direction.)
-    r = check_label(read_text(make_reader(), img), RIM, "KIT-A", KITS)
+    _, r = inspect_label(make_reader(), img, RIM, "KIT-A", KITS)
     assert r["status"] == "mismatch", r
 
 
 def test_detections_on_the_label_are_its_letters_not_parts():
-    from src.inspection.kit_label import on_label
+    from src.inspection.kit_label import label_overlap
     quad = [[900, 280], [1100, 280], [1100, 340], [900, 340]]      # a label's text box
-    assert on_label([950, 285, 975, 335], [quad])                     # the "I" in KIT, read as a bolt
-    assert not on_label([700, 200, 800, 260], [quad])                 # a real part elsewhere
-    assert not on_label([1050, 250, 1250, 420], [quad])               # a real part only touching the label
+    assert label_overlap([950, 285, 975, 335], [quad])                     # the "I" in KIT, read as a bolt
+    assert not label_overlap([700, 200, 800, 260], [quad])                 # a real part elsewhere
+    assert not label_overlap([1050, 250, 1250, 420], [quad])               # a real part only touching the label
 
 
 def test_a_box_around_the_whole_label_is_the_label():
-    from src.inspection.kit_label import on_label
+    from src.inspection.kit_label import label_overlap
     quad = [[900, 280], [1100, 280], [1100, 340], [900, 340]]      # the text
-    assert on_label([880, 250, 1120, 380], [quad])                    # "other 0.78" around the label paper
-    assert not on_label([600, 100, 1300, 700], [quad])                # something far bigger than a label
+    assert label_overlap([880, 250, 1120, 380], [quad])                    # "other 0.78" around the label paper
+    assert not label_overlap([600, 100, 1300, 700], [quad])                # something far bigger than a label
 
 
 def test_sideways_label_is_found_by_the_turned_pass():
     """Real sideways labels on the curved wall defeat the first pass (7 of 40 live photos), but a drawn
     label doesn't, so a stand-in OCR plays that part: it only sees text in the TURNED frame."""
     import numpy as np
-    from src.inspection.kit_label import read_text
+    from src.inspection.kit_label import inspect_label
 
     class Result:
         def __init__(self, boxes, txts, scores):
@@ -111,8 +111,37 @@ def test_sideways_label_is_found_by_the_turned_pass():
             # a label at original x 280-320, y 300-420 sits at x' = 719-y, y' = x in the turned frame
             box = np.array([[299, 280], [419, 280], [419, 320], [299, 320]], float)
             return Result([box], ["KIT-A"], [0.98])
-        return Result(None, [], [])
+        return Result([[[20, 10], [80, 10], [80, 30], [20, 30]]], ["KIT-B"], [1.0])
 
-    found = read_text(ocr, np.zeros((720, 1280, 3), np.uint8))
-    assert [t["text"] for t in found] == ["KIT-A"]
-    assert found[0]["center"] == [300, 360]          # mapped back to where the label is in the real frame
+    _, result = inspect_label(ocr, np.zeros((720, 1280, 3), np.uint8), (600, 360, 300), "KIT-B", KITS)
+    assert result["passes"] == 2
+    assert result["status"] == "mismatch"
+    assert result["quads"] == [result["label"]["box"]]
+    assert result["label"]["center"] == [300, 360]          # mapped back to where the label is in the real frame
+
+def test_only_verified_carrier_can_exclude_detections():
+    for reads in ([text("KIT-A", *ON_BENCH)], [text("KIT-A", *ON_TRAY, conf=0.4)],
+                  [text("KIT-A", *ON_TRAY), text("KIT-B", *ON_TRAY)]):
+        assert check_label(reads, RIM, "KIT-A", KITS)["quads"] == []
+
+
+def test_rim_label_paper_vs_possible_object():
+    from src.inspection.kit_label import mark_label_detections
+
+    carrier = text("KIT-A", *ON_TRAY)
+    paper = Detection("other", 0.85, [960, 267, 1080, 333])
+    part = Detection("bolt", 0.82, [996, 285, 1010, 315])
+    localized_junk = Detection("other", 0.85, part.box)
+    for detection, floor, doubt in [
+        (paper, (600, 300, 280, True), False),
+        (part, (600, 300, 280, True), False),
+        (localized_junk, (600, 300, 280, True), True),
+        (part, (900, 300, 150, True), True),
+        (part, (600, 300, 280, False), True),
+    ]:
+        label = check_label([carrier], RIM, "KIT-A", KITS)
+        d = Detection(detection.cls, detection.conf, detection.box)
+        mark_label_detections([d], label, floor, 0.7)
+        assert d.on_label and not d.in_bowl and d.label_ambiguous == doubt
+        decision = decide("KIT-A", {"KIT-A": {}}, [d], label=label)
+        assert decision.result == (REVIEW if doubt else PASS)

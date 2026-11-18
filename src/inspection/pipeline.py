@@ -21,7 +21,7 @@ from pathlib import Path
 import yaml
 
 from src.inspection.decision import Detection, decide
-from src.inspection.kit_label import check_label, make_reader, on_label, read_text
+from src.inspection.kit_label import inspect_label, mark_label_detections, make_reader
 from src.inspection.leftovers import find_leftovers
 from src.inspection.scene import check_scene
 from src.inspection.tray import in_bowl
@@ -62,11 +62,9 @@ class Inspector:
             unknown = find_leftovers(frame, scene["floor"], boxes, **self.cfg["leftovers"])
         label, t_label = None, time.perf_counter()
         if self.reader is not None:
-            label = check_label(read_text(self.reader, frame), scene["rim"], kit_id, self.kits,
+            _, label = inspect_label(self.reader, frame, scene["rim"], kit_id, self.kits,
                                 self.label_cfg["min_conf"], tuple(self.label_cfg["near"]))
-            for d in detections:                  # the label's letters read as "bolts": not parts
-                if d.in_bowl and on_label(d.box, label["quads"]):
-                    d.in_bowl, d.on_label = False, True
+            mark_label_detections(detections, label, scene["floor"], d_cfg["high"])
         t_label = round((time.perf_counter() - t_label) * 1000, 1)
         decision = decide(kit_id, self.kits, detections, scene["problems"], unknown, label=label, **d_cfg)
         t_end = time.perf_counter()
