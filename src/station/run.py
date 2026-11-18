@@ -209,20 +209,20 @@ def main():
 
     station = VisionSide(inspect, frames.get, on_result=on_result, health=frames.health)
 
+    def plc_status(text):
+        if text != state["plc"]:                  # print changes only, not every retry
+            print(text)
+        state["plc"] = text
+
     def serve_plc():
-        """Answer PLC triggers; without a PLC the window still works (bench only)."""
-        state["plc"] = "PLC: connected, answering triggers"
-        try:
-            station.run()
-        except Exception as e:
-            state["plc"] = f"PLC: not connected ({type(e).__name__}) - SPACE still works"
-            print(state["plc"])
+        """Answer PLC triggers, reconnecting by itself; without a PLC the window still works (SPACE)."""
+        station.serve(on_status=plc_status)
     source = args.images or "camera"
     print(f"Station ready. Model {model}, photos from {source}"
           f"{', history in data/history/' if history else ''}. Waiting for PLC triggers; Ctrl+C to stop.")
     try:
         if not args.show:
-            station.run()
+            station.serve(on_status=plc_status)
         else:
             worker = threading.Thread(target=serve_plc, daemon=True)
             worker.start()

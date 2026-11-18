@@ -42,10 +42,11 @@ class VisionSide:
         self.fault_from_health = False            # health faults clear themselves; inspection faults need a good cycle
         self.stop = threading.Event()
 
-    def heartbeat(self):
+    def heartbeat(self, over):
+        """Toggle Vision_Heartbeat until the station stops or this PLC session is over."""
         with Tags(self.cfg, port=self.port) as t:
             beat = False
-            while not self.stop.is_set():
+            while not self.stop.is_set() and not over.is_set():
                 if not self.faulted:
                     beat = not beat
                     t.write("heartbeat", beat)
@@ -93,13 +94,28 @@ class VisionSide:
             t.write("fault", False)
             self.on_result({"cycle_id": None, "kit_id": None, "idle": True, "recovered": True})
 
-    def run(self):
-        """Serve triggers until self.stop is set."""
+    def serve(self, on_status=print, retry_s=2.0):
+        """run() forever, reconnecting every retry_s when the PLC is unreachable or drops out
+        (PLC rebooted, cable pulled, simulator started after the station). Until self.stop."""
+        while not self.stop.is_set():
+            try:
+                self.run(on_connected=lambda: on_status("PLC: connected, answering triggers"))
+            except Exception as e:
+                on_status(f"PLC: not connected ({type(e).__name__}: {str(e)[:60]}), retrying every {retry_s:.0f} s")
+                self.stop.wait(retry_s)
+
+    def run(self, on_connected=None):
+        """One PLC session: serve triggers until self.stop is set; raises if the connection fails."""
         poll_s = self.cfg["poll_ms"] / 1000
         with Tags(self.cfg, port=self.port) as t:
             for role in ("busy", "done", "fault"):
                 t.write(role, False)
-            beat = threading.Thread(target=self.heartbeat, daemon=True)
+            if self.faulted:                       # still faulted from before a reconnect: tell the PLC again
+                t.write("fault", True)
+            if on_connected:
+                on_connected()
+            over = threading.Event()
+            beat = threading.Thread(target=self.heartbeat, args=(over,), daemon=True)
             beat.start()
             last_trigger = t.read("trigger")       # a trigger already up at start-up isn't a new kit
             try:
@@ -113,6 +129,6 @@ class VisionSide:
                     last_trigger = trigger
                     time.sleep(poll_s)
             finally:
-                self.stop.set()
+                over.set()
                 beat.join()
 

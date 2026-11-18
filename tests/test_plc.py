@@ -113,7 +113,7 @@ def test_station_recovers_after_a_fault(plc):
 
 def test_lost_heartbeat_holds_even_a_pass(plc):
     class NoHeartbeat(VisionSide):
-        def heartbeat(self):
+        def heartbeat(self, over):
             pass
     with Station(answers("PASS"), cls=NoHeartbeat):
         time.sleep(CFG["heartbeat_timeout_s"] + 0.2)
@@ -153,3 +153,27 @@ def test_camera_lost_while_idle_faults_at_once_and_recovers_by_itself(plc):
         assert plc.tags.read("fault") is False and s.seen[-1].get("recovered")
         out = plc.cycle(1)
     assert out["released"], out["why"]                          # the FIRST kit after recovery is inspected normally
+
+
+def test_station_started_before_the_plc_connects_when_it_comes_up():
+    """What happened Nov 18: the station started first, the PLC simulator after. It must connect by itself."""
+    port = PORT + 1
+    seen, status = [], []
+    side = VisionSide(answers("PASS"), lambda after: "frame", cfg=CFG, codes=CODES, port=port,
+                      on_result=seen.append)
+    thread = threading.Thread(target=side.serve, kwargs={"on_status": status.append, "retry_s": 0.2}, daemon=True)
+    thread.start()
+    time.sleep(0.5)
+    assert status and "not connected" in status[-1]          # no PLC yet: keeps retrying, doesn't give up
+    proc = start_sim(CFG, port=port)
+    try:
+        time.sleep(1.0)
+        assert "connected, answering" in status[-1]
+        with Tags(CFG, port=port) as t:
+            out = Line(t, CFG).cycle(2)
+        assert out["released"] and seen[-1]["kit_id"] == "KIT-B"
+    finally:
+        side.stop.set()
+        thread.join(timeout=5)
+        proc.terminate()
+        proc.wait()
