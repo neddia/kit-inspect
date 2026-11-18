@@ -37,9 +37,10 @@ def plc(sim):
 class Station:
     """Run a VisionSide in a background thread for one test."""
 
-    def __init__(self, inspect, cls=VisionSide):
+    def __init__(self, inspect, cls=VisionSide, health=None):
         self.seen = []
-        self.side = cls(inspect, lambda after: "frame", cfg=CFG, codes=CODES, port=PORT, on_result=self.seen.append)
+        self.side = cls(inspect, lambda after: "frame", cfg=CFG, codes=CODES, port=PORT, on_result=self.seen.append,
+                        health=health)
         self.thread = threading.Thread(target=self.side.run, daemon=True)
 
     def __enter__(self):
@@ -134,3 +135,21 @@ def test_late_answer_is_never_used_for_the_next_kit(plc):
         second = plc.cycle(1)
     assert not first["released"] and first["why"].startswith("timeout")
     assert second["released"] and second["cycle_id"] == first["cycle_id"] + 1
+
+
+def test_camera_lost_while_idle_faults_at_once_and_recovers_by_itself(plc):
+    camera = {"ok": True}
+    health = lambda: None if camera["ok"] else "camera lost: unplugged"
+    with Station(answers("PASS"), health=health) as s:
+        camera["ok"] = False                                    # unplugged while no kit is waiting
+        time.sleep(0.1)
+        assert plc.tags.read("fault") is True                   # the PLC knows before the next kit arrives
+        assert s.seen[-1]["error"] == "camera lost: unplugged" and s.seen[-1]["idle"]
+        beat = plc.tags.read("heartbeat")
+        time.sleep(0.3)
+        assert plc.tags.read("heartbeat") == beat               # heartbeat stopped
+        camera["ok"] = True                                     # plugged back in
+        time.sleep(0.3)                                         # heartbeat back before the next kit
+        assert plc.tags.read("fault") is False and s.seen[-1].get("recovered")
+        out = plc.cycle(1)
+    assert out["released"], out["why"]                          # the FIRST kit after recovery is inspected normally

@@ -32,6 +32,7 @@ from src.station.handshake import VisionSide
 from src.station.history import History
 
 FRAME_TIMEOUT_S = 1.0     # no new camera frame within this after a trigger = camera lost (fault, PLC holds)
+CAMERA_STALE_S = 1.0      # newest frame older than this, even while idle = camera lost (fault until frames return)
 WINDOW = "Kit inspection station"
 
 
@@ -63,6 +64,9 @@ class FolderFrames:
     def latest(self):
         return self.frame, 0.0
 
+    def health(self):
+        return None
+
 
 class CameraFrames:
     def __init__(self):
@@ -81,6 +85,13 @@ class CameraFrames:
 
     def latest(self):
         return self.feed.latest()
+
+    def health(self):
+        """None while frames arrive; else why not (checked every PLC poll, so an idle unplug faults at once)."""
+        frame, age = self.feed.latest()
+        if frame is not None and age <= CAMERA_STALE_S:
+            return None
+        return f"camera lost: {self.feed.error or f'no new frame for {age:.1f} s'}"
 
 
 def window_closed():
@@ -153,14 +164,20 @@ def main():
             return inspector.inspect(frame, kit_id)
 
     def on_result(r):
+        if r.get("recovered"):                    # health fault cleared by itself: frames are back
+            state["note"] = "camera back: fault cleared, heartbeat running"
+            print(state["note"])
+            return
         if history:
             try:
                 history.record(r, model, train=state["collect"])
             except Exception as e:                # a full disk must not stop the line: warn, keep inspecting
                 print(f"WARNING: history not saved: {e}")
-        label = f"cycle {r['cycle_id']:>4}" if r["cycle_id"] is not None else "bench     "
+        label = (f"cycle {r['cycle_id']:>4}" if r["cycle_id"] is not None
+                 else "idle      " if r.get("idle") else "bench     ")
         if "error" in r:
             print(f"{label}  FAULT   {r['error']}")
+            state["note"] = f"FAULT: {r['error']}"[:60]
             return
         d = r["decision"]
         print(f"{label}  {frames.name:<16} {r['kit_id'] or '-':<7} {d.result:<7} "
@@ -181,7 +198,7 @@ def main():
         on_result({"cycle_id": None, "kit_id": args.kit, "decision": out["decision"], "out": out, "frame": frame,
                    "ms_frame": ms_frame, "ms": round((time.monotonic() - t0) * 1000, 1)})
 
-    station = VisionSide(inspect, frames.get, on_result=on_result)
+    station = VisionSide(inspect, frames.get, on_result=on_result, health=frames.health)
 
     def serve_plc():
         """Answer PLC triggers; without a PLC the window still works (bench only)."""
