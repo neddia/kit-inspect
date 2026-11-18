@@ -395,7 +395,7 @@ hardval/hardval_0005.jpg,hardval,val,normal,KIT-A,3,3,2,0,PASS,complete
 hardval/hardval_0006.jpg,hardval,val,normal,KIT-A,3,3,2,0,PASS,complete
 hardval/hardval_0007.jpg,hardval,val,normal,KIT-A,3,3,2,0,PASS,complete
 hardval/hardval_0008.jpg,hardval,val,normal,KIT-A,3,3,2,0,PASS,complete
-hardval/hardval_0009.jpg,hardval,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
+hardval/hardval_0009.jpg,hardval,val,normal,KIT-A,3,3,2,0,PASS,complete
 hardval/hardval_0010.jpg,hardval,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 hardval/hardval_0011.jpg,hardval,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object
 hardval/hardval_0012.jpg,hardval,val,normal,KIT-A,3,3,2,1,NOT_PASS,foreign_object

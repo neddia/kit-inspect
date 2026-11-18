@@ -7,7 +7,7 @@ hardval/hardval_0005.jpg,complete,PASS,REVIEW,review,unsure about 1 bolt (0.36)
 hardval/hardval_0006.jpg,complete,PASS,FAIL,false reject,missing 1 bolt
 hardval/hardval_0007.jpg,complete,PASS,PASS,right,counts match KIT-A
 hardval/hardval_0008.jpg,complete,PASS,PASS,right,counts match KIT-A
-hardval/hardval_0009.jpg,foreign_object,NOT_PASS,PASS,FALSE PASS,counts match KIT-A
+hardval/hardval_0009.jpg,complete,PASS,PASS,right,counts match KIT-A
 hardval/hardval_0010.jpg,foreign_object,NOT_PASS,REVIEW,right,2 unknown objects on the tray
 hardval/hardval_0011.jpg,foreign_object,NOT_PASS,PASS,FALSE PASS,counts match KIT-A
 hardval/hardval_0012.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray

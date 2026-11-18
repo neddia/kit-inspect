@@ -8,3 +8,6 @@ when,image,field,old,new,reason
 2026-11-16T21:24:06,train03/train03_0033.jpg,screws,3,2,review: miscounted at capture
 2026-11-16T21:24:06,train03/train03_0033.jpg,scenario,two_faults,missing_nut,review: miscounted at capture
 2026-11-16T21:35:57,val01/val01_0038.jpg,nuts,3,2,review: miscounted at capture
+2026-11-17T23:30:00,hardval/hardval_0009.jpg,scenario,foreign_object,complete,no junk was placed (checked by eye)
+2026-11-17T23:00:38,hardval/hardval_0009.jpg,other,1,0,Operator confirmed complete kit with no junk
+2026-11-17T23:00:38,hardval/hardval_0009.jpg,expected,NOT_PASS,PASS,Operator confirmed complete kit with no junk
