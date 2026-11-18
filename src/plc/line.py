@@ -19,6 +19,11 @@ Fail-safe: no Done within timeout_s = hold. No heartbeat toggle within
 heartbeat_timeout_s = hold. A result for another cycle = hold. Only a matched
 PASS releases.
 
+Between kits the PLC keeps scanning (watchdog(), every poll): if the vision
+station's heartbeat stops or it raises a fault, Release_Permit drops at once,
+even with nobody pressing anything. (Before Nov 18 a PASS could leave the
+release on while the PLC sat waiting for the next kit.)
+
 Run (with the simulated PLC and the vision station running):
     uv run python -m src.plc.line                    # ENTER sends the next kit (KIT-A)
     uv run python -m src.plc.line --kit KIT-B        # same trays, different recipe
@@ -26,7 +31,9 @@ Run (with the simulated PLC and the vision station running):
 """
 
 import argparse
+import queue
 import sys
+import threading
 import time
 
 from src.plc.tags import RESULT_CODES, Tags, load_config
@@ -49,6 +56,18 @@ class Line:
         if beat != self.last_beat:
             self.last_beat, self.last_beat_t = beat, time.monotonic()
         return time.monotonic() - self.last_beat_t < self.heartbeat_timeout_s
+
+    def watchdog(self):
+        """Between kits: vision heartbeat stopped or faulted -> Release_Permit off now.
+        Returns dict(heartbeat_ok, fault, released, dropped) for a panel to show."""
+        beat_ok, fault = self.heartbeat_ok(), self.tags.read("fault")
+        released = self.tags.read("release_permit")
+        dropped = None
+        if released and (not beat_ok or fault):
+            self.tags.write("release_permit", False)
+            released = False
+            dropped = "vision heartbeat lost -> HOLD" if not beat_ok else "vision fault -> HOLD"
+        return {"heartbeat_ok": beat_ok, "fault": fault, "released": released, "dropped": dropped}
 
     def wait_for(self, role, value, timeout_s):
         """Poll a tag until it equals value (True) or the time runs out (False). Watches the heartbeat meanwhile."""
@@ -119,16 +138,30 @@ def main():
     cfg, codes = load_config()
     by_name = {name: code for code, name in codes.items()}
     kit_code = int(args.kit) if args.kit.isdigit() else by_name[args.kit]
+    enter = queue.Queue()
+    if not args.every:
+        def read_enter():
+            while True:
+                input()
+                enter.put(1)
+        threading.Thread(target=read_enter, daemon=True).start()
     with Tags(cfg) as tags:
         line = Line(tags, cfg)
-        print(f"PLC (simulated) sending kit code {kit_code} ({codes.get(kit_code, 'not in kits.yaml')}).")
-        n = 0
+        print(f"PLC (simulated) sending kit code {kit_code} ({codes.get(kit_code, 'not in kits.yaml')}). "
+              + (f"A kit every {args.every} s." if args.every else "ENTER = next kit."))
+        n, next_t = 0, time.monotonic() + (args.every or 0)
         try:
             while not args.cycles or n < args.cycles:
-                if args.every:
-                    time.sleep(args.every)
-                else:
-                    input("ENTER = next kit ")
+                due = time.monotonic() >= next_t if args.every else not enter.empty()
+                if not due:
+                    w = line.watchdog()               # between kits: keep watching the vision station
+                    if w["dropped"]:
+                        print(f"            HOLD     release dropped: {w['dropped']}")
+                    time.sleep(line.poll_s)
+                    continue
+                if not args.every:
+                    enter.get()
+                next_t = time.monotonic() + (args.every or 0)
                 out = line.cycle(kit_code)
                 n += 1
                 status = "RELEASE" if out["released"] else "HOLD   "
@@ -136,7 +169,6 @@ def main():
                       f"{out['ms']:>5} ms  {out['why']}")
         except KeyboardInterrupt:
             pass
-
 
 if __name__ == "__main__":
     main()

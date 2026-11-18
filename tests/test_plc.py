@@ -177,3 +177,28 @@ def test_station_started_before_the_plc_connects_when_it_comes_up():
         thread.join(timeout=5)
         proc.terminate()
         proc.wait()
+
+
+def test_watchdog_drops_a_release_when_vision_stops_while_idle(plc):
+    """Get a PASS, stop the vision app while no kit is waiting: the PLC's actual Release_Permit must drop to
+    HOLD within the heartbeat timeout, with nobody pressing anything."""
+    with Station(answers("PASS")):
+        out = plc.cycle(1)
+        assert out["released"] and plc.tags.read("release_permit") is True
+        assert plc.watchdog()["released"]                     # vision alive: the release stays
+    t0 = time.monotonic()                                     # vision app closed here
+    while plc.tags.read("release_permit") and time.monotonic() - t0 < CFG["heartbeat_timeout_s"] + 1.0:
+        w = plc.watchdog()
+        time.sleep(0.02)
+    assert plc.tags.read("release_permit") is False
+    assert "heartbeat lost" in w["dropped"] and time.monotonic() - t0 <= CFG["heartbeat_timeout_s"] + 0.3
+
+
+def test_watchdog_drops_a_release_on_a_vision_fault(plc):
+    camera = {"ok": True}
+    with Station(answers("PASS"), health=lambda: None if camera["ok"] else "camera lost") :
+        assert plc.cycle(1)["released"]
+        camera["ok"] = False                                  # camera unplugged after the PASS, while idle
+        time.sleep(0.1)
+        w = plc.watchdog()
+    assert w["dropped"] == "vision fault -> HOLD" and plc.tags.read("release_permit") is False
