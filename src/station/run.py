@@ -140,7 +140,8 @@ def main():
     parser.add_argument("--show", action="store_true", help="window with the live view and the last result")
     parser.add_argument("--no-history", action="store_true", help="don't record inspections")
     parser.add_argument("--collect", action="store_true", help='start with "save for training" on (t toggles)')
-    parser.add_argument("--kit", default="KIT-A", help="kit for bench inspections (SPACE); the PLC sends its own")
+    parser.add_argument("--kit", help="kit for bench inspections (SPACE). Default: the kit the PLC sent last "
+                                      "(KIT-A before the first one)")
     args = parser.parse_args()
     sys.stdout.reconfigure(line_buffering=True)
     quiet_jpeg_warnings()
@@ -180,12 +181,18 @@ def main():
             state["note"] = f"FAULT: {r['error']}"[:60]
             return
         d = r["decision"]
+        if r["cycle_id"] is not None:
+            state["plc_kit"] = r["kit_id"]        # SPACE bench tests follow the line's current kit
         print(f"{label}  {frames.name:<16} {r['kit_id'] or '-':<7} {d.result:<7} "
               f"photo {r['ms_frame']:>4.0f} ms  total {r['ms']:>4.0f} ms  {'; '.join(d.reasons)}")
         if args.show:
             last["img"] = draw(r["frame"], r["out"], high)
             state["note"] = (f"last: cycle {r['cycle_id']}, kit {r['kit_id']} from the PLC" if r["cycle_id"] is not None
-                             else f"last: SPACE bench test, kit {r['kit_id']} (--kit, not the PLC)")
+                             else f"last: SPACE bench test, kit {r['kit_id']}"
+                             + (" (--kit)" if args.kit else " (PLC's last kit)" if state.get("plc_kit") else " (default)"))
+
+    def bench_kit():
+        return args.kit or state.get("plc_kit") or "KIT-A"
 
     def bench():
         """SPACE: inspect the tray now, without the PLC (no release; recorded like any other)."""
@@ -193,11 +200,11 @@ def main():
         try:
             frame = frames.get(t0)
             ms_frame = round((time.monotonic() - t0) * 1000, 1)
-            out = inspect(frame, args.kit)
+            out = inspect(frame, bench_kit())
         except Exception as e:
-            on_result({"cycle_id": None, "kit_id": args.kit, "error": f"{type(e).__name__}: {e}"})
+            on_result({"cycle_id": None, "kit_id": bench_kit(), "error": f"{type(e).__name__}: {e}"})
             return
-        on_result({"cycle_id": None, "kit_id": args.kit, "decision": out["decision"], "out": out, "frame": frame,
+        on_result({"cycle_id": None, "kit_id": bench_kit(), "decision": out["decision"], "out": out, "frame": frame,
                    "ms_frame": ms_frame, "ms": round((time.monotonic() - t0) * 1000, 1)})
 
     station = VisionSide(inspect, frames.get, on_result=on_result, health=frames.health)
