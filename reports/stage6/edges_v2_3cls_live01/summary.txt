@@ -1,0 +1,39 @@
+Full decision on live01 (29 trays). Model: runs/detect/runs/stage5/v2_3cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    0 of 29 faulty trays   <- the headline number
+False rejects:   0 of 0 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 0 of 0
+Review rate:     27 of 29 trays (93%)   target: under 5%
+Time per tray:   median 49 ms (this PC; laptop measured in Stage 7)
+
+scenario         trays  PASS  FAIL  REVIEW
+foreign_object      29     0     2      27
+
+Every REVIEW and every wrong answer, with reasons:
+  live01/live01_0001.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0002.jpg     foreign_object  REVIEW  right        2 unknown objects on the tray
+  live01/live01_0003.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0004.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0005.jpg     foreign_object  REVIEW  right        3 unknown objects on the tray
+  live01/live01_0006.jpg     foreign_object  REVIEW  right        2 unknown objects on the tray
+  live01/live01_0007.jpg     foreign_object  REVIEW  right        2 unknown objects on the tray
+  live01/live01_0008.jpg     foreign_object  REVIEW  right        2 unknown objects on the tray
+  live01/live01_0009.jpg     foreign_object  REVIEW  right        3 unknown objects on the tray
+  live01/live01_0010.jpg     foreign_object  REVIEW  right        3 unknown objects on the tray
+  live01/live01_0011.jpg     foreign_object  REVIEW  right        unsure about 2 screws (0.68, 0.60); 3 unknown objects on the tray
+  live01/live01_0012.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0013.jpg     foreign_object  REVIEW  right        2 unknown objects on the tray
+  live01/live01_0014.jpg     foreign_object  REVIEW  right        3 unknown objects on the tray
+  live01/live01_0015.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0016.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0017.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0018.jpg     foreign_object  REVIEW  right        unsure about 1 screw (0.65); 1 unknown object on the tray
+  live01/live01_0019.jpg     foreign_object  REVIEW  right        3 unknown objects on the tray
+  live01/live01_0020.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0021.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0022.jpg     foreign_object  REVIEW  right        5 unknown objects on the tray
+  live01/live01_0023.jpg     foreign_object  REVIEW  right        4 unknown objects on the tray
+  live01/live01_0024.jpg     foreign_object  REVIEW  right        too dark (floor brightness 139, normal 140+)
+  live01/live01_0025.jpg     foreign_object  REVIEW  right        12 unknown objects on the tray
+  live01/live01_0028.jpg     foreign_object  REVIEW  right        1 unknown object on the tray
+  live01/live01_0029.jpg     foreign_object  REVIEW  right        1 unknown object on the tray

@@ -1,0 +1,30 @@
+image,scenario,expected,result,outcome,reasons
+live01/live01_0001.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0002.jpg,foreign_object,NOT_PASS,REVIEW,right,2 unknown objects on the tray
+live01/live01_0003.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0004.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0005.jpg,foreign_object,NOT_PASS,REVIEW,right,3 unknown objects on the tray
+live01/live01_0006.jpg,foreign_object,NOT_PASS,REVIEW,right,2 unknown objects on the tray
+live01/live01_0007.jpg,foreign_object,NOT_PASS,REVIEW,right,2 unknown objects on the tray
+live01/live01_0008.jpg,foreign_object,NOT_PASS,REVIEW,right,2 unknown objects on the tray
+live01/live01_0009.jpg,foreign_object,NOT_PASS,REVIEW,right,3 unknown objects on the tray
+live01/live01_0010.jpg,foreign_object,NOT_PASS,REVIEW,right,3 unknown objects on the tray
+live01/live01_0011.jpg,foreign_object,NOT_PASS,REVIEW,right,"unsure about 2 screws (0.68, 0.60); 3 unknown objects on the tray"
+live01/live01_0012.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0013.jpg,foreign_object,NOT_PASS,REVIEW,right,2 unknown objects on the tray
+live01/live01_0014.jpg,foreign_object,NOT_PASS,REVIEW,right,3 unknown objects on the tray
+live01/live01_0015.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0016.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0017.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0018.jpg,foreign_object,NOT_PASS,REVIEW,right,unsure about 1 screw (0.65); 1 unknown object on the tray
+live01/live01_0019.jpg,foreign_object,NOT_PASS,REVIEW,right,3 unknown objects on the tray
+live01/live01_0020.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0021.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0022.jpg,foreign_object,NOT_PASS,REVIEW,right,5 unknown objects on the tray
+live01/live01_0023.jpg,foreign_object,NOT_PASS,REVIEW,right,4 unknown objects on the tray
+live01/live01_0024.jpg,foreign_object,NOT_PASS,REVIEW,right,"too dark (floor brightness 139, normal 140+)"
+live01/live01_0025.jpg,foreign_object,NOT_PASS,REVIEW,right,12 unknown objects on the tray
+live01/live01_0026.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 screw; also: 2 unknown objects on the tray
+live01/live01_0027.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 screw; also: 1 unknown object on the tray
+live01/live01_0028.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
+live01/live01_0029.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray
