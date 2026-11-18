@@ -30,3 +30,6 @@ data/anomaly/
 
 # Station history: every inspection (SQLite + raw photos). Local data, not code.
 data/history/
+
+# kit_label diagnostic output, overwritten on every run
+reports/stage7/label_check*.jpg
