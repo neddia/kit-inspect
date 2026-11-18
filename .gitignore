@@ -23,6 +23,7 @@ reports/explore/
 
 # Derived YOLO training layout (rebuilt by src/labeling/export_yolo.py)
 data/yolo/
+data/yolo_other/
 
 # Bowl crops for PatchCore (rebuilt by `python -m src.inspection.patchcore prep`)
 data/anomaly/

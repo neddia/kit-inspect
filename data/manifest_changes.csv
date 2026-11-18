@@ -11,3 +11,47 @@ when,image,field,old,new,reason
 2026-11-17T23:30:00,hardval/hardval_0009.jpg,scenario,foreign_object,complete,no junk was placed (checked by eye)
 2026-11-17T23:00:38,hardval/hardval_0009.jpg,other,1,0,Operator confirmed complete kit with no junk
 2026-11-17T23:00:38,hardval/hardval_0009.jpg,expected,NOT_PASS,PASS,Operator confirmed complete kit with no junk
+2026-11-17T23:22:54,hardval/hardval_0014.jpg,scenario,foreign_object,stacked,review: part hidden in photo
+2026-11-17T23:25:22,hardval/hardval_0018.jpg,scenario,lookalike_nut,stacked,review: part hidden in photo
+2026-11-17T23:28:40,hard01/hard01_0023.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:28:40,hard01/hard01_0023.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:29:07,hard01/hard01_0024.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:29:07,hard01/hard01_0024.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:29:20,hard01/hard01_0025.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:29:20,hard01/hard01_0025.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:29:44,hard01/hard01_0026.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:29:44,hard01/hard01_0026.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:29:53,hard01/hard01_0027.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:29:53,hard01/hard01_0027.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:30:33,hard01/hard01_0028.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:30:33,hard01/hard01_0028.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:31:00,hard01/hard01_0029.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:31:00,hard01/hard01_0029.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:31:08,hard01/hard01_0032.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:31:08,hard01/hard01_0032.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:31:14,hard01/hard01_0033.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:31:14,hard01/hard01_0033.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:31:34,hard01/hard01_0034.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:31:34,hard01/hard01_0034.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:31:48,hard01/hard01_0036.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:31:48,hard01/hard01_0036.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:33:31,hard01/hard01_0038.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:33:31,hard01/hard01_0038.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:33:42,hard01/hard01_0039.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:33:42,hard01/hard01_0039.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:34:23,hard01/hard01_0040.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:34:23,hard01/hard01_0040.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:34:48,hard01/hard01_0041.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:34:48,hard01/hard01_0041.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:35:12,hard01/hard01_0042.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:35:12,hard01/hard01_0042.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:35:26,hard01/hard01_0043.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:35:26,hard01/hard01_0043.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:35:40,hard01/hard01_0044.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:35:40,hard01/hard01_0044.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:36:57,hard01/hard01_0030.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:36:57,hard01/hard01_0030.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:37:19,hard01/hard01_0031.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:37:19,hard01/hard01_0031.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
+2026-11-17T23:37:28,hard01/hard01_0035.jpg,screws,2,1,review: miscounted at capture
+2026-11-17T23:37:28,hard01/hard01_0035.jpg,scenario,foreign_object,two_faults,review: miscounted at capture
