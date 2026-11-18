@@ -29,7 +29,7 @@ import cv2
 
 from src.capture.camera import quiet_jpeg_warnings
 from src.inspection.draw import draw
-from src.inspection.pipeline import REPO, Inspector
+from src.inspection.pipeline import REPO, Inspector, load_settings
 
 DATA = REPO / "data"
 
@@ -45,6 +45,8 @@ def main():
     parser.add_argument("--session", nargs="+", default=["val01"])
     parser.add_argument("--name", default="val01")
     parser.add_argument("--model", help="model to use instead of station.yaml's (e.g. an OpenVINO export folder)")
+    parser.add_argument("--label", action="store_true",
+                        help="also run the kit label check (only for sessions shot with labels on the tray)")
     args = parser.parse_args()
 
     quiet_jpeg_warnings()
@@ -57,7 +59,9 @@ def main():
     if args.model:
         from ultralytics import YOLO
         model = YOLO(args.model, task="detect")
-    inspector = Inspector(model=model)
+    settings, kits = load_settings()
+    settings["label"] = dict(settings.get("label", {}), enabled=args.label)   # older sessions have no labels
+    inspector = Inspector(settings=settings, kits=kits, model=model)
     results, by_scenario, times = [], {}, []
     for row in rows:
         frame = cv2.imread(str(DATA / "images" / row["image"]))

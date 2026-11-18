@@ -139,6 +139,10 @@ def main():
           + (f"  (ignored, off the tray: {result['ignored']})" if result["ignored"] else ""))
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(args.out, img)
+    if not args.image:                            # the raw photo too, to re-run with --image (never the drawn one)
+        raw = str(Path(args.out).with_name(Path(args.out).stem + "_raw.jpg"))
+        cv2.imwrite(raw, frame)
+        print(f"raw photo: {raw}")
     print(f"picture: {args.out}  (blue rings = where a label counts as ON the tray)")
 
 
