@@ -1,0 +1,31 @@
+image,scenario,expected,result,outcome,reasons
+hard03/hard03_0001.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0002.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0003.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0004.jpg,complete,PASS,FAIL,false reject,missing 1 bolt; 1 extra nut
+hard03/hard03_0005.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0006.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0007.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0008.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0009.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0010.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0011.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0012.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0013.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0014.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0015.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0016.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0017.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0018.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0019.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0020.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0021.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0022.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0023.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0024.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0025.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0026.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0027.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0028.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0029.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard03/hard03_0030.jpg,complete,PASS,PASS,right,counts match KIT-A

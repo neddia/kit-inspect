@@ -1,0 +1,21 @@
+image,scenario,expected,result,outcome,reasons
+hardval/hardval_0001.jpg,complete,PASS,REVIEW,review,unsure about 1 bolt (0.66); unsure about 1 nut (0.63)
+hardval/hardval_0002.jpg,complete,PASS,FAIL,false reject,1 extra nut
+hardval/hardval_0003.jpg,complete,PASS,PASS,right,counts match KIT-A
+hardval/hardval_0004.jpg,complete,PASS,REVIEW,review,unsure about 1 bolt (0.38); unsure about 1 nut (0.34)
+hardval/hardval_0005.jpg,complete,PASS,REVIEW,review,unsure about 1 bolt (0.49); unsure about 1 nut (0.60)
+hardval/hardval_0006.jpg,complete,PASS,REVIEW,review,unsure about 1 bolt (0.57)
+hardval/hardval_0007.jpg,complete,PASS,PASS,right,counts match KIT-A
+hardval/hardval_0008.jpg,complete,PASS,PASS,right,counts match KIT-A
+hardval/hardval_0009.jpg,complete,PASS,PASS,right,counts match KIT-A
+hardval/hardval_0010.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hardval/hardval_0011.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hardval/hardval_0012.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+hardval/hardval_0013.jpg,foreign_object,NOT_PASS,FAIL,right,missing 1 screw; 1 foreign object
+hardval/hardval_0014.jpg,stacked,NOT_PASS,REVIEW,right,tray off position (34% of the floor is outside the photo)
+hardval/hardval_0015.jpg,lookalike_nut,NOT_PASS,REVIEW,right,unsure about 1 bolt (0.21); unsure about 1 nut (0.22); maybe a foreign object (0.67)
+hardval/hardval_0016.jpg,lookalike_nut,NOT_PASS,FAIL,right,missing 1 nut; 1 foreign object
+hardval/hardval_0017.jpg,lookalike_nut,NOT_PASS,FAIL,right,missing 1 nut; 1 foreign object; also: 2 unknown objects on the tray
+hardval/hardval_0018.jpg,stacked,NOT_PASS,FAIL,right,missing 1 bolt; missing 2 nuts; 1 foreign object
+hardval/hardval_0019.jpg,missing_nut,FAIL,FAIL,right,missing 1 screw; 1 foreign object
+hardval/hardval_0020.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut

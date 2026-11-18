@@ -1,0 +1,14 @@
+Full decision on hard03 (30 trays). Model: runs/detect/runs/stage5/v2_3cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    0 of 0 faulty trays   <- the headline number
+False rejects:   1 of 30 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 1 of 30
+Review rate:     1 of 30 trays (3%)   target: under 5%
+Time per tray:   median 45 ms (this PC; laptop measured in Stage 7)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete            30    28     1       1
+
+Every REVIEW and every wrong answer, with reasons:
+  hard03/hard03_0004.jpg     complete        FAIL    false reject missing 1 bolt; 1 extra nut
+  hard03/hard03_0005.jpg     complete        REVIEW  review       unsure about 1 bolt (0.64); unsure about 2 nuts (0.55, 0.32)

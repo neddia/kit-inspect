@@ -91,6 +91,11 @@ sessions:
     setup: "HARD CASES CHECK SET (never trained on): normal light; mix odd poses, overlaps and look-alikes"
     hint: "mix it up: odd poses, overlaps, look-alikes"
     mix: {complete: 8, foreign_object: 6, lookalike_nut: 4, missing_nut: 2}
+  - name: hardval2
+    split: test           # never trained on AND never YOLO's val (hardval was): the honest check, Nov 18
+    setup: "FRESH CHECK SET for the 'other' class: normal light. Junk shots: first 5 with junk NEVER used before (drawer stuff), last 5 with coin cells/batteries in new spots"
+    hint: "junk the model has never seen is the real test; complete trays: odd poses + overlap"
+    mix: {complete: 6, foreign_object: 10, lookalike_nut: 4}
 
   # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
   - name: stress_side

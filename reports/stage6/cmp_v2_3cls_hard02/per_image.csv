@@ -1,0 +1,31 @@
+image,scenario,expected,result,outcome,reasons
+hard02/hard02_0001.jpg,complete,PASS,FAIL,false reject,missing 1 nut
+hard02/hard02_0002.jpg,complete,PASS,FAIL,false reject,missing 1 nut
+hard02/hard02_0003.jpg,complete,PASS,FAIL,false reject,missing 1 nut
+hard02/hard02_0004.jpg,complete,PASS,REVIEW,review,unsure about 1 nut (0.23)
+hard02/hard02_0005.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0006.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0007.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0008.jpg,complete,PASS,FAIL,false reject,1 extra bolt; missing 1 screw
+hard02/hard02_0009.jpg,complete,PASS,REVIEW,review,unsure about 1 nut (0.62); unsure about 1 screw (0.57)
+hard02/hard02_0010.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0011.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0012.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0013.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0014.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0015.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0016.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0017.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0018.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0019.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0020.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0021.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0022.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0023.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0024.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0025.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0026.jpg,complete,PASS,REVIEW,review,unsure about 1 screw (0.39)
+hard02/hard02_0027.jpg,complete,PASS,REVIEW,review,"unsure about 2 screws (0.53, 0.45)"
+hard02/hard02_0028.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0029.jpg,complete,PASS,PASS,right,counts match KIT-A
+hard02/hard02_0030.jpg,complete,PASS,REVIEW,review,unsure about 1 screw (0.50)
