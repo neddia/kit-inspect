@@ -78,3 +78,11 @@ def test_ocr_reads_a_rotated_label_on_the_tray():
                                                # a dropped letter matches no kit -> REVIEW, the safe direction.)
     r = check_label(read_text(make_reader(), img), RIM, "KIT-A", KITS)
     assert r["status"] == "mismatch", r
+
+
+def test_detections_on_the_label_are_its_letters_not_parts():
+    from src.inspection.kit_label import on_label
+    quad = [[900, 280], [1100, 280], [1100, 340], [900, 340]]      # a label's text box
+    assert on_label([950, 285, 975, 335], [quad])                     # the "I" in KIT, read as a bolt
+    assert not on_label([700, 200, 800, 260], [quad])                 # a real part elsewhere
+    assert not on_label([1050, 250, 1250, 420], [quad])               # a real part only touching the label

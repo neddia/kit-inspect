@@ -46,6 +46,7 @@ class Detection:
     conf: float
     box: list            # [x1, y1, x2, y2] pixels
     in_bowl: bool = True
+    on_label: bool = False   # lettering on the kit label, read as a part (not counted)
 
 
 @dataclass

@@ -35,7 +35,7 @@ def draw(frame, out, high=0.7):
         color = ((150, 150, 150) if not d.in_bowl else (255, 0, 255) if d.cls == "other"
                  else (60, 200, 60) if d.conf >= high else (0, 200, 255))
         cv2.rectangle(img, (x1, y1), (x2, y2), color, thick)
-        tag(img, f"{d.cls} {d.conf:.2f}", x1, y1, color, scale, thick)
+        tag(img, f"{d.cls} {d.conf:.2f}" + (" (label)" if d.on_label else ""), x1, y1, color, scale, thick)
     for u in out["unknown_objects"]:
         x1, y1, x2, y2 = u["box"]
         cv2.rectangle(img, (x1 - 6, y1 - 6), (x2 + 6, y2 + 6), (255, 0, 255), thick + 1)

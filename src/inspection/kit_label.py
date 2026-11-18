@@ -17,6 +17,12 @@ unless the station knows which tray to expect. Why the full frame: the tray move
 and rotates, so a fixed crop would miss the label; the OCR's own text detector
 finds text anywhere and at any angle (an angle classifier handles upside down).
 
+The label's own letters fool the detector (Nov 18, live): "I"/"T" read as bolts
+(0.25-0.65), "B" as a nut, the whole label as "other". The label sits on the bowl
+wall, inside the counted area, so perfect kits went to REVIEW. Fix: a detection
+lying mostly on a kit-label text box is lettering, not a part (on_label). If the
+label can't be read at all, its letters still count -> REVIEW, the safe direction.
+
 Measured Nov 18 on fake labels pasted on a real tray photo (0-180 deg): read
 every time, confidence 1.0, ~135 ms per 720p frame on 2 CPU cores.
 Real printed labels (glare, perspective, focus) still to be tested.
@@ -56,6 +62,14 @@ def normalize(text):
     return s[:3].translate(LOOKALIKES) + s[3:]
 
 
+def on_label(box, quads, margin=15, share=0.6):
+    """True if at least `share` of a detection box [x1, y1, x2, y2] lies on a kit label (grown by margin px)."""
+    from shapely.geometry import Polygon, box as rect
+
+    b = rect(*box)
+    return b.area > 0 and any(Polygon(q).buffer(margin).intersection(b).area >= share * b.area for q in quads)
+
+
 def check_label(texts, rim, expected, kits, min_conf=0.8, near=(0.9, 1.8)):
     """Decide what the label says about this tray.
 
@@ -66,13 +80,14 @@ def check_label(texts, rim, expected, kits, min_conf=0.8, near=(0.9, 1.8)):
     Returns dict(status = ok | mismatch | review, reason, label, ignored)."""
     known = {normalize(k): k for k in kits}
     labels = [t for t in texts if normalize(t["text"]).startswith(LABEL_PREFIX)]
+    quads = [t["box"] for t in labels]            # where kit-label lettering is (on_label uses them)
     on_tray, ignored = [], []
     for t in labels:
         if rim is not None and near[0] * rim[2] <= math.dist(t["center"], rim[:2]) <= near[1] * rim[2]:
             on_tray.append(t)
         else:
             ignored.append(t["text"])
-    out = {"label": None, "ignored": ignored}
+    out = {"label": None, "ignored": ignored, "quads": quads}
     if rim is None:
         return out | {"status": "review", "reason": "kit label: no tray found to look around"}
     if not on_tray:
