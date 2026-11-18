@@ -40,7 +40,8 @@ COLUMNS = """
     model TEXT,           -- model file and version
     error TEXT,           -- what went wrong, for faults
     train INTEGER DEFAULT 0,  -- 1 = marked "save for training" (station window: t toggles, u undoes)
-    harvested TEXT        -- training session it was copied into (src/station/harvest.py)
+    harvested TEXT,       -- training session it was copied into (src/station/harvest.py)
+    label TEXT            -- JSON kit label check {status, reason, text, conf}, empty if the check is off
 """
 
 
@@ -53,7 +54,7 @@ class History:
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute(f"CREATE TABLE IF NOT EXISTS inspections ({COLUMNS})")
         have = {r[1] for r in self.db.execute("PRAGMA table_info(inspections)")}
-        for col, kind in (("train", "INTEGER DEFAULT 0"), ("harvested", "TEXT")):   # older history files
+        for col, kind in (("train", "INTEGER DEFAULT 0"), ("harvested", "TEXT"), ("label", "TEXT")):   # older files
             if col not in have:
                 self.db.execute(f"ALTER TABLE inspections ADD COLUMN {col} {kind}")
         self.db.commit()
@@ -86,6 +87,11 @@ class History:
                 "scene": json.dumps(out["scene"], default=float),
                 "ms_inspect": out["ms"]["total"],
             }
+            lab = out.get("label")
+            if lab:
+                row["label"] = json.dumps({"status": lab["status"], "reason": lab["reason"],
+                                           "text": lab["label"]["text"] if lab["label"] else None,
+                                           "conf": lab["label"]["conf"] if lab["label"] else None})
         with self.lock:
             cur = self.db.execute(f"INSERT INTO inspections ({', '.join(row)}) VALUES ({', '.join('?' * len(row))})",
                                   list(row.values()))

@@ -13,6 +13,7 @@ dependencies = [
     "pandas==2.3.3",
     "pylogix==1.1.7",        # vision-side PLC client (pycomm3 can't talk to cpppo)
     "pyyaml==6.0.3",
+    "rapidocr==3.10.0",
     "transformers==5.20.2",
     "ultralytics==8.4.213",
     "uvicorn==0.54.0",

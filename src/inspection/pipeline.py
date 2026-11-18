@@ -1,8 +1,9 @@
 """One inspection: photo + kit ID from the PLC -> PASS / FAIL / REVIEW with reasons.
 
-    photo ──> model (bolt / nut / screw boxes)
+    photo ──> model (bolt / nut / screw / other boxes)
           ──> scene check (tray found? in position? brightness normal?)
           ──> unknown-object check (anything on the floor the model didn't explain)
+          ──> kit label check (OCR, if enabled: does the tray's label match the PLC's kit?)
           ──> decision rules (src/inspection/decision.py)
 
 Settings come from configs/station.yaml, section `inspection`.
@@ -20,6 +21,7 @@ from pathlib import Path
 import yaml
 
 from src.inspection.decision import Detection, decide
+from src.inspection.kit_label import check_label, make_reader, read_text
 from src.inspection.leftovers import find_leftovers
 from src.inspection.scene import check_scene
 from src.inspection.tray import in_bowl
@@ -42,6 +44,8 @@ class Inspector:
             from ultralytics import YOLO
             model = YOLO(str(REPO / self.cfg["model"]), task="detect")   # task needed for exported models
         self.model = model
+        self.label_cfg = self.cfg.get("label", {"enabled": False})
+        self.reader = make_reader(self.label_cfg.get("threads", 2)) if self.label_cfg["enabled"] else None
 
     def inspect(self, frame, kit_id):
         t0 = time.perf_counter()
@@ -56,12 +60,18 @@ class Inspector:
         unknown = []
         if scene["floor"] is not None:
             unknown = find_leftovers(frame, scene["floor"], boxes, **self.cfg["leftovers"])
-        decision = decide(kit_id, self.kits, detections, scene["problems"], unknown, **d_cfg)
+        label, t_label = None, time.perf_counter()
+        if self.reader is not None:
+            label = check_label(read_text(self.reader, frame), scene["rim"], kit_id, self.kits,
+                                self.label_cfg["min_conf"], tuple(self.label_cfg["near"]))
+        t_label = round((time.perf_counter() - t_label) * 1000, 1)
+        decision = decide(kit_id, self.kits, detections, scene["problems"], unknown, label=label, **d_cfg)
         t_end = time.perf_counter()
         return {
+            "label": label,
             "decision": decision,
             "detections": detections,
             "scene": scene,
             "unknown_objects": unknown,
-            "ms": {"model": round((t_model - t0) * 1000, 1), "total": round((t_end - t0) * 1000, 1)},
+            "ms": {"model": round((t_model - t0) * 1000, 1), "label": t_label, "total": round((t_end - t0) * 1000, 1)},
         }

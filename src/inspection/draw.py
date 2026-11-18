@@ -5,6 +5,7 @@ The verdict and reasons go in a black strip ABOVE the photo, so they never cover
 """
 
 import cv2
+import numpy as np
 
 COLORS = {"PASS": (60, 200, 60), "FAIL": (60, 60, 230), "REVIEW": (0, 200, 255)}
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -39,6 +40,13 @@ def draw(frame, out, high=0.7):
         x1, y1, x2, y2 = u["box"]
         cv2.rectangle(img, (x1 - 6, y1 - 6), (x2 + 6, y2 + 6), (255, 0, 255), thick + 1)
         tag(img, "unknown", x1 - 6, y1 - 6, (255, 0, 255), scale, thick)
+    label = out.get("label")
+    if label and label["label"]:                  # the kit label the OCR read on the tray
+        color = {"ok": (60, 200, 60), "mismatch": (60, 60, 230)}.get(label["status"], (0, 200, 255))
+        quad = np.array(label["label"]["box"], np.int32)
+        cv2.polylines(img, [quad], True, color, thick + 1)
+        x, y = quad.min(0)
+        tag(img, f"label {label['label']['text']} {label['label']['conf']:.2f}", int(x), int(y), color, scale, thick)
 
     dec = out["decision"]
     line = int(30 * k)

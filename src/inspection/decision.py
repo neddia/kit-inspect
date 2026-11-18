@@ -5,6 +5,9 @@ They run in order; the first that applies wins:
 
   1. Scene problem (no tray, too dark/bright, tray off position)   -> REVIEW
   2. Kit ID from the PLC missing or not in kits.yaml                 -> REVIEW
+  2b. Kit label on the tray (OCR, if enabled; src/inspection/kit_label.py):
+        says a DIFFERENT kit  -> FAIL (wrong kit on the line, whatever the counts)
+        missing / unreadable  -> one more REVIEW reason (a FAIL from the counts stays a FAIL)
   3. Sort detections in the bowl by confidence:
         below `low`              ignored (noise)
         `low` up to `high`       UNSURE: might or might not be a real part
@@ -89,11 +92,16 @@ def unsure_about(n, part, confs):
     return f"{what} ({confs})"
 
 
-def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=0.25, high=0.6, overlap_iou=0.6):
+def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=0.25, high=0.6, overlap_iou=0.6,
+           label=None):
+    """label: kit_label.check_label() output, or None when the label check is off."""
     if scene_problems:
         return Decision(REVIEW, list(scene_problems))
     if not kit_id or kit_id not in kits:
         return Decision(REVIEW, [f"kit ID {kit_id!r} not in kits.yaml" if kit_id else "no kit ID from the PLC"])
+    if label and label["status"] == "mismatch":
+        return Decision(FAIL, [label["reason"]])
+    label_doubt = label["reason"] if label and label["status"] == "review" else None
 
     spec = kits[kit_id]
     sure_list, unsure_list = sort_detections(detections, low, high, overlap_iou)
@@ -113,6 +121,8 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
                 reasons.append(extra(closest - want[p], p))
         if unknown_objects:
             reasons.append(f"also: {plural(len(unknown_objects), 'unknown object')} on the tray")
+        if label_doubt:
+            reasons.append(f"also: {label_doubt}")
         return Decision(FAIL, reasons, sure, unsure, want)
 
     reasons = []
@@ -121,6 +131,8 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
             reasons.append(unsure_about(unsure[p], p, ", ".join(f"{d.conf:.2f}" for d in unsure_list if d.cls == p)))
     if unknown_objects:
         reasons.append(f"{plural(len(unknown_objects), 'unknown object')} on the tray")
+    if label_doubt:
+        reasons.append(label_doubt)
     if reasons:
         return Decision(REVIEW, reasons, sure, unsure, want)
     return Decision(PASS, ["counts match " + kit_id], sure, unsure, want)
