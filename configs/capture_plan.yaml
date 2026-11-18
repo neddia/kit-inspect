@@ -100,7 +100,7 @@ sessions:
   - name: labelval
     split: test           # check set for the label rules (Nov 18): never trained on. Score: kit eval --session labelval --label
     setup: "LABEL CHECK SET: KIT-A label on the tray, normal light. Turn the tray between shots so the label faces different ways"
-    hint: "shots 7-10: junk ON the label (coin cell, spare nut, battery corner, ring); 11-12: junk TOUCHING the label; 13-14: junk elsewhere"
+    hint: "shots 7-10: junk ON the label (coin cell, washer, battery corner, ring); 11-12: junk TOUCHING the label; 13-14: junk elsewhere"
     mix: {complete: 6, foreign_object: 8, missing_nut: 2}
 
   # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
