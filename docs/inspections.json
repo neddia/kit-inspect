@@ -1,6 +1,6 @@
 {
-  "source": "Frozen v3 inspection replay",
-  "description": "Eight selected photos replayed through the station and simulated PLC. The 48-tray blind test used KIT-A; the KIT-B orders below are separate bench examples.",
+  "source": "Eight trays, as the station saw them",
+  "description": "Six photos from the blind test sets (KIT-A) and two bench photos of KIT-B orders. Pick a tray: the banner is the station's verdict, the boxes are what the model found.",
   "initial_id": 8,
   "band": {
     "low": 0.2,
@@ -157,7 +157,8 @@
       "image": "frames/v3-test01_0025.jpg",
       "error": null,
       "source_photo": "test01_0025",
-      "truth": "KIT-A requires 3 bolts, 3 nuts and 2 screws. This tray has only 2 bolts."
+      "truth": "KIT-A requires 3 bolts, 3 nuts and 2 screws. This tray has only 2 bolts.",
+      "expected": "FAIL"
     },
     {
       "id": 1,
@@ -338,7 +339,8 @@
       "image": "frames/v3-test01_0044.jpg",
       "error": null,
       "source_photo": "test01_0044",
-      "truth": "KIT-A with the normal part counts and a red foreign object on the tray."
+      "truth": "KIT-A with the normal part counts and a red foreign object on the tray.",
+      "expected": "NOT_PASS"
     },
     {
       "id": 2,
@@ -503,7 +505,8 @@
       "image": "frames/v3-test01_0001.jpg",
       "error": null,
       "source_photo": "test01_0001",
-      "truth": "Complete KIT-A. All eight parts are present."
+      "truth": "Complete KIT-A. All eight parts are present.",
+      "expected": "PASS"
     },
     {
       "id": 3,
@@ -655,7 +658,8 @@
       "image": "frames/v3-test01_0012.jpg",
       "error": null,
       "source_photo": "test01_0012",
-      "truth": "Complete KIT-A. Both screws are present; one lies almost entirely under a bolt."
+      "truth": "Complete KIT-A. Both screws are present; one lies almost entirely under a bolt.",
+      "expected": "PASS"
     },
     {
       "id": 4,
@@ -836,7 +840,8 @@
       "image": "frames/v3-labelval_0005.jpg",
       "error": null,
       "source_photo": "labelval_0005",
-      "truth": "Complete KIT-A with a foreign object touching the tag."
+      "truth": "Complete KIT-A with a foreign object touching the tag.",
+      "expected": "NOT_PASS"
     },
     {
       "id": 5,
@@ -984,7 +989,8 @@
       "image": "frames/v3-labelval_0002.jpg",
       "error": null,
       "source_photo": "labelval_0002",
-      "truth": "Complete KIT-A with a foreign object covering the printed tag. The unreadable tag caused the hold."
+      "truth": "Complete KIT-A with a foreign object covering the printed tag. The unreadable tag caused the hold.",
+      "expected": "NOT_PASS"
     },
     {
       "id": 6,
@@ -1137,7 +1143,8 @@
       "image": "frames/v3-bench_237.jpg",
       "error": null,
       "source_photo": "bench_237",
-      "truth": "The order calls for KIT-B (2 bolts, 4 nuts, 2 screws). This tray carries KIT-A (3 bolts, 3 nuts, 2 screws). Both kits have eight parts."
+      "truth": "The order calls for KIT-B (2 bolts, 4 nuts, 2 screws). This tray carries KIT-A (3 bolts, 3 nuts, 2 screws). Both kits have eight parts.",
+      "expected": "FAIL"
     },
     {
       "id": 7,
@@ -1302,7 +1309,8 @@
       "image": "frames/v3-bench_243.jpg",
       "error": null,
       "source_photo": "bench_243",
-      "truth": "Complete KIT-B with its matching tag: two bolts, four nuts and two screws."
+      "truth": "Complete KIT-B with its matching tag: two bolts, four nuts and two screws.",
+      "expected": "PASS"
     }
   ]
 }

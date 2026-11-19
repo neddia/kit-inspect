@@ -2,24 +2,42 @@ const el = id => document.getElementById(id);
 let records = [];
 let selected;
 let initialId;
-function cycle(row) {
-  return row.cycle_id == null ? 'History #' + row.id : 'Cycle ' + row.cycle_id;
-}
-function reason(row) {
-  if (row.result === 'FAIL' && row.label?.status === 'mismatch')
-    return 'Wrong kit for this order: ordered ' + row.kit_id + ', tray says ' + row.label.text;
+let replay = false;
 
-  const message = row.error || row.reasons?.join(' · ') || 'No reason recorded';
-  return message[0].toUpperCase() + message.slice(1);
+// Same colours and captions as the station window (src/inspection/draw.py).
+const COLOR = {sure: '#3cc83c', unsure: '#ffc800', foreign: '#ff00ff', ignored: '#969696',
+  ok: '#3cc83c', mismatch: '#e63c3c', doubt: '#ffc800'};
+let band = {low: 0.2, high: 0.7};
+
+function cycle(row) {
+  return row.cycle_id == null ? 'History #' + row.id : (replay ? 'Tray ' : 'Cycle ') + row.cycle_id;
+}
+function sentence(text) {
+  return text ? text[0].toUpperCase() + text.slice(1) : text;
+}
+function reasons(row) {
+  if (row.result === 'FAIL' && row.label?.status === 'mismatch')
+    return ['Wrong kit for this order: PLC ordered ' + row.kit_id + ', tag says ' + row.label.text];
+  if (row.error) return [row.error];
+  return (row.reasons || ['no reason recorded']).map(sentence);
 }
 function badge(target, result) {
   target.textContent = result;
   target.dataset.result = result;
 }
-// Same colours and captions as the station window (src/inspection/draw.py).
-const COLOR = {sure: '#3cc83c', unsure: '#ffc800', foreign: '#ff00ff', ignored: '#969696',
-  ok: '#3cc83c', mismatch: '#e63c3c', doubt: '#ffc800'};
-let band = {low: 0.2, high: 0.7};
+// Was the station right? Only known when the tray's truth was recorded.
+function correct(row) {
+  if (!row.expected) return null;
+  return row.expected === 'PASS' ? row.result === 'PASS' : row.result !== 'PASS';
+}
+function verdictNote(row) {
+  const ok = correct(row);
+  if (ok === null) return '';
+  if (!ok) return row.expected === 'PASS' ? 'Station wrong: a good kit was failed' : 'Station wrong: a faulty kit passed';
+  if (row.expected === 'PASS') return 'Station right: released';
+  return row.result === 'REVIEW' ? 'Station right: held for an operator' : 'Station right: held';
+}
+
 function iou(a, b) {
   const w = Math.min(a[2], b[2]) - Math.max(a[0], b[0]), h = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);
   if (w <= 0 || h <= 0) return 0;
@@ -39,7 +57,7 @@ function draw() {
   canvas.height = frame.naturalHeight;
   if (!canvas.width || !selected || !el('boxes').checked) return;
   const ctx = canvas.getContext('2d');
-  const size = Math.round(canvas.width / 64), thick = Math.max(2, Math.round(canvas.width / 400));
+  const size = Math.round(canvas.width / 56), thick = Math.max(2, Math.round(canvas.width / 400));
   ctx.font = `bold ${size}px ui-monospace, monospace`;
   ctx.lineWidth = thick;
   const label = selected.label;
@@ -53,7 +71,7 @@ function draw() {
     ctx.stroke();
     ctx.lineWidth = thick;
     const [x, y] = label.box.reduce((a, b) => a[1] >= b[1] ? a : b);
-    const text = `label ${label.text} ${(label.conf ?? 1).toFixed(2)}`;
+    const text = `tag ${label.text} ${(label.conf ?? 1).toFixed(2)}`;
     tag(ctx, text, Math.min(x, canvas.width - ctx.measureText(text).width - 10), Math.min(y + size + 10, canvas.height), color, size);
   }
   // Boxes on the same object (e.g. a coin read as "other" and as a weak "nut") share one caption.
@@ -73,7 +91,8 @@ function draw() {
       ctx.strokeStyle = colorOf(d);
       ctx.strokeRect(x, y, right - x, bottom - y);
     }
-    const caption = g.map(d => d.label_ambiguous ? 'check label area' : `${d.cls} ${d.conf.toFixed(2)}`).join(' / ');
+    const name = d => d.cls === 'other' ? 'foreign' : d.cls;
+    const caption = g.map(d => d.label_ambiguous ? 'check tag area' : `${name(d)} ${d.conf.toFixed(2)}`).join(' / ');
     tag(ctx, caption, g[0].box[0], g[0].box[1], colorOf(g[0]), size);
   }
   for (const u of selected.unknown_objects || []) {
@@ -84,40 +103,18 @@ function draw() {
     tag(ctx, 'unknown', x - 6, y - 6, COLOR.foreign, size);
   }
 }
-function partLine(row) {
-  // One line per part: found / expected, coloured like the boxes. Unsure parts are named with their confidence.
-  const counts = row.counts, wrap = document.createElement('div');
-  wrap.className = 'parts';
-  if (!Object.keys(counts?.spec || {}).length) return wrap;
-  const dets = (row.detections || []).filter(d => d.in_bowl !== false);
-  const items = Object.entries(counts.spec).filter(([part]) => part !== 'other').map(([part, n]) => [part, n, counts.sure[part] || 0,
-    dets.filter(d => d.cls === part && d.conf < band.high).map(d => d.conf)]);
-  const foreign = dets.filter(d => d.cls === 'other').length + (row.unknown_objects || []).length;
-  if (foreign) items.push(['foreign object', 0, foreign, []]);
-  for (const [part, n, sure, unsure] of items) {
-    const chip = document.createElement('span');
-    chip.className = 'part';
-    // like decision.py: too many sure, or too few even counting the unsure = wrong; unsure could change it = unsure
-    chip.dataset.state = sure > n || sure + unsure.length < n ? 'wrong' : unsure.length ? 'unsure' : 'ok';
-    const name = document.createElement('b');
-    name.textContent = part;
-    chip.append(name, part === 'foreign object' ? ` ${sure}` : ` ${sure} of ${n}` + (unsure.length ? ` + ${unsure.length} unsure (${unsure.map(c => c.toFixed(2)).join(', ')})` : ''));
-    wrap.append(chip);
-  }
-  return wrap;
-}
 function legend() {
-  const p = document.createElement('p');
-  p.className = 'legend';
-  for (const [color, text] of [[COLOR.sure, `sure (≥ ${band.high})`], [COLOR.unsure, `unsure (${band.low}–${band.high}) → REVIEW`],
-    [COLOR.foreign, 'foreign object'], [COLOR.ignored, 'ignored (kit label)']]) {
+  const p = el('legend');
+  p.replaceChildren();
+  for (const [color, text] of [[COLOR.sure, 'sure'], [COLOR.unsure, 'unsure → REVIEW'],
+    [COLOR.foreign, 'foreign object'], [COLOR.ok, 'kit tag (OCR)']]) {
     const key = document.createElement('span'), dot = document.createElement('i');
-    dot.style.background = color;
+    dot.style.borderColor = color;
     key.append(dot, text);
     p.append(key);
   }
-  return p;
 }
+
 function display() {
   selected = records.find(r => '#inspection-' + r.id === location.hash) || records.find(r => r.id === initialId) || records[0];
   if (!selected) return;
@@ -126,35 +123,41 @@ function display() {
     el('filter').value = '';
     filterList();
   }
-  el('cycle').textContent = cycle(row);
-  el('stamp').textContent = row.source_photo || row.time.slice(0,19).replace('T',' ');
+  // The banner: what the station window shows above the camera picture.
+  badge(el('verdict'), row.result);
+  el('banner').dataset.result = row.result;
+  const released = row.result === 'PASS';
+  el('plc').textContent = 'PLC: ' + (released ? 'RELEASE' : 'HOLD');
+  el('plc').dataset.released = String(released);
+  el('reasons').replaceChildren(...reasons(row).map(text => {
+    const li = document.createElement('li'); li.textContent = text; return li;
+  }));
+  const facts = [cycle(row), row.source_photo ? 'photo ' + row.source_photo : row.time.slice(0, 19).replace('T', ' '),
+    'order ' + (row.kit_id || '—'), 'tag ' + (row.label?.text || 'not read'),
+    row.ms_total == null ? null : Math.round(row.ms_total) + ' ms'].filter(Boolean);
+  el('facts').textContent = facts.join(' · ');
+
+  const ok = correct(row);
   el('truth').hidden = !row.truth;
-  el('truth').textContent = row.truth ? 'On the tray: ' + row.truth : '';
-  badge(el('verdict'),row.result);
-  el('reason').textContent = reason(row);
+  el('truth').replaceChildren();
+  if (row.truth) {
+    const head = document.createElement('b'), note = document.createElement('span');
+    head.textContent = 'Checked by eye: ';
+    note.className = 'check';
+    note.dataset.ok = String(ok);
+    note.textContent = verdictNote(row);
+    el('truth').append(head, row.truth + ' ', note);
+  }
+
   const frame = el('frame');
-  el('frameLegend').textContent = row.label?.located_on_replay ? 'Label outline from OCR replay'
-    : row.label?.box ? 'Printed kit tag located by OCR' : 'Station camera';
   frame.hidden = !row.image;
   el('noFrame').hidden = Boolean(row.image);
   el('overlay').hidden = !row.image;
   if (row.image) {
-    frame.alt = 'Tray photographed for ' + cycle(row);
+    frame.alt = 'Camera photo for ' + cycle(row) + ': ' + (row.truth || row.result);
     frame.src = row.image;
   } else frame.removeAttribute('src');
-  el('facts').replaceChildren();
-  for (const [key,value] of [['Kit ordered by PLC',row.kit_id],['Printed tag on tray',row.label?.text],
-    ['Trigger to result',row.ms_total == null ? null : Math.round(row.ms_total)+' ms']]) {
-    const pair = document.createElement('div'), term = document.createElement('dt'), detail = document.createElement('dd');
-    term.textContent = key; detail.textContent = value || '—'; pair.append(term,detail); el('facts').append(pair);
-  }
-  if (row.label?.passes != null) {
-    const detail = document.createElement('div');
-    detail.innerHTML = '<dt>OCR</dt><dd></dd>';
-    detail.lastChild.textContent = row.label.passes + (row.label.passes === 1 ? ' pass · ' : ' passes · ') + Math.round(row.label.ms) + ' ms';
-    el('facts').append(detail);
-  }
-  el('counts').replaceChildren(partLine(row), legend());
+
   const list = el('records');
   for (const a of list.children) {
     const active = a.hash === '#inspection-' + row.id;
@@ -170,10 +173,11 @@ function filterList() {
   for (const a of el('records').children) a.hidden = Boolean(el('filter').value && a.dataset.result !== el('filter').value);
 }
 function summarize() {
+  // Live station history only: counts over a hand-picked replay would mean nothing.
   const totals = new Map();
   for (const row of records) totals.set(row.result, (totals.get(row.result) || 0) + 1);
   const times = records.map(r => r.ms_total).filter(Number.isFinite).sort((a,b) => a-b);
-  const metrics = [[records[0].source_photo ? 'Replay cycles' : 'Records', records.length]];
+  const metrics = [['Records', records.length]];
   for (const verdict of ['PASS','FAIL','REVIEW','FAULT']) {
     if (verdict !== 'FAULT' || totals.has(verdict)) metrics.push([verdict, totals.get(verdict) || 0]);
     if (totals.has(verdict)) el('filter').add(new Option(verdict,verdict));
@@ -194,21 +198,33 @@ async function start() {
     const response = await fetch('inspections.json',{cache:'no-store'});
     if (!response.ok) throw Error();
     const data = await response.json();
+    replay = Boolean(data.description);          // the published replay, not a live station's history
+    document.body.classList.toggle('replay', replay);
+    el('about').hidden = !replay;
+    el('filterLabel').hidden = replay;
+    el('listTitle').textContent = replay ? 'Trays' : 'Cycle history';
     el('title').textContent = data.source;
     records = data.records;
     initialId = data.initial_id;
     band = data.band || band;
-    el('evaluation').hidden = !data.description;
-    el('intro').textContent = data.description || (initialId ? 'One recorded bench run. Select a cycle to see what the station found.'
-      : 'Latest saved station records. Refresh to load new cycles.');
+    el('intro').textContent = data.description || 'Latest saved station records. Refresh to load new cycles.';
     if (!records.length) { el('status').textContent = 'No inspections saved yet. Run a station cycle, then refresh.'; return; }
-    summarize();
+    if (!replay) summarize();
+    legend();
     for (const row of records) {
       const a = document.createElement('a'), head = document.createElement('div'), title = document.createElement('span'),
         status = document.createElement('span'), message = document.createElement('p');
       a.href = '#inspection-'+row.id; a.className = 'record'; a.dataset.result = row.result; head.className = 'recordhead'; status.className = 'badge';
-      title.textContent = cycle(row); badge(status,row.result); message.textContent = reason(row);
-      head.append(title,status); a.append(head,message); el('records').append(a);
+      title.textContent = cycle(row); badge(status,row.result); message.textContent = reasons(row).join(' · ');
+      head.append(title,status); a.append(head,message);
+      const ok = correct(row);
+      if (ok !== null) {
+        const mark = document.createElement('p');
+        mark.className = 'check'; mark.dataset.ok = String(ok);
+        mark.textContent = ok ? 'station right' : row.expected === 'PASS' ? 'station wrong: good kit failed' : 'station wrong: faulty kit passed';
+        a.append(mark);
+      }
+      el('records').append(a);
       a.addEventListener('click',() => {if (matchMedia('(max-width:760px)').matches) el('layout').scrollIntoView();});
     }
     el('status').hidden = true; el('layout').hidden = false; display();

@@ -1,27 +1,34 @@
 # Fastener Kit Inspection Station
 
-A fixed-camera inspection station for fastener kits. It counts the bolts, nuts and screws on a tray, spots foreign objects, reads the kit label, decides **PASS / FAIL / REVIEW**, and hands the result to a **simulated** Allen-Bradley PLC. The PLC releases the kit only on a PASS for the current cycle; anything else, including silence, holds it.
+A machine vision station that decides whether a fastener kit may leave the station. A fixed camera counts the bolts, nuts and screws, catches foreign objects and reads the printed kit tag. A simulated Allen-Bradley PLC releases the tray only on a PASS that answers its own request; anything else, including a silent camera, holds it.
 
-[![Selected photos replayed through frozen v3, followed by the simulated PLC withdrawing release when the vision heartbeat stops](docs/station-demo.gif)](https://neddia.github.io/kit-inspect/)
+**[Live demo: eight real trays, as the station saw them](https://neddia.github.io/kit-inspect/)** · [How it works](#how-it-works) · [Every experiment and decision](experiments.md)
 
-**[Explore recorded inspections](https://neddia.github.io/kit-inspect/)** · [How the PLC handshake works](#how-it-works) · [Evaluation results](#inspection-results)
+[![Photos replayed through the station, then the simulated PLC withdrawing release when the vision heartbeat stops](docs/station-demo.gif)](https://neddia.github.io/kit-inspect/)
 
-The replay opens on [a KIT-A tray missing a bolt](https://neddia.github.io/kit-inspect/#inspection-8). The order requires three bolts and the camera finds two. Another tray [fails because it is the wrong kit for the order](https://neddia.github.io/kit-inspect/#inspection-6). The PLC ordered KIT-B, but the printed tag reads KIT-A. Both kits contain eight parts in different proportions. The wrong tag alone puts the tray on hold.
+## Results
 
-The eight photos include a red foreign object, an object covering the tag, and a complete kit the station incorrectly failed. The animation ends with the PLC withdrawing permission to move the tray when the vision heartbeat stops.
-
-## Inspection results
-
-**Final test**: 48 KIT-A trays photographed under normal conditions (kit tag in view, parts dropped in by hand), shot blind and scored once with the frozen model and settings:
+**Blind test**: 48 KIT-A trays photographed under normal conditions (kit tag in view, parts dropped in by hand), shot blind and scored once with the model and settings frozen:
 
 | | Trays | PASS | REVIEW | FAIL |
 | --- | --- | --- | --- | --- |
 | Faulty kits (missing, extra or wrong parts, foreign objects) | 24 | **0** | 1 | 23 |
 | Good kits | 24 | 18 | 5 | 1 |
 
-All 24 faulty trays received a hold verdict. One good kit failed because a screw lay almost entirely under a bolt; five went to an operator, mostly nuts tucked against other parts. Median inspection time on the test PC was 120 ms per tray. [Per-tray results](reports/stage6/v3_test01/per_image.csv) · [Every experiment and model comparison](experiments.md)
+No faulty kit was released, including foreign objects never seen in training. Five good kits went to an operator, mostly a nut tucked against another part; one was failed wrongly because a screw lay almost entirely under a bolt ([it's tray 4 in the demo](https://neddia.github.io/kit-inspect/#inspection-3)). Median 120 ms per tray on a CPU. [Per-tray results](reports/stage6/v3_test01/per_image.csv)
 
-On a harder 20-tray challenge set used for model selection (odd poses, stacked parts, junk never seen in training), the station also passed 0 of 14 faulty kits.
+On a harder 20-tray challenge set used for model selection (odd poses, stacked parts, junk never seen in training), the station also released 0 of 14 faulty kits.
+
+## What's in it
+
+| Area | What was built |
+| --- | --- |
+| Vision pipeline | YOLO26n detection (bolt, nut, screw, foreign object), an OpenCV check for objects the model has never seen, OCR of the kit tag, and plain-code decision rules. OpenVINO on CPU |
+| Model lifecycle | Guided photo capture that records the truth for every photo, SAM 3-assisted labelling with a review tool, training, PASS / FAIL / REVIEW scoring against the truth, and retraining on misses pulled from the station's own history |
+| PLC integration | Logix tag map over EtherNet/IP (pylogix client, cpppo simulator), cycle-ID handshake, heartbeat watchdog, fault flag, automatic reconnect |
+| Error-proofing | Release only on a PASS for the current request. A wrong kit tag is a hold even when every part is there. A lost camera raises a fault and holds |
+| Traceability | Every inspection stored with its photo, verdict, reasons and timings, with a viewer for the history |
+| Operator screens | PLC panel (kit select, RELEASE / HOLD lamp, heartbeat and fault lamps) and a station window with the verdict banner |
 
 ## Run the demo
 
@@ -29,20 +36,20 @@ To explore the eight selected v3 replay cycles in a fresh clone, run `python3 -m
 
 To browse the latest 100 records on a station with local history, run `uv run kit dashboard` and open <http://localhost:8010>. Refresh to load new cycles. The station saves a photo, vision verdict and timing under each history ID. Its SQLite rows do not store the PLC release tag.
 
-For the two-window operator demo, install the project dependencies and supply the configured station model from your training/export run. Model weights and the full photo sessions are excluded from Git.
+For the single-window operator demo, install the project dependencies and supply the configured station model from your training/export run. Model weights and the full photo sessions are excluded from Git.
 
 ```bash
 uv sync                          # once (training PC). Station laptop: uv sync --no-default-groups --group prod
-uv run kit demo                  # PLC operator panel + vision station, as two separate apps
+uv run kit demo                  # one recording window for the station and simulated PLC
 ```
 
 In the **PLC panel**: `1` / `2` picks the kit the line is building, `SPACE` sends a kit, `a` sends one every 4 s.
-The lamp reads the simulated PLC’s `Release_Permit` signal. When it is on, this tray may move to the next station. When it is off, the tray must stay put. The **station window** shows the camera, what it found and why.
+The lamp reads the simulated PLC’s `Release_Permit` signal. When it is on, this tray may move to the next station. When it is off, the tray must stay put. The large image shows the last inspection, with its verdict and reason below. The smaller live view shows the tray as you change it.
 
 Things to try:
 - A correct kit → **RELEASE**. Take a nut out → **HOLD**, "missing 1 nut".
 - Put the KIT-A label on a KIT-B order → **HOLD**, "label says KIT-A, PLC expects KIT-B".
-- Close the station window while the lamp says RELEASE → the PLC sees the heartbeat stop and drops to **HOLD** by itself.
+- Press `q` or close the operator window to end the demo. To run the components independently, use `kit plc` and `kit station --show`.
 - Unplug the webcam while the panel shows RELEASE. The PLC switches to HOLD. Plug it back in and wait for the live picture to return, then send a correct kit to see RELEASE again. On WSL the station uses Windows’ `usbipd.exe` to reattach the already-shared C510 automatically.
 
 No camera? `uv run kit demo --images data/images/hardval2` replays photos instead.
@@ -98,6 +105,17 @@ A candidate becomes the station's model only when you set `inspection.model` in 
 - 0 of 24 is a small sample: the true false-pass rate could still be a few percent. Laptop timing is pending.
 - The PLC is simulated (cpppo + pylogix). No real controller was used.
 - Junk the model has never seen relies on the OpenCV check, which can't see objects inside a part's box.
+
+## On a real line, next
+
+- **Lighting and fixturing first.** Diffuse light and a flat tag holder outside the bowl would remove most of the false holds (part shadows, the tag sitting on the rim) and close the tag gap above.
+- **A second camera** at an angle for parts hidden under other parts, the cause of the one wrong FAIL.
+- **A real controller.** The tag map stays the same; the simulator is replaced by a CompactLogix or ControlLogix, or the station talks through Kepware / OPC UA.
+- **Deployment and monitoring.** Run the station in a container on the line PC, alert on faults, heartbeat loss and a rising review rate, and keep harvesting real misses into the next training round.
+
+## How this was built
+
+Developed with an AI coding assistant (Claude Code, credited as co-author on the commits). The camera rig, the photos, the label review and the go / no-go decisions are the author's. Every decision and the evidence behind it is logged in [experiments.md](experiments.md).
 
 ## License note
 Ultralytics YOLO models are AGPL-3.0 licensed.

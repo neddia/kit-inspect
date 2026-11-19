@@ -2,26 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Explore real photographs and inspection decisions from a fastener kit vision station.">
-<title>Inspection history · Fastener Kit Inspection Station</title>
+<meta name="description" content="A machine vision station that checks fastener kits and interlocks with a PLC: YOLO, OpenCV, OCR and an Allen-Bradley tag handshake. Real photos, real verdicts.">
+<title>Fastener Kit Inspection Station · machine vision + PLC</title>
 <link rel="stylesheet" href="style.css"><script defer src="viewer.js"></script>
 </head>
 <body>
-<header><div class="wrap mast"><div class="brand"><span class="nut" aria-hidden="true"></span>Fastener Kit Inspection Station</div><a href="https://github.com/neddia/kit-inspect#readme">GitHub repository</a></div></header>
+<header><div class="wrap mast"><div class="brand"><span class="nut" aria-hidden="true"></span>Fastener Kit Inspection Station</div>
+<nav class="links" aria-label="Project links"><a href="https://github.com/neddia/kit-inspect#how-it-works">How it works</a><a href="https://github.com/neddia/kit-inspect">Code on GitHub</a></nav></div></header>
 <main class="wrap">
-<h1 id="title">Recorded inspections</h1>
-<p id="intro">Select a cycle to inspect its camera frame and the station’s decision.</p>
-<p id="evaluation" hidden><a href="https://github.com/neddia/kit-inspect#inspection-results">Full 48-tray KIT-A test results</a></p>
+
+<section id="about" hidden>
+<p class="kicker">Machine vision · PLC interlock · Python</p>
+<h1>A camera that decides whether a kit may leave the station</h1>
+<p class="lede">A fixed camera checks every fastener kit before it moves on. It counts the bolts, nuts and screws, catches foreign objects, reads the printed kit tag, and tells a simulated Allen-Bradley PLC whether to release the tray. Anything short of a clean PASS for the current cycle holds the tray, and so does a silent camera.</p>
+
+<div class="results">
+<div class="headline"><strong>0 of 24</strong><span>faulty kits released in a blind 48-tray test, shot under normal conditions and scored once with the model frozen</span></div>
+<div class="tablewrap"><table>
+<thead><tr><th scope="col">Blind test, 48 trays</th><th scope="col">PASS</th><th scope="col">REVIEW</th><th scope="col">FAIL</th></tr></thead>
+<tbody>
+<tr><th scope="row">Faulty kits: missing, extra or wrong parts, foreign objects (24)</th><td class="zero">0</td><td>1</td><td>23</td></tr>
+<tr><th scope="row">Good kits (24)</th><td>18</td><td>5</td><td class="miss">1</td></tr>
+</tbody></table></div>
+<p class="note">Five good kits went to an operator, mostly a nut tucked against another part. One was failed wrongly: a screw lay almost entirely under a bolt (tray 4 below). Median 120 ms per tray on a CPU. <a href="https://github.com/neddia/kit-inspect/blob/main/reports/stage6/v3_test01/per_image.csv">Every tray's result</a> · <a href="https://github.com/neddia/kit-inspect/blob/main/experiments.md">Every experiment</a></p>
+</div>
+
+<ul class="how">
+<li><b>Detect.</b> A YOLO26n model trained on 487 labelled photos of real trays finds the parts and known junk. An OpenCV check catches objects the model has never seen.</li>
+<li><b>Read.</b> OCR finds the printed kit tag. The wrong kit for the order is a hold even when every part is there.</li>
+<li><b>Interlock.</b> A cycle-ID handshake ties each verdict to the PLC's request. If the vision heartbeat stops, the PLC drops its release permit on its own.</li>
+</ul>
+</section>
+
+<h2 id="title">Recorded inspections</h2>
+<p id="intro">Select a cycle to see the camera frame and the station's decision.</p>
 <dl id="summary" aria-label="Results for the displayed history window" hidden></dl>
 <div id="layout" hidden>
-<section class="detail" aria-labelledby="cycle">
-<div class="detailhead"><div><small id="stamp"></small><h2 id="cycle"></h2></div><strong class="badge" id="verdict"></strong></div>
-<div class="reading"><h3 id="reason"></h3><p id="truth" hidden></p><dl id="facts"></dl></div>
+<section class="detail" aria-label="Selected inspection">
+<div class="banner" id="banner" aria-live="polite">
+<div class="bannerhead"><strong id="verdict"></strong><span id="plc"></span></div>
+<ul id="reasons"></ul>
+<p id="facts"></p>
+</div>
 <div class="photo"><img id="frame" alt=""><canvas id="overlay" aria-hidden="true"></canvas><p id="noFrame" hidden>No camera frame was saved.</p></div>
-<div class="framefoot"><span id="frameLegend">Station camera</span><label><input id="boxes" type="checkbox" checked> Show overlays</label></div>
-<div class="reading" id="counts"></div>
+<div class="framefoot"><p class="legend" id="legend"></p><label><input id="boxes" type="checkbox" checked> Boxes</label></div>
+<p id="truth" hidden></p>
 </section>
-<aside><div class="historyhead"><h2>Cycle history</h2><label>Verdict <select id="filter"><option value="">All</option></select></label></div><nav id="records" aria-label="Inspection records"></nav>
-<p class="plcnote"><b>May the tray move on?</b>The PLC turns its release permit on when this tray passes inspection. FAIL, REVIEW or loss of the vision heartbeat keeps the tray on hold.</p></aside>
+<aside><div class="historyhead"><h2 id="listTitle">Cycles</h2><label id="filterLabel">Verdict <select id="filter"><option value="">All</option></select></label></div><nav id="records" aria-label="Inspection records"></nav>
+<p class="plcnote"><b>When does the tray move?</b>The PLC turns its release permit on only for a PASS that answers its own request. FAIL, REVIEW or a lost vision heartbeat keeps the tray on hold.</p></aside>
 </div><p id="status" role="status">Loading inspections…</p>
 </main></body></html>
