@@ -45,6 +45,13 @@ def public_record(row, root):
     return data
 
 
+def band():
+    """The station's confidence band, so the viewer colours boxes exactly like the station window."""
+    from src.inspection.pipeline import load_settings
+    d = load_settings()[0]["decision"]
+    return {"low": d["low"], "high": d["high"]}
+
+
 def export(root, ids, locate_labels=False):
     rows = records(root, ids)
     if len(rows) != len(set(ids)) or not all(photo(root, row) for row in rows):
@@ -75,7 +82,7 @@ def export(root, ids, locate_labels=False):
             if replay["label"] and replay["label"]["text"] == label["text"] and replay["status"] == label["status"]:
                 label.update(box=replay["label"]["box"], located_on_replay=True)
         exported.append(item)
-    data = {"source": "Recorded inspections", "initial_id": ids[0], "records": exported}
+    data = {"source": "Recorded inspections", "initial_id": ids[0], "band": band(), "records": exported}
     (SITE / "inspections.json").write_text(json.dumps(data, indent=2) + "\n")
 
 
@@ -84,7 +91,7 @@ def application(root):
 
     @app.get("/inspections.json")
     def recent():
-        return {"source": "Local inspection history", "records": [public_record(r, root) for r in records(root)]}
+        return {"source": "Local inspection history", "band": band(), "records": [public_record(r, root) for r in records(root)]}
 
     @app.get("/frames/{record_id}.jpg")
     def image(record_id: int):

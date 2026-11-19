@@ -1,6 +1,7 @@
 {
   "source": "Recorded inspections",
   "initial_id": 237,
+  "band": {"low": 0.2, "high": 0.7},
   "records": [
     {
       "id": 243,

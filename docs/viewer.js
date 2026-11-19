@@ -13,37 +13,107 @@ function badge(target, result) {
   target.textContent = result;
   target.dataset.result = result;
 }
+// Same colours and captions as the station window (src/inspection/draw.py).
+const COLOR = {sure: '#3cc83c', unsure: '#ffc800', foreign: '#ff00ff', ignored: '#969696',
+  ok: '#3cc83c', mismatch: '#e63c3c', doubt: '#ffc800'};
+let band = {low: 0.2, high: 0.7};
+function iou(a, b) {
+  const w = Math.min(a[2], b[2]) - Math.max(a[0], b[0]), h = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);
+  if (w <= 0 || h <= 0) return 0;
+  const area = r => (r[2] - r[0]) * (r[3] - r[1]);
+  return w * h / (area(a) + area(b) - w * h);
+}
+function tag(ctx, text, x, y, color, size) {
+  const top = Math.max(0, y - size - 6);
+  ctx.fillStyle = color;
+  ctx.fillRect(x, top, ctx.measureText(text).width + 10, size + 6);
+  ctx.fillStyle = '#000';
+  ctx.fillText(text, x + 5, top + size);
+}
 function draw() {
   const frame = el('frame'), canvas = el('overlay');
   canvas.width = frame.naturalWidth;
   canvas.height = frame.naturalHeight;
   if (!canvas.width || !selected || !el('boxes').checked) return;
   const ctx = canvas.getContext('2d');
-  const boxes = (selected.detections || []).filter(d => d.in_bowl !== false || d.label_ambiguous);
-  boxes.push(...(selected.unknown_objects || []));
-  const labelBox = selected.label?.box;
-  if (labelBox) {
-    ctx.strokeStyle = '#71f2ed';
-    ctx.lineWidth = 4;
+  const size = Math.round(canvas.width / 64), thick = Math.max(2, Math.round(canvas.width / 400));
+  ctx.font = `bold ${size}px ui-monospace, monospace`;
+  ctx.lineWidth = thick;
+  const label = selected.label;
+  if (label?.box) {
+    const color = COLOR[label.status] || COLOR.doubt;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = thick + 2;
     ctx.beginPath();
-    labelBox.forEach(([x,y], i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y));
+    label.box.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
     ctx.closePath();
     ctx.stroke();
+    ctx.lineWidth = thick;
+    const [x, y] = label.box.reduce((a, b) => a[1] >= b[1] ? a : b);
+    const text = `label ${label.text} ${(label.conf ?? 1).toFixed(2)}`;
+    tag(ctx, text, Math.min(x, canvas.width - ctx.measureText(text).width - 10), Math.min(y + size + 10, canvas.height), color, size);
   }
-  // A recipe mismatch ends the inspection before part counts are evaluated.
-  if (selected.label?.status === 'mismatch') return;
-  ctx.font = 'bold 18px monospace';
-  for (const item of boxes) {
-    const [x,y,right,bottom] = item.box;
-    const label = item.label_ambiguous ? 'check label area' : item.cls || 'unknown';
-    ctx.strokeStyle = ctx.fillStyle = '#ffce6c';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(x,y,right-x,bottom-y);
-    const top = Math.max(0,y-22);
-    ctx.fillRect(x,top,ctx.measureText(label).width+9,22);
-    ctx.fillStyle = '#15262d';
-    ctx.fillText(label,x+4,top+17);
+  // Boxes on the same object (e.g. a coin read as "other" and as a weak "nut") share one caption.
+  const shown = (selected.detections || []).filter(d => d.in_bowl !== false || d.label_ambiguous);
+  const colorOf = d => d.in_bowl === false ? COLOR.ignored : d.cls === 'other' ? COLOR.foreign
+    : d.conf >= band.high ? COLOR.sure : COLOR.unsure;
+  const rank = d => d.in_bowl === false ? 0 : d.cls === 'other' ? 3 : d.conf >= band.high ? 1 : 2;
+  const groups = [];
+  for (const d of shown) {
+    const g = groups.find(g => iou(g[0].box, d.box) > 0.5);
+    g ? g.push(d) : groups.push([d]);
   }
+  for (const g of groups) {
+    g.sort((a, b) => rank(b) - rank(a));
+    for (const d of [...g].reverse()) {
+      const [x, y, right, bottom] = d.box;
+      ctx.strokeStyle = colorOf(d);
+      ctx.strokeRect(x, y, right - x, bottom - y);
+    }
+    const caption = g.map(d => d.label_ambiguous ? 'check label area' : `${d.cls} ${d.conf.toFixed(2)}`).join(' / ');
+    tag(ctx, caption, g[0].box[0], g[0].box[1], colorOf(g[0]), size);
+  }
+  for (const u of selected.unknown_objects || []) {
+    const [x, y, right, bottom] = u.box;
+    ctx.strokeStyle = COLOR.foreign;
+    ctx.lineWidth = thick + 1;
+    ctx.strokeRect(x - 6, y - 6, right - x + 12, bottom - y + 12);
+    tag(ctx, 'unknown', x - 6, y - 6, COLOR.foreign, size);
+  }
+}
+function partLine(row) {
+  // One line per part: found / expected, coloured like the boxes. Unsure parts are named with their confidence.
+  const counts = row.counts, wrap = document.createElement('div');
+  wrap.className = 'parts';
+  if (!Object.keys(counts?.spec || {}).length) return wrap;
+  const dets = (row.detections || []).filter(d => d.in_bowl !== false);
+  const items = Object.entries(counts.spec).filter(([part]) => part !== 'other').map(([part, n]) => [part, n, counts.sure[part] || 0,
+    dets.filter(d => d.cls === part && d.conf < band.high).map(d => d.conf)]);
+  const foreign = dets.filter(d => d.cls === 'other').length + (row.unknown_objects || []).length;
+  if (foreign) items.push(['foreign object', 0, foreign, []]);
+  for (const [part, n, sure, unsure] of items) {
+    const chip = document.createElement('span');
+    chip.className = 'part';
+    // like decision.py: too many sure, or too few even counting the unsure = wrong; unsure could change it = unsure
+    chip.dataset.state = sure > n || sure + unsure.length < n ? 'wrong' : unsure.length ? 'unsure' : 'ok';
+    const name = document.createElement('b');
+    name.textContent = part;
+    chip.append(name, part === 'foreign object' ? ` ${sure}` : ` ${sure} of ${n}` + (unsure.length ? ` + ${unsure.length} unsure (${unsure.map(c => c.toFixed(2)).join(', ')})` : ''));
+    wrap.append(chip);
+  }
+  return wrap;
+}
+function legend() {
+  const p = document.createElement('p');
+  p.className = 'legend';
+  for (const [color, text] of [[COLOR.sure, `sure (≥ ${band.high})`], [COLOR.unsure, `unsure (${band.low}–${band.high}) → REVIEW`],
+    [COLOR.foreign, 'foreign object'], [COLOR.ignored, 'ignored (kit label)']]) {
+    const key = document.createElement('span'), dot = document.createElement('i');
+    dot.style.background = color;
+    key.append(dot, text);
+    p.append(key);
+  }
+  return p;
 }
 function display() {
   selected = records.find(r => '#inspection-' + r.id === location.hash) || records.find(r => r.id === initialId) || records[0];
@@ -79,20 +149,7 @@ function display() {
     detail.lastChild.textContent = row.label.passes + (row.label.passes === 1 ? ' pass · ' : ' passes · ') + Math.round(row.label.ms) + ' ms';
     el('facts').append(detail);
   }
-  const counts = row.counts;
-  el('counts').replaceChildren();
-  if (Object.keys(counts?.spec || {}).length) {
-    const table = document.createElement('table');
-    table.innerHTML = '<caption>Part count</caption><thead><tr><th>Part</th><th>Expected</th><th>Confirmed</th><th>Uncertain</th></tr></thead>';
-    const body = table.createTBody();
-    for (const [part, n] of Object.entries(counts.spec)) {
-      const tr = body.insertRow();
-      for (const value of [part, n, counts.sure[part] || 0, counts.unsure[part] || 0]) tr.insertCell().textContent = value;
-    }
-    el('counts').append(table);
-  } else if (row.label?.status === 'mismatch') {
-    el('counts').textContent = 'The wrong kit label failed this inspection before the part-count check.';
-  }
+  el('counts').replaceChildren(partLine(row), legend());
   const list = el('records');
   for (const a of list.children) {
     const active = a.hash === '#inspection-' + row.id;
@@ -135,6 +192,7 @@ async function start() {
     el('title').textContent = data.source;
     records = data.records;
     initialId = data.initial_id;
+    band = data.band || band;
     el('intro').textContent = initialId ? 'One recorded bench run. Select a cycle to see what the station found.'
       : 'Latest saved station records. Refresh to load new cycles.';
     if (!records.length) { el('status').textContent = 'No inspections saved yet. Run a station cycle, then refresh.'; return; }
