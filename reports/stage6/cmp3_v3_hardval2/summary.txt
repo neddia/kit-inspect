@@ -1,0 +1,19 @@
+Full decision on hardval2 (20 trays). Model: models/kit_yolo26n_640_v3_openvino_model. Settings: configs/station.yaml
+
+False passes:    0 of 14 faulty trays   <- the headline number
+False rejects:   1 of 6 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 3 of 6
+Review rate:     4 of 20 trays (20%)   target: under 5%
+Time per tray:   median 50 ms (this PC; laptop measured in Stage 7)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete             6     2     1       3
+foreign_object      12     0    11       1
+lookalike_nut        2     0     2       0
+
+Every REVIEW and every wrong answer, with reasons:
+  hardval2/hardval2_0001.jpg complete        REVIEW  review       unsure about 1 screw (0.64)
+  hardval2/hardval2_0002.jpg complete        FAIL    false reject missing 1 nut
+  hardval2/hardval2_0005.jpg complete        REVIEW  review       unsure about 1 nut (0.33); unsure about 1 screw (0.65)
+  hardval2/hardval2_0006.jpg complete        REVIEW  review       unsure about 2 nuts (0.63, 0.46)
+  hardval2/hardval2_0009.jpg foreign_object  REVIEW  right        unsure about 1 bolt (0.60); unsure about 4 nuts (0.57, 0.44, 0.31, 0.22)

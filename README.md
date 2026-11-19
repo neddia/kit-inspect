@@ -10,7 +10,16 @@ Cycle 10 shows why counting parts alone is insufficient. The PLC ordered KIT-B, 
 
 ## Inspection results
 
-On a 20-tray challenge set used for model selection, the four-class detector passed **0 of 14 faulty kits**. Of six good kits, two passed, two went to review and two failed because the station missed a nut. The check evaluated parts and foreign objects with OCR disabled. [Per-tray results](reports/stage6/floorfix_hardval2/per_image.csv) · [Model comparisons](experiments.md)
+**Final test**: 48 trays photographed under normal conditions (kit tag in view, parts dropped in by hand), shot blind and scored once with the frozen model and settings:
+
+| | Trays | PASS | REVIEW | FAIL |
+| --- | --- | --- | --- | --- |
+| Faulty kits (missing, extra or wrong parts, foreign objects) | 24 | **0** | 1 | 23 |
+| Good kits | 24 | 18 | 5 | 1 |
+
+No faulty kit was released. One good kit failed because a screw lay almost entirely under a bolt; five went to an operator, mostly nuts tucked against other parts. Median 120 ms per tray. [Per-tray results](reports/stage6/v3_test01/per_image.csv) · [Every experiment and model comparison](experiments.md)
+
+On a harder 20-tray challenge set used for model selection (odd poses, stacked parts, junk never seen in training), the station also passed 0 of 14 faulty kits.
 
 ## Run the demo
 
@@ -83,8 +92,8 @@ A candidate becomes the station's model only when you set `inspection.model` in 
 
 ## Known limits
 
-- The carrier label sits on the sloped rim. A small object directly on the printed lettering can still be confused with the label. A dedicated label-obstruction photo set is planned.
-- Final test sessions with frozen model settings and laptop timing are pending.
+- The kit tag sits on the bowl's rim, and the model has learned to ignore it. Junk lying **on** the tag is barely seen: in a 6-tray check it was held only because it hid the printed letters. The fix is physical: a flat tag outside the bowl.
+- 0 of 24 is a small sample: the true false-pass rate could still be a few percent. Laptop timing is pending.
 - The PLC is simulated (cpppo + pylogix). No real controller was used.
 - Junk the model has never seen relies on the OpenCV check, which can't see objects inside a part's box.
 

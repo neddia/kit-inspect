@@ -1,0 +1,7 @@
+image,scenario,expected,result,outcome,reasons
+labelval/labelval_0001.jpg,foreign_object,NOT_PASS,REVIEW,right,1 unknown object on the tray; no kit label found on the tray
+labelval/labelval_0002.jpg,foreign_object,NOT_PASS,REVIEW,right,no kit label found on the tray
+labelval/labelval_0003.jpg,foreign_object,NOT_PASS,REVIEW,right,no kit label found on the tray
+labelval/labelval_0004.jpg,foreign_object,NOT_PASS,REVIEW,right,maybe a foreign object (0.57); no kit label found on the tray
+labelval/labelval_0005.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+labelval/labelval_0006.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object

@@ -1,0 +1,49 @@
+image,scenario,expected,result,outcome,reasons
+test01/test01_0001.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0002.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0003.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0004.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0005.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0006.jpg,complete,PASS,REVIEW,review,unsure about 1 nut (0.61)
+test01/test01_0007.jpg,complete,PASS,REVIEW,review,"unsure about 2 nuts (0.59, 0.39); 1 unknown object on the tray"
+test01/test01_0008.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0009.jpg,complete,PASS,REVIEW,review,unsure about 1 nut (0.29)
+test01/test01_0010.jpg,complete,PASS,REVIEW,review,unsure about 1 screw (0.41)
+test01/test01_0011.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0012.jpg,complete,PASS,FAIL,false reject,missing 1 screw
+test01/test01_0013.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0014.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0015.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0016.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0017.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0018.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0019.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0020.jpg,complete,PASS,REVIEW,review,unsure about 1 nut (0.69)
+test01/test01_0021.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0022.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0023.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0024.jpg,complete,PASS,PASS,right,counts match KIT-A
+test01/test01_0025.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+test01/test01_0026.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+test01/test01_0027.jpg,missing_bolt,FAIL,FAIL,right,missing 1 bolt
+test01/test01_0028.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut
+test01/test01_0029.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut
+test01/test01_0030.jpg,missing_nut,FAIL,FAIL,right,missing 1 nut
+test01/test01_0031.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+test01/test01_0032.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+test01/test01_0033.jpg,missing_screw,FAIL,FAIL,right,missing 1 screw
+test01/test01_0034.jpg,extra_part,FAIL,FAIL,right,1 extra bolt
+test01/test01_0035.jpg,extra_part,FAIL,FAIL,right,1 extra nut
+test01/test01_0036.jpg,extra_part,FAIL,FAIL,right,1 extra screw
+test01/test01_0037.jpg,two_faults,FAIL,FAIL,right,missing 1 bolt; missing 1 nut
+test01/test01_0038.jpg,two_faults,FAIL,FAIL,right,missing 1 nut; 1 extra screw
+test01/test01_0039.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+test01/test01_0040.jpg,foreign_object,NOT_PASS,FAIL,right,2 foreign objects
+test01/test01_0041.jpg,foreign_object,NOT_PASS,FAIL,right,2 foreign objects
+test01/test01_0042.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+test01/test01_0043.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+test01/test01_0044.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+test01/test01_0045.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+test01/test01_0046.jpg,foreign_object,NOT_PASS,REVIEW,right,"unsure about 2 nuts (0.64, 0.30); unsure about 1 screw (0.20)"
+test01/test01_0047.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object
+test01/test01_0048.jpg,foreign_object,NOT_PASS,FAIL,right,1 foreign object; also: 1 unknown object on the tray
