@@ -1,15 +1,167 @@
 {
   "source": "Frozen v3 inspection replay",
-  "description": "Seven selected photos replayed through the station and simulated PLC. The 48-tray blind test used KIT-A; the KIT-B orders below are separate bench examples.",
-  "initial_id": 1,
+  "description": "Eight selected photos replayed through the station and simulated PLC. The 48-tray blind test used KIT-A; the KIT-B orders below are separate bench examples.",
+  "initial_id": 8,
   "band": {
     "low": 0.2,
     "high": 0.7
   },
   "records": [
     {
-      "id": 1,
+      "id": 8,
       "cycle_id": 1,
+      "kit_id": "KIT-A",
+      "result": "FAIL",
+      "reasons": [
+        "missing 1 bolt"
+      ],
+      "label": {
+        "status": "ok",
+        "reason": "label KIT-A matches",
+        "text": "KIT-A",
+        "conf": 1.0,
+        "box": [
+          [
+            174,
+            209
+          ],
+          [
+            332,
+            0
+          ],
+          [
+            415,
+            46
+          ],
+          [
+            257,
+            267
+          ]
+        ],
+        "passes": 1,
+        "ms": 64.1
+      },
+      "time": "2026-11-19T00:26:18.020",
+      "counts": {
+        "sure": {
+          "bolt": 2,
+          "nut": 3,
+          "screw": 2
+        },
+        "unsure": {
+          "bolt": 0,
+          "nut": 0,
+          "screw": 0
+        },
+        "spec": {
+          "bolt": 3,
+          "nut": 3,
+          "screw": 2
+        }
+      },
+      "detections": [
+        {
+          "cls": "bolt",
+          "conf": 0.95,
+          "box": [
+            598,
+            415,
+            802,
+            565
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        },
+        {
+          "cls": "screw",
+          "conf": 0.948,
+          "box": [
+            514,
+            182,
+            621,
+            342
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        },
+        {
+          "cls": "nut",
+          "conf": 0.943,
+          "box": [
+            784,
+            208,
+            864,
+            286
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        },
+        {
+          "cls": "nut",
+          "conf": 0.941,
+          "box": [
+            789,
+            292,
+            868,
+            372
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        },
+        {
+          "cls": "bolt",
+          "conf": 0.929,
+          "box": [
+            554,
+            283,
+            767,
+            416
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        },
+        {
+          "cls": "screw",
+          "conf": 0.898,
+          "box": [
+            679,
+            108,
+            736,
+            265
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        },
+        {
+          "cls": "nut",
+          "conf": 0.857,
+          "box": [
+            708,
+            258,
+            787,
+            311
+          ],
+          "in_bowl": true,
+          "on_label": false,
+          "label_ambiguous": false
+        }
+      ],
+      "unknown_objects": [],
+      "ms_total": 147.6,
+      "image": "frames/v3-test01_0025.jpg",
+      "error": null,
+      "source_photo": "test01_0025",
+      "truth": "KIT-A requires 3 bolts, 3 nuts and 2 screws. This tray has only 2 bolts."
+    },
+    {
+      "id": 1,
+      "cycle_id": 2,
       "kit_id": "KIT-A",
       "result": "FAIL",
       "reasons": [
@@ -39,9 +191,9 @@
           ]
         ],
         "passes": 1,
-        "ms": 69.1
+        "ms": 90.4
       },
-      "time": "2026-11-19T00:17:04.043",
+      "time": "2026-11-19T00:26:18.260",
       "counts": {
         "sure": {
           "bolt": 3,
@@ -182,7 +334,7 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 153.2,
+      "ms_total": 157.0,
       "image": "frames/v3-test01_0044.jpg",
       "error": null,
       "source_photo": "test01_0044",
@@ -190,7 +342,7 @@
     },
     {
       "id": 2,
-      "cycle_id": 2,
+      "cycle_id": 3,
       "kit_id": "KIT-A",
       "result": "PASS",
       "reasons": [
@@ -220,9 +372,9 @@
           ]
         ],
         "passes": 1,
-        "ms": 94.4
+        "ms": 100.4
       },
-      "time": "2026-11-19T00:17:04.300",
+      "time": "2026-11-19T00:26:18.516",
       "counts": {
         "sure": {
           "bolt": 3,
@@ -347,7 +499,7 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 160.7,
+      "ms_total": 173.7,
       "image": "frames/v3-test01_0001.jpg",
       "error": null,
       "source_photo": "test01_0001",
@@ -355,7 +507,7 @@
     },
     {
       "id": 3,
-      "cycle_id": 3,
+      "cycle_id": 4,
       "kit_id": "KIT-A",
       "result": "FAIL",
       "reasons": [
@@ -385,9 +537,9 @@
           ]
         ],
         "passes": 1,
-        "ms": 84.2
+        "ms": 68.0
       },
-      "time": "2026-11-19T00:17:04.519",
+      "time": "2026-11-19T00:26:18.728",
       "counts": {
         "sure": {
           "bolt": 3,
@@ -499,7 +651,7 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 149.6,
+      "ms_total": 135.7,
       "image": "frames/v3-test01_0012.jpg",
       "error": null,
       "source_photo": "test01_0012",
@@ -507,7 +659,7 @@
     },
     {
       "id": 4,
-      "cycle_id": 4,
+      "cycle_id": 5,
       "kit_id": "KIT-A",
       "result": "FAIL",
       "reasons": [
@@ -537,9 +689,9 @@
           ]
         ],
         "passes": 1,
-        "ms": 74.9
+        "ms": 70.2
       },
-      "time": "2026-11-19T00:17:04.722",
+      "time": "2026-11-19T00:26:18.944",
       "counts": {
         "sure": {
           "bolt": 3,
@@ -680,7 +832,7 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 145.5,
+      "ms_total": 142.3,
       "image": "frames/v3-labelval_0005.jpg",
       "error": null,
       "source_photo": "labelval_0005",
@@ -688,7 +840,7 @@
     },
     {
       "id": 5,
-      "cycle_id": 5,
+      "cycle_id": 6,
       "kit_id": "KIT-A",
       "result": "REVIEW",
       "reasons": [
@@ -701,9 +853,9 @@
         "conf": null,
         "box": null,
         "passes": 2,
-        "ms": 164.5
+        "ms": 162.7
       },
-      "time": "2026-11-19T00:17:05.023",
+      "time": "2026-11-19T00:26:19.248",
       "counts": {
         "sure": {
           "bolt": 3,
@@ -828,7 +980,7 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 236.5,
+      "ms_total": 237.2,
       "image": "frames/v3-labelval_0002.jpg",
       "error": null,
       "source_photo": "labelval_0002",
@@ -836,7 +988,7 @@
     },
     {
       "id": 6,
-      "cycle_id": 6,
+      "cycle_id": 7,
       "kit_id": "KIT-B",
       "result": "FAIL",
       "reasons": [
@@ -866,9 +1018,9 @@
           ]
         ],
         "passes": 1,
-        "ms": 75.7
+        "ms": 76.4
       },
-      "time": "2026-11-19T00:17:05.235",
+      "time": "2026-11-19T00:26:19.471",
       "counts": {
         "sure": {},
         "unsure": {},
@@ -981,15 +1133,15 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 153.6,
+      "ms_total": 154.3,
       "image": "frames/v3-bench_237.jpg",
       "error": null,
       "source_photo": "bench_237",
-      "truth": "KIT-A tray and tag, with a KIT-B order. The printed ID and order disagree."
+      "truth": "The order calls for KIT-B (2 bolts, 4 nuts, 2 screws). This tray carries KIT-A (3 bolts, 3 nuts, 2 screws). Both kits have eight parts."
     },
     {
       "id": 7,
-      "cycle_id": 7,
+      "cycle_id": 8,
       "kit_id": "KIT-B",
       "result": "PASS",
       "reasons": [
@@ -1019,9 +1171,9 @@
           ]
         ],
         "passes": 1,
-        "ms": 112.5
+        "ms": 117.3
       },
-      "time": "2026-11-19T00:17:05.499",
+      "time": "2026-11-19T00:26:19.746",
       "counts": {
         "sure": {
           "bolt": 2,
@@ -1146,7 +1298,7 @@
         }
       ],
       "unknown_objects": [],
-      "ms_total": 193.4,
+      "ms_total": 199.1,
       "image": "frames/v3-bench_243.jpg",
       "error": null,
       "source_photo": "bench_243",

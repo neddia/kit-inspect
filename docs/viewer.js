@@ -6,6 +6,9 @@ function cycle(row) {
   return row.cycle_id == null ? 'History #' + row.id : 'Cycle ' + row.cycle_id;
 }
 function reason(row) {
+  if (row.result === 'FAIL' && row.label?.status === 'mismatch')
+    return 'Wrong kit for this order: ordered ' + row.kit_id + ', tray says ' + row.label.text;
+
   const message = row.error || row.reasons?.join(' · ') || 'No reason recorded';
   return message[0].toUpperCase() + message.slice(1);
 }
@@ -140,7 +143,7 @@ function display() {
     frame.src = row.image;
   } else frame.removeAttribute('src');
   el('facts').replaceChildren();
-  for (const [key,value] of [['PLC recipe',row.kit_id],['Label read',row.label?.text],
+  for (const [key,value] of [['Kit ordered by PLC',row.kit_id],['Printed tag on tray',row.label?.text],
     ['Trigger to result',row.ms_total == null ? null : Math.round(row.ms_total)+' ms']]) {
     const pair = document.createElement('div'), term = document.createElement('dt'), detail = document.createElement('dd');
     term.textContent = key; detail.textContent = value || '—'; pair.append(term,detail); el('facts').append(pair);

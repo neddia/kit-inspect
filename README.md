@@ -6,7 +6,9 @@ A fixed-camera inspection station for fastener kits. It counts the bolts, nuts a
 
 **[Explore recorded inspections](https://neddia.github.io/kit-inspect/)** · [How the PLC handshake works](#how-it-works) · [Evaluation results](#inspection-results)
 
-The viewer opens on a KIT-A tray containing a red foreign object. Compare it with [an object covering the printed tag](https://neddia.github.io/kit-inspect/#inspection-5), which went to REVIEW because OCR could not read the label. The seven replay cycles use original photos from the final test, the tag challenge and two earlier bench cycles. Those bench photos show a KIT-A tag on a KIT-B order and a correctly labeled KIT-B. The animation ends with the simulated PLC withdrawing release when the heartbeat stops.
+The replay opens on [a KIT-A tray missing a bolt](https://neddia.github.io/kit-inspect/#inspection-8). The order requires three bolts and the camera finds two. Another tray [fails because it is the wrong kit for the order](https://neddia.github.io/kit-inspect/#inspection-6). The PLC ordered KIT-B, but the printed tag reads KIT-A. Both kits contain eight parts in different proportions. The wrong tag alone puts the tray on hold.
+
+The eight photos include a red foreign object, an object covering the tag, and a complete kit the station incorrectly failed. The animation ends with the PLC withdrawing permission to move the tray when the vision heartbeat stops.
 
 ## Inspection results
 
@@ -23,7 +25,7 @@ On a harder 20-tray challenge set used for model selection (odd poses, stacked p
 
 ## Run the demo
 
-To explore the seven selected v3 replay cycles in a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
+To explore the eight selected v3 replay cycles in a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
 
 To browse the latest 100 records on a station with local history, run `uv run kit dashboard` and open <http://localhost:8010>. Refresh to load new cycles. The station saves a photo, vision verdict and timing under each history ID. Its SQLite rows do not store the PLC release tag.
 
@@ -35,7 +37,7 @@ uv run kit demo                  # PLC operator panel + vision station, as two s
 ```
 
 In the **PLC panel**: `1` / `2` picks the kit the line is building, `SPACE` sends a kit, `a` sends one every 4 s.
-The big lamp is the PLC's real `Release_Permit` tag. The **station window** shows the camera, what it found and why.
+The lamp reads the simulated PLC’s `Release_Permit` signal. When it is on, this tray may move to the next station. When it is off, the tray must stay put. The **station window** shows the camera, what it found and why.
 
 Things to try:
 - A correct kit → **RELEASE**. Take a nut out → **HOLD**, "missing 1 nut".
