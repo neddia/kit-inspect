@@ -156,7 +156,7 @@ def main(argv=None):
     worker.start()
     cv2.namedWindow(window, (cv2.WINDOW_NORMAL if view else cv2.WINDOW_AUTOSIZE) | cv2.WINDOW_GUI_NORMAL)
     if view:
-        cv2.resizeWindow(window, 1200, 690)
+        cv2.resizeWindow(window, 1200, 736)
     try:
         while True:
             cv2.imshow(window, view.render(st, codes) if view else draw_panel(st, codes, specs))

@@ -181,7 +181,9 @@ def main():
             if args.preview_dir:
                 from src.station.demo_view import publish
                 publish(args.preview_dir / "inspection", annotated[-r["frame"].shape[0]:], cycle=r["cycle_id"],
-                        kit=r["kit_id"], result=d.result, reasons=d.reasons)
+                        kit=r["kit_id"], result=d.result, reasons=d.reasons,
+                        expected=d.spec, confirmed=d.sure, uncertain=d.unsure,
+                        tag=(r["out"].get("label") or {}).get("label"))
             last["img"] = annotated
 
     station = VisionSide(inspector.inspect, frames.get, on_result=on_result, health=frames.health)
