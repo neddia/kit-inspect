@@ -100,33 +100,33 @@ sessions:
   # ---- Nov 18 evening, in this order: train06 -> train v3 -> pick + freeze -> labelval -> test01 ----
   - name: train06
     split: train          # what hardval2 failed on (nuts touching parts, stacked nuts, bolts tip to tip) + the kit label in view
-    setup: "TRAINING, LABELS + TOUCHING PARTS: normal light, a kit label always in view. Swap KIT-A / KIT-B label every ~5 shots. Put 5 never-used junk items ASIDE for test01 first: don't use them here"
+    setup: "TRAINING: normal light, the printed KIT tag always in view (swap KIT-A / KIT-B tag every ~5 shots). Junk IS used (shots 29-40). Before you start: hide 5 junk items you have NEVER photographed, they are saved for test01"
     loose: true
-    hint: "label in view; every part countable by eye"
+    hint: "KIT tag in view; every part countable by eye"
     mix: {complete: 28, foreign_object: 12, missing_nut: 3, missing_bolt: 2, missing_screw: 2, extra_part: 3}
     pauses:
       1: "NUTS TOUCHING PARTS (shots 1-10): a nut on a bolt head, on a shaft, standing on its edge against a part"
       11: "TWO NUTS STACKED FLAT (shots 11-16): offset so both are countable by eye"
       17: "BOLTS TIP TO TIP or CROSSING (shots 17-22)"
-      23: "PLAIN KITS (shots 23-28): move the label around: different directions, partly up the wall, near parts"
-      29: "JUNK ON THE LABEL (shots 29-32): coin cell, washer, ring, battery corner lying on the letters"
-      33: "JUNK TOUCHING THE LABEL (shots 33-36)"
+      23: "PLAIN KITS (shots 23-28): move the KIT tag around: different directions, partly up the wall, near parts"
+      29: "JUNK ON THE KIT TAG (shots 29-32): coin cell, washer, ring, battery corner lying on the printed letters"
+      33: "JUNK TOUCHING THE KIT TAG (shots 33-36)"
       37: "JUNK ELSEWHERE (shots 37-40), touching parts is fine"
-      41: "MISSING / EXTRA PARTS (shots 41-50): keep a label in view; nuts touching parts again where you can"
+      41: "MISSING / EXTRA PARTS (shots 41-50), no junk: KIT tag in view; nuts touching parts again where you can"
 
   - name: labelval
     split: test           # check for the label rules: does junk ON the label still get caught? Never trained on.
                           # Shoot after v3 is frozen. Score: kit eval --session labelval --label
-    setup: "LABEL CHECK: KIT-A label only, normal light, complete kit + one piece of junk on or against the label every shot"
-    hint: "1-4: junk ON the letters, 5-6: TOUCHING the label"
+    setup: "KIT TAG CHECK: KIT-A tag only, normal light, complete kit + one piece of junk on or against the tag every shot"
+    hint: "1-4: junk ON the tag's letters, 5-6: TOUCHING the tag"
     mix: {foreign_object: 6}
 
   - name: test01
     split: test           # THE headline set (Stage 8): normal conditions, frozen model + settings, shot blind, scored ONCE.
                           # Change nothing after seeing its score; a fix means a new set. Score: kit eval --session test01 --label
-    setup: "FINAL TEST SET: normal light, KIT-A label ONLY (a KIT-B label would be a correct FAIL scored as wrong), fully in view. Drop the parts in from your hand like a packer, don't arrange them"
+    setup: "FINAL TEST SET: normal light, KIT-A tag ONLY (a KIT-B tag would be a correct FAIL scored as wrong), fully in view. Drop the parts in from your hand like a packer, don't arrange them"
     loose: true
-    hint: "can't count every part by eye? drop again. Junk 1-5: the set-aside items"
+    hint: "can't count every part by eye? drop again. Junk shots 1-5: the 5 hidden never-seen items"
     mix: {complete: 24, missing_bolt: 3, missing_nut: 3, missing_screw: 3, extra_part: 3, two_faults: 2, foreign_object: 10}
 
   # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
