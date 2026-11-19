@@ -14,7 +14,7 @@ keeps trying to reopen it.
 import threading
 import time
 
-from src.capture.camera import load_camera_config, open_camera
+from src.capture.camera import load_camera_config, open_camera, station_camera_config
 
 
 class CameraLost(RuntimeError):
@@ -41,27 +41,31 @@ class CameraFeed:
 
     def _run(self):
         while not self.stop.is_set():
+            cap = None
             try:
-                cap = open_camera(self.cfg)
+                cap = open_camera(station_camera_config(self.cfg))
+                while not self.stop.is_set():
+                    ok, frame = cap.read()
+                    if not ok or frame is None:
+                        raise CameraLost("camera stopped sending frames")
+                    with self.new_frame:
+                        self.error = None
+                        self.frame, self.frame_t = frame, time.monotonic()
+                        self.new_frame.notify_all()
             except Exception as e:
-                self.error = f"can't open camera: {e}"
-                self.stop.wait(self.reopen_s)
-                continue
-            self.error = None
-            while not self.stop.is_set():
-                ok, frame = cap.read()
-                if not ok:
-                    self.error = "camera stopped sending frames"
-                    break
                 with self.new_frame:
-                    self.frame, self.frame_t = frame, time.monotonic()
+                    self.error = str(e)
+                    self.frame, self.frame_t = None, 0.0
                     self.new_frame.notify_all()
-            cap.release()
+            finally:
+                if cap is not None:
+                    cap.release()
             self.stop.wait(self.reopen_s)
 
     def latest(self):
-        """(frame, age in s) of the newest frame, for a live view. frame is None before the first one."""
-        return self.frame, time.monotonic() - self.frame_t
+        """(frame, age in s) of the newest frame, for a live view. frame is None while disconnected."""
+        with self.new_frame:
+            return self.frame, time.monotonic() - self.frame_t
 
     def fresh_frame(self, after=None, timeout_s=1.0):
         """The first frame taken after `after` (default: now). Raises CameraLost if none arrives in time."""

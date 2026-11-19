@@ -10,6 +10,8 @@ Try it (from the repo root):
 """
 
 import os
+import platform
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -68,42 +70,79 @@ def read_controls(device, names):
     return values
 
 
+def find_usb_camera(usb_id, video_class=Path("/sys/class/video4linux")):
+    """Find the capture interface of this USB camera, including after kernel renumbering."""
+    for node in sorted(video_class.glob("video*")):
+        try:
+            if (node / "index").read_text().strip() != "0":
+                continue
+            for parent in (node / "device").resolve().parents:
+                if (parent / "idVendor").is_file():
+                    identity = ":".join((parent / name).read_text().strip() for name in ("idVendor", "idProduct"))
+                    if identity.lower() == usb_id.lower():
+                        return "/dev/" + node.name
+                    break
+        except FileNotFoundError:
+            continue  # unplugged while enumerating
+    return None
+
+
+def station_camera_config(cfg):
+    """Resolve the camera for each open attempt. WSL loses USB forwarding on unplug."""
+    usb_id = cfg.get("usb_id")
+    if not usb_id:
+        return cfg
+    device = find_usb_camera(usb_id)
+    if device is None:
+        tool = shutil.which("usbipd.exe") if "microsoft" in platform.release().lower() else None
+        if tool:
+            result = subprocess.run([tool, "attach", "--wsl", "--hardware-id", usb_id],
+                                    capture_output=True, text=True, timeout=10)
+            if result.returncode:
+                raise RuntimeError(result.stderr.strip() or "waiting for the shared USB webcam")
+            device = find_usb_camera(usb_id)
+        if device is None:
+            raise RuntimeError(f"waiting for USB webcam {usb_id}")
+    return dict(cfg, device=device)
+
+
 def open_camera(cfg=None):
     """Open the camera, lock its settings, verify them, and return the capture."""
     cfg = cfg or load_camera_config()
     device = cfg["device"]
 
     cap = cv2.VideoCapture(device, cv2.CAP_V4L2)
-    if not cap.isOpened():
-        raise RuntimeError(f"Can't open {device}. On WSL, is it attached? (usbipd attach --wsl --busid 8-4)")
-    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*cfg["fourcc"]))
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["width"])
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["height"])
-    cap.set(cv2.CAP_PROP_FPS, cfg["fps"])
+    try:
+        if not cap.isOpened():
+            raise RuntimeError(f"Can't open {device}. On WSL, is it attached? (usbipd attach --wsl --busid 8-4)")
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*cfg["fourcc"]))
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["width"])
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["height"])
+        cap.set(cv2.CAP_PROP_FPS, cfg["fps"])
 
-    # Start the stream BEFORE setting controls. Tested on the C510: the first
-    # read() starts the stream and resets gain to 16, wiping whatever we set.
-    cap.read()
-    set_controls(device, cfg["controls"])
-    for _ in range(WARMUP_FRAMES):
+        # Start the stream BEFORE setting controls. Tested on the C510: the first
+        # read() starts the stream and resets gain to 16, wiping whatever we set.
         cap.read()
+        set_controls(device, cfg["controls"])
+        for _ in range(WARMUP_FRAMES):
+            cap.read()
 
-    # Trust, but verify: a control the camera silently ignored is how you end
-    # up with a training set shot on auto exposure.
-    actual = read_controls(device, list(cfg["controls"]))
-    wrong = {k: (v, actual.get(k)) for k, v in cfg["controls"].items() if actual.get(k) != v}
-    if wrong:
-        cap.release()
-        raise RuntimeError(f"Camera ignored settings (wanted, got): {wrong}")
+        # Trust, but verify: a control the camera silently ignored is how you end
+        # up with a training set shot on auto exposure.
+        actual = read_controls(device, list(cfg["controls"]))
+        wrong = {k: (v, actual.get(k)) for k, v in cfg["controls"].items() if actual.get(k) != v}
+        if wrong:
+            raise RuntimeError(f"Camera ignored settings (wanted, got): {wrong}")
 
-    ok, frame = cap.read()
-    if not ok:
+        ok, frame = cap.read()
+        if not ok:
+            raise RuntimeError("Camera opened but returned no frame. On WSL, try detach + re-attach.")
+        h, w = frame.shape[:2]
+        if (w, h) != (cfg["width"], cfg["height"]):
+            raise RuntimeError(f"Asked for {cfg['width']}x{cfg['height']}, got {w}x{h}")
+    except Exception:
         cap.release()
-        raise RuntimeError("Camera opened but returned no frame. On WSL, try detach + re-attach.")
-    h, w = frame.shape[:2]
-    if (w, h) != (cfg["width"], cfg["height"]):
-        cap.release()
-        raise RuntimeError(f"Asked for {cfg['width']}x{cfg['height']}, got {w}x{h}")
+        raise
     return cap
 
 

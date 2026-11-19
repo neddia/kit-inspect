@@ -43,7 +43,7 @@ Things to try:
 - A correct kit → **RELEASE**. Take a nut out → **HOLD**, "missing 1 nut".
 - Put the KIT-A label on a KIT-B order → **HOLD**, "label says KIT-A, PLC expects KIT-B".
 - Close the station window while the lamp says RELEASE → the PLC sees the heartbeat stop and drops to **HOLD** by itself.
-- Unplug the camera → the station raises a fault at once; plug it back in and it recovers.
+- Unplug the webcam while the panel shows RELEASE. The PLC switches to HOLD. Plug it back in and wait for the live picture to return, then send a correct kit to see RELEASE again. On WSL the station uses Windows’ `usbipd.exe` to reattach the already-shared C510 automatically.
 
 No camera? `uv run kit demo --images data/images/hardval2` replays photos instead.
 

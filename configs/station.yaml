@@ -4,6 +4,7 @@
 #   plc:        Stage 7 (below)
 
 camera:
+  usb_id: "046d:081d"      # live station rediscovers this webcam after unplug
   device: /dev/video0      # Logitech C510 (USB 046d:081d)
   width: 1280              # 720p is the sensor's real resolution; bigger sizes are upscaled
   height: 720
