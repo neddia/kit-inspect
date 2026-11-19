@@ -59,3 +59,38 @@ when,image,field,old,new,reason
 2026-11-18T12:23:31,hardval2/hardval2_0017.jpg,scenario,lookalike_nut,foreign_object,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"
 2026-11-18T12:23:31,hardval2/hardval2_0018.jpg,nuts,2,3,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"
 2026-11-18T12:23:31,hardval2/hardval2_0018.jpg,scenario,lookalike_nut,foreign_object,"operator: full kit + junk, not a nut swap (only 19-20 were swaps)"
+2026-11-18T23:28:51,train06/train06_0041.jpg,nuts,2,1,review: miscounted at capture
+2026-11-18T23:28:51,train06/train06_0041.jpg,scenario,missing_nut,two_faults,review: miscounted at capture
+2026-11-18T23:29:55,train06/train06_0043.jpg,bolts,3,4,review: miscounted at capture
+2026-11-18T23:29:55,train06/train06_0043.jpg,scenario,missing_nut,two_faults,review: miscounted at capture
+2026-11-18T23:30:46,train06/train06_0044.jpg,bolts,2,4,review: miscounted at capture
+2026-11-18T23:30:46,train06/train06_0044.jpg,nuts,3,2,review: miscounted at capture
+2026-11-18T23:30:46,train06/train06_0044.jpg,scenario,missing_bolt,two_faults,review: miscounted at capture
+2026-11-18T23:32:38,train06/train06_0045.jpg,bolts,2,4,review: miscounted at capture
+2026-11-18T23:32:38,train06/train06_0045.jpg,nuts,3,2,review: miscounted at capture
+2026-11-18T23:32:38,train06/train06_0045.jpg,scenario,missing_bolt,two_faults,review: miscounted at capture
+2026-11-18T23:33:03,train06/train06_0046.jpg,bolts,3,4,review: miscounted at capture
+2026-11-18T23:33:03,train06/train06_0046.jpg,nuts,3,4,review: miscounted at capture
+2026-11-18T23:33:03,train06/train06_0046.jpg,screws,1,2,review: miscounted at capture
+2026-11-18T23:33:03,train06/train06_0046.jpg,scenario,missing_screw,two_faults,review: miscounted at capture
+2026-11-18T23:33:51,train06/train06_0047.jpg,bolts,3,4,review: miscounted at capture
+2026-11-18T23:33:51,train06/train06_0047.jpg,nuts,3,4,review: miscounted at capture
+2026-11-18T23:33:51,train06/train06_0047.jpg,screws,1,2,review: miscounted at capture
+2026-11-18T23:33:51,train06/train06_0047.jpg,scenario,missing_screw,two_faults,review: miscounted at capture
+2026-11-18T23:37:54,train06/train06_0038.jpg,other,1,0,review: miscounted at capture
+2026-11-18T23:37:54,train06/train06_0038.jpg,scenario,foreign_object,complete,review: miscounted at capture
+2026-11-18T23:37:54,train06/train06_0038.jpg,expected,NOT_PASS,PASS,review: miscounted at capture
+2026-11-18T23:38:03,train06/train06_0039.jpg,other,1,0,review: miscounted at capture
+2026-11-18T23:38:03,train06/train06_0039.jpg,scenario,foreign_object,complete,review: miscounted at capture
+2026-11-18T23:38:03,train06/train06_0039.jpg,expected,NOT_PASS,PASS,review: miscounted at capture
+2026-11-18T23:39:04,train06/train06_0041.jpg,other,0,1,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0041.jpg,expected,FAIL,NOT_PASS,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0042.jpg,other,0,1,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0042.jpg,scenario,missing_nut,two_faults,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0042.jpg,expected,FAIL,NOT_PASS,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0043.jpg,other,0,1,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0043.jpg,expected,FAIL,NOT_PASS,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0044.jpg,other,0,1,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0044.jpg,expected,FAIL,NOT_PASS,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0045.jpg,other,0,1,review: junk left on the tray by accident (boxed as other)
+2026-11-18T23:39:04,train06/train06_0045.jpg,expected,FAIL,NOT_PASS,review: junk left on the tray by accident (boxed as other)
