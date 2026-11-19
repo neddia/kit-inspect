@@ -112,11 +112,13 @@ def fix_hidden(row, spec):
             "expected": expected_for(counts, spec, row["tier"], stacked=True)}
 
 
-def fix_counts(row, labelled, spec):
-    """I miscounted: the tray really held what's labelled."""
-    counts = labelled | {"other": int(row["other"])}
+def fix_counts(row, labelled, spec, other=None):
+    """I miscounted: the tray really held what's labelled. other = junk boxes labelled (same count as the panel)
+    (None keeps the manifest's junk count, for labels made before the 4th class)."""
+    other = int(row["other"]) if other is None else other
+    counts = labelled | {"other": other}
     stacked = row["scenario"] == "stacked"
-    return {**{f"{p}s": labelled[p] for p in PARTS},
+    return {**{f"{p}s": labelled[p] for p in PARTS}, "other": other,
             "scenario": scenario_for(counts, spec, stacked),
             "expected": expected_for(counts, spec, row["tier"], stacked)}
 
@@ -446,7 +448,8 @@ def main():
                 row = update_manifest(image, fix_hidden(row, spec), "review: part hidden in photo")
                 status = f"manifest: {row['scenario']}, expected {row['expected']}"
             elif key == ord("m"):
-                row = update_manifest(image, fix_counts(row, counts_inside(objects), spec), "review: miscounted at capture")
+                junk = sum(o["cls"] == "other" for o in objects)   # junk on the KIT tag (outside the floor) is still on the tray
+                row = update_manifest(image, fix_counts(row, counts_inside(objects), spec, junk), "review: miscounted at capture")
                 status = f"manifest counts set to labelled ({row['scenario']})"
             elif key == ord(" "):
                 label.update(objects=objects, reviewed=True, reviewed_at=datetime.now().isoformat(timespec="seconds"))
