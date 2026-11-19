@@ -12,28 +12,24 @@
 <main class="wrap">
 
 <section id="about" hidden>
-<p class="kicker">Machine vision · PLC interlock · Python</p>
-<h1>A camera that decides whether a kit may leave the station</h1>
-<p class="lede">A fixed camera checks every fastener kit before it moves on. It counts the bolts, nuts and screws, catches foreign objects, reads the printed kit tag, and tells a simulated Allen-Bradley PLC whether to release the tray. Anything short of a clean PASS for the current cycle holds the tray, and so does a silent camera.</p>
-
-<div class="results">
-<div class="headline"><strong>0 of 24</strong><span>faulty kits released in a blind 48-tray test, shot under normal conditions and scored once with the model frozen</span></div>
-<div class="tablewrap"><table>
-<thead><tr><th scope="col">Blind test, 48 trays</th><th scope="col">PASS</th><th scope="col">REVIEW</th><th scope="col">FAIL</th></tr></thead>
-<tbody>
-<tr><th scope="row">Faulty kits: missing, extra or wrong parts, foreign objects (24)</th><td class="zero">0</td><td>1</td><td>23</td></tr>
-<tr><th scope="row">Good kits (24)</th><td>18</td><td>5</td><td class="miss">1</td></tr>
-</tbody></table></div>
-<p class="note">Five good kits went to an operator, mostly a nut tucked against another part. One was failed wrongly: a screw lay almost entirely under a bolt (tray 4 below). Median 120 ms per tray on a CPU. <a href="https://github.com/neddia/kit-inspect/blob/main/reports/stage6/v3_test01/per_image.csv">Every tray's result</a> · <a href="https://github.com/neddia/kit-inspect/blob/main/experiments.md">Every experiment</a></p>
+<div class="overview">
+<div>
+<h1>Does this tray match the order?</h1>
+<p class="lede">A camera checks the parts and printed tag on each tray. A simulated Allen-Bradley PLC holds the kit if anything is missing, the tag is wrong, or the camera goes offline.</p>
+<p class="finding"><strong>0 of 24</strong> faulty kits passed the blind test.</p>
+<p class="note">Of 24 good kits, 18 passed, five went to review, and one failed. Median inspection time was 120 ms on the test PC.</p>
+<details class="test-results"><summary>Blind test results</summary>
+<table><caption>48 KIT-A trays, scored once with the frozen model</caption>
+<thead><tr><th scope="col">Tray</th><th scope="col">Pass</th><th scope="col">Review</th><th scope="col">Fail</th></tr></thead>
+<tbody><tr><th scope="row">Faulty</th><td>0</td><td>1</td><td>23</td></tr><tr><th scope="row">Good</th><td>18</td><td>5</td><td>1</td></tr></tbody></table>
+<p><a href="https://github.com/neddia/kit-inspect/blob/main/reports/stage6/v3_test01/per_image.csv">Per-tray results</a></p></details>
 </div>
+<figure class="film" id="demo"><video controls playsinline preload="none" width="1440" height="882" aria-label="Fastener kit inspection station demonstration" data-poster="demo-poster.webp" data-src="station-demo.mp4"></video>
+<figcaption><strong>Station demo · 1:21</strong><span>Part counts, wrong-kit detection, and webcam disconnect and recovery.</span></figcaption></figure>
+</div></section>
 
-<ul class="how">
-<li><b>Detect.</b> A YOLO26n model trained on 487 labelled photos of real trays finds the parts and known junk. An OpenCV check catches objects the model has never seen.</li>
-<li><b>Read.</b> OCR finds the printed kit tag. The wrong kit for the order is a hold even when every part is there.</li>
-<li><b>Interlock.</b> A cycle-ID handshake ties each verdict to the PLC's request. If the vision heartbeat stops, the PLC drops its release permit on its own.</li>
-</ul>
-</section>
-
+<details id="explorer" open>
+<summary id="exploreHeading">Explore eight recorded trays</summary>
 <h2 id="title">Recorded inspections</h2>
 <p id="intro">Select a cycle to see the camera frame and the station's decision.</p>
 <dl id="summary" aria-label="Results for the displayed history window" hidden></dl>
@@ -49,6 +45,6 @@
 <p id="truth" hidden></p>
 </section>
 <aside><div class="historyhead"><h2 id="listTitle">Cycles</h2><label id="filterLabel">Verdict <select id="filter"><option value="">All</option></select></label></div><nav id="records" aria-label="Inspection records"></nav>
-<p class="plcnote"><b>When does the tray move?</b>The PLC turns its release permit on only for a PASS that answers its own request. FAIL, REVIEW or a lost vision heartbeat keeps the tray on hold.</p></aside>
+</aside>
 </div><p id="status" role="status">Loading inspections…</p>
-</main></body></html>
+</details></main></body></html>

@@ -2,9 +2,9 @@
 
 A machine vision station that decides whether a fastener kit may leave the station. A fixed camera counts the bolts, nuts and screws, catches foreign objects and reads the printed kit tag. A simulated Allen-Bradley PLC releases the tray only on a PASS that answers its own request; anything else, including a silent camera, holds it.
 
-**[Live demo: eight real trays, as the station saw them](https://neddia.github.io/kit-inspect/)** · [How it works](#how-it-works) · [Every experiment and decision](experiments.md)
+**[Watch the station demo (1:21) and explore eight inspections](https://neddia.github.io/kit-inspect/)** · [How it works](#how-it-works) · [Every experiment and decision](experiments.md)
 
-[![Photos replayed through the station, then the simulated PLC withdrawing release when the vision heartbeat stops](docs/station-demo.gif)](https://neddia.github.io/kit-inspect/)
+[![Watch the recorded station check trays and recover from a webcam disconnect](docs/demo-poster.webp)](https://neddia.github.io/kit-inspect/)
 
 ## Results
 

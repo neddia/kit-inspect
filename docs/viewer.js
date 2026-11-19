@@ -117,7 +117,7 @@ function legend() {
 
 function display() {
   selected = records.find(r => '#inspection-' + r.id === location.hash) || records.find(r => r.id === initialId) || records[0];
-  if (!selected) return;
+  if (!selected || !el('explorer').open) return;
   const row = selected;
   if (el('filter').value && el('filter').value !== row.result) {
     el('filter').value = '';
@@ -195,12 +195,20 @@ function summarize() {
 }
 async function start() {
   try {
-    const response = await fetch('inspections.json',{cache:'no-store'});
+    const response = await fetch('inspections.json',{cache:'no-cache'});
     if (!response.ok) throw Error();
     const data = await response.json();
     replay = Boolean(data.description);          // the published replay, not a live station's history
     document.body.classList.toggle('replay', replay);
     el('about').hidden = !replay;
+    el('exploreHeading').hidden = !replay;
+    el('title').hidden = replay;
+    el('explorer').open = !replay || location.hash.startsWith('#inspection-');
+    if (replay) {
+      const video = el('demo').querySelector('video');
+      video.poster = video.dataset.poster;
+      video.src = video.dataset.src;
+    }
     el('filterLabel').hidden = replay;
     el('listTitle').textContent = replay ? 'Trays' : 'Cycle history';
     el('title').textContent = data.source;
@@ -218,7 +226,7 @@ async function start() {
       title.textContent = cycle(row); badge(status,row.result); message.textContent = reasons(row).join(' · ');
       head.append(title,status); a.append(head,message);
       const ok = correct(row);
-      if (ok !== null) {
+      if (ok === false) {
         const mark = document.createElement('p');
         mark.className = 'check'; mark.dataset.ok = String(ok);
         mark.textContent = ok ? 'station right' : row.expected === 'PASS' ? 'station wrong: good kit failed' : 'station wrong: faulty kit passed';
@@ -227,7 +235,7 @@ async function start() {
       el('records').append(a);
       a.addEventListener('click',() => {if (matchMedia('(max-width:760px)').matches) el('layout').scrollIntoView();});
     }
-    el('status').hidden = true; el('layout').hidden = false; display();
+    el('status').hidden = true; el('layout').hidden = false; followInspectionLink();
   } catch { el('status').textContent = 'Inspection history could not be loaded. Refresh to retry.'; }
 }
 el('filter').onchange = () => {
@@ -238,5 +246,13 @@ el('filter').onchange = () => {
 el('frame').onload = draw;
 el('frame').onerror = () => {el('frame').hidden = true; el('overlay').hidden = true; el('noFrame').hidden = false;};
 el('boxes').onchange = draw;
-window.addEventListener('hashchange',display);
+function followInspectionLink() {
+  if (replay && location.hash.startsWith('#inspection-')) {
+    el('explorer').open = true;
+    el('explorer').scrollIntoView();
+  }
+  display();
+}
+el('explorer').addEventListener('toggle',display);
+window.addEventListener('hashchange',followInspectionLink);
 start();
