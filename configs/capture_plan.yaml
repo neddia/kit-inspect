@@ -110,8 +110,6 @@ sessions:
     loose: true
     hint: "foreign shots: the first 5 with junk NEVER used before (drawer stuff), the rest with anything"
     mix: {complete: 24, missing_bolt: 3, missing_nut: 3, missing_screw: 3, extra_part: 3, two_faults: 2, foreign_object: 10}
-    pauses:
-      25: "Room lights OFF (lamp only)"
 
   # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
   - name: stress_side
