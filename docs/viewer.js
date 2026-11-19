@@ -131,7 +131,7 @@ function display() {
   el('reason').textContent = reason(row);
   const frame = el('frame');
   el('frameLegend').textContent = row.label?.located_on_replay ? 'Label outline from OCR replay'
-    : row.label?.box ? 'Kit label outlined in cyan' : 'Station camera';
+    : row.label?.box ? 'Printed kit tag located by OCR' : 'Station camera';
   frame.hidden = !row.image;
   el('noFrame').hidden = Boolean(row.image);
   el('overlay').hidden = !row.image;
