@@ -27,12 +27,12 @@ exactly what the free-form capture script would write.
 
 import argparse
 import csv
-import textwrap
 import time
 from pathlib import Path
 from types import SimpleNamespace
 
 import cv2
+import numpy as np
 import yaml
 
 from src.capture.camera import load_camera_config, open_camera, quiet_jpeg_warnings
@@ -159,16 +159,42 @@ def position(order, shots, done):
 
 # ---------- drawing ----------
 
-def banner(img, lines, color):
-    """Big text in a dark band at the bottom of the frame."""
-    h, w = img.shape[:2]
-    lines = [part for text in lines for part in textwrap.wrap(text, 62)]
-    line_h = 38
-    top = h - line_h * len(lines) - 14
-    img[top:h] = (img[top:h] * 0.25).astype(img.dtype)
-    for i, text in enumerate(lines):
-        cv2.putText(img, text, (14, top + 32 + i * line_h), cv2.FONT_HERSHEY_SIMPLEX, 0.85, color, 2, cv2.LINE_AA)
+TOP_ROWS, BOTTOM_ROWS = 5, 5   # fixed strip heights, so the window doesn't jump between shots
+
+
+def strip(width, lines, color, scale, line_h, thick, rows):
+    """Text on a black strip, wrapped to the width. The strips sit above and below the camera
+    picture, never on it, so the whole tray stays visible."""
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    wrapped = []
+    for text in lines:
+        if cv2.getTextSize(text, font, scale, thick)[0][0] <= width - 28:
+            wrapped.append(text)                  # fits: keep its spacing as written
+            continue
+        line = ""
+        for word in text.split():
+            trial = f"{line} {word}".strip()
+            if line and cv2.getTextSize(trial, font, scale, thick)[0][0] > width - 28:
+                wrapped.append(line)
+                line = word
+            else:
+                line = trial
+        wrapped.append(line)
+    img = np.zeros((line_h * max(rows, len(wrapped)) + 14, width, 3), np.uint8)
+    for i, text in enumerate(wrapped):
+        cv2.putText(img, text, (14, line_h - 6 + i * line_h), font, scale, color, thick, cv2.LINE_AA)
     return img
+
+
+def banner(width, lines, color):
+    """What to do for this shot: the strip under the picture."""
+    return strip(width, lines, color, 0.85, 38, 2, BOTTOM_ROWS)
+
+
+def section_for(session, shot):
+    """The short name of the part of the session this shot is in (the text before ':' of the last pause)."""
+    pauses = {int(k): v for k, v in (session.get("pauses") or {}).items() if int(k) <= shot}
+    return pauses[max(pauses)].split(":")[0] if pauses else None
 
 
 YELLOW, GREEN, CYAN = (0, 230, 255), (80, 230, 80), (255, 220, 120)
@@ -243,7 +269,9 @@ def main():
 
     window = "guided capture (SPACE save, ENTER confirm, u undo, q quit)"
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(window, cam_cfg["width"], cam_cfg["height"])
+    total_h = cam_cfg["height"] + (26 * TOP_ROWS + 14) + (38 * BOTTOM_ROWS + 14)
+    k = min(1.0, 1000 / total_h)                       # picture + both strips, fits a 1080p screen
+    cv2.resizeWindow(window, int(cam_cfg["width"] * k), int(total_h * k))
 
     saved = []            # (image, session) saved in this run, for undo
     status, status_until = "", 0.0
@@ -308,27 +336,30 @@ def main():
             + ("   TOO BRIGHT? lots of pure white" if clipped > 2 else ""),
             status if time.time() < status_until else "",
         ]
-        out = draw_overlay(frame, top, show_grid)
+        picture = draw_overlay(frame, [], show_grid)    # grid only: the text goes in strips around it
+        width = picture.shape[1]
+        header = strip(width, [t for t in top if t], (255, 255, 255), 0.6, 26, 1, TOP_ROWS)
 
         if waiting:
-            out = banner(out, [f"SET UP: {waiting}", "then press ENTER"], CYAN)
+            footer = banner(width, [f"SET UP: {waiting}", "then press ENTER"], CYAN)
         else:
             before = shots[name][k - 1]["counts"] if k else {p: spec.get(p, 0) for p in parts} | {"other": 0}
             change = change_text(before, plan_shot["counts"])
             layout = LAYOUTS[k % len(LAYOUTS)]
             if session.get("loose"):
-                layout += "; tray down LOOSE (±2 cm, slightly turned)"
+                layout += ", tray down loose"
             lines = [f"SHOT: {plan_shot['scenario'].replace('_', ' ').upper()}   ->  {tray_text(plan_shot['counts'], parts)}"]
             note = note_for(plan_shot["scenario"])
             if change:
                 lines.append(f"CHANGE PARTS: {change}")
             if note:
                 lines.append(note.upper())
-            if session.get("hint"):
-                lines.append(session["hint"])
-            lines.append(f"layout: {layout}   ...shake, hands out, SPACE")
-            out = banner(out, lines, YELLOW if change or note else GREEN)
-        cv2.imshow(window, out)
+            section = section_for(session, k + 1)
+            if section or session.get("hint"):
+                lines.append(section or session["hint"])
+            lines.append(f"layout: {layout}. Hands out, SPACE")
+            footer = banner(width, lines, YELLOW if change or note else GREEN)
+        cv2.imshow(window, np.vstack([header, picture, footer]))
 
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):

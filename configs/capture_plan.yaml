@@ -102,7 +102,7 @@ sessions:
     split: train          # what hardval2 failed on (nuts touching parts, stacked nuts, bolts tip to tip) + the kit label in view
     setup: "TRAINING, LABELS + TOUCHING PARTS: normal light, a kit label always in view. Swap KIT-A / KIT-B label every ~5 shots. Put 5 never-used junk items ASIDE for test01 first: don't use them here"
     loose: true
-    hint: "label always in view (flat on the rim, partly up the wall, any direction); every part countable by eye"
+    hint: "label in view; every part countable by eye"
     mix: {complete: 28, foreign_object: 12, missing_nut: 3, missing_bolt: 2, missing_screw: 2, extra_part: 3}
     pauses:
       1: "NUTS TOUCHING PARTS (shots 1-10): a nut on a bolt head, on a shaft, standing on its edge against a part"
@@ -118,7 +118,7 @@ sessions:
     split: test           # check for the label rules: does junk ON the label still get caught? Never trained on.
                           # Shoot after v3 is frozen. Score: kit eval --session labelval --label
     setup: "LABEL CHECK: KIT-A label only, normal light, complete kit + one piece of junk on or against the label every shot"
-    hint: "shots 1-4: junk ON the letters; 5-6: junk TOUCHING the label. Use junk positions you didn't use in train06"
+    hint: "1-4: junk ON the letters, 5-6: TOUCHING the label"
     mix: {foreign_object: 6}
 
   - name: test01
@@ -126,7 +126,7 @@ sessions:
                           # Change nothing after seeing its score; a fix means a new set. Score: kit eval --session test01 --label
     setup: "FINAL TEST SET: normal light, KIT-A label ONLY (a KIT-B label would be a correct FAIL scored as wrong), fully in view. Drop the parts in from your hand like a packer, don't arrange them"
     loose: true
-    hint: "if you can't count every part by eye, drop them again. Foreign shots: first 5 = the junk you set aside (never seen), then anything"
+    hint: "can't count every part by eye? drop again. Junk 1-5: the set-aside items"
     mix: {complete: 24, missing_bolt: 3, missing_nut: 3, missing_screw: 3, extra_part: 3, two_faults: 2, foreign_object: 10}
 
   # ---- Optional: stress and invalid scenes (never trained on; manifest only) ----
