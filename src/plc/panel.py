@@ -90,15 +90,15 @@ def main(argv=None):
     parser.add_argument("--every", type=float, default=4.0, help="seconds between kits in auto mode (a)")
     parser.add_argument("--preview-dir", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    specs = kit_specs()
     view = None
     window = WINDOW
     if args.preview_dir:
         from src.station.demo_view import DemoView
-        view = DemoView(args.preview_dir)
+        view = DemoView(args.preview_dir, specs)
         window = "Fastener kit inspection"
 
     cfg, codes = load_config()
-    specs = kit_specs()
     proc = None
     try:
         with Tags(cfg) as t:

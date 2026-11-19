@@ -47,7 +47,8 @@ class Snapshot:
 
 
 class DemoView:
-    def __init__(self, directory):
+    def __init__(self, directory, specs):
+        self.specs = specs
         self.live = Snapshot(directory / "preview")
         self.last = Snapshot(directory / "inspection")
         self.had_heartbeat = False
@@ -77,7 +78,22 @@ class DemoView:
         # Identical 16:9 viewing areas keep the raw and annotated tray at the same scale.
         left, right, width, height = 24, 608, 568, 320
         label(left, 43, "Fastener kit inspection", 1.0, weight=2)
-        label(900, 40, "Next order: " + codes[state["kit"]], .76, white, 2)
+        selected = state["kit"]
+        recipe = self.specs[codes[selected]]
+        label(462, 23, "SELECTED FOR NEXT INSPECTION", .51, muted)
+        parts = " / ".join(f"{n} {part}{'s' if n != 1 else ''}" for part, n in recipe.items())
+        label(462, 47, parts, .60, white)
+        choices = sorted(codes) if len(codes) <= 2 else [selected]
+        for i, code in enumerate(choices):
+            x = 792 + i * 196
+            active = code == selected
+            accent = (247, 207, 111) if code == 1 else (247, 183, 210)
+            cv2.rectangle(img, (x, 8), (x + 188, 54), accent if active else (89, 77, 63), -1 if active else 1)
+            ink = (38, 32, 24) if active else muted
+            cv2.circle(img, (x + 18, 31), 7, ink, 2)
+            if active:
+                cv2.circle(img, (x + 18, 31), 3, ink, -1)
+            label(x + 36, 39, f"{code}   {codes[code]}", .76, ink, 2 if active else 1)
         cv2.line(img, (left, 61), (1176, 61), (91, 82, 65))
         label(left, 93, "PHOTO REPLAY" if current.get("replay") else "LIVE CAMERA", .62, muted)
         caption = "LAST INSPECTION"
