@@ -29,12 +29,13 @@ camera:
   # No focus control: the C510 is fixed-focus. Set the camera height so the tray is sharp.
 
 inspection:                # Stage 6. Every number here is chosen on train/val data; freeze before the test sessions.
-  model: models/kit_yolo26n_640_v2_4cls_openvino_model   # v2, 4 classes (bolt, nut, screw, other = junk), Nov 18.
-                          # Chosen on hardval2 (never-seen junk): 0/14 false passes vs 1/14 for the 3-class v2.
+  model: models/kit_yolo26n_640_v3_openvino_model   # v3, 4 classes (bolt, nut, screw, other = junk), Nov 18-19.
+                          # v2 + train06 (KIT tags in view, nuts touching parts, stacked nuts, bolts tip to tip).
+                          # vs v2: boxes on the KIT tag in 92 station photos 215 -> 1; false passes 0 on hardval2,
+                          # val01, hardval (both); hardval2 good kits failed 2/6 -> 1/6. FROZEN for test01.
                           # OpenVINO FP32 (same decisions as the .pt, faster on CPU). Not INT8: it dropped a
-                          # touching screw on v1 (val01_0036). Rebuild with:
-                          #   uv run yolo export model=models/kit_yolo26n_640_v2_4cls.pt format=openvino imgsz=640
-                          # Previous: models/kit_yolo26n_640_v1_openvino_model (3 classes, before the hard cases).
+                          # touching screw on v1 (val01_0036). Rebuild: uv run kit train v3 (or yolo export ... format=openvino)
+                          # Previous: models/kit_yolo26n_640_v2_4cls_openvino_model (no tags in its training photos).
   imgsz: 640               # must match training
   decision:
     low: 0.2               # detections below this are noise (ignored)
