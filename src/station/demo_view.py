@@ -11,7 +11,7 @@ import numpy as np
 def publish(path, frame, **fields):
     payload = b""
     if frame is not None:
-        width = min(frame.shape[1], 820 if path.name == "inspection" else 640)
+        width = min(frame.shape[1], 640)
         img = cv2.resize(frame, (width, round(width * frame.shape[0] / frame.shape[1])))
         ok, encoded = cv2.imencode(".jpg", img)
         if not ok:
@@ -74,35 +74,24 @@ class DemoView:
         fresh = time.monotonic() - current.get("time", 0) < 1.5
         live = self.live.image if fresh else None
         last = self.last.fields
-        label(24, 46, "Fastener kit inspection", 1.05, weight=2)
-        label(898, 43, "SIMULATED PLC", .72, muted)
-        cv2.line(img, (24,65), (1176,65), (91,82,65))
-        title = f"LAST INSPECTION   /   CYCLE {last['cycle']}   /   {last['kit']}" if last else "CAMERA PREVIEW"
-        label(24, 101, title, .65, muted)
+        # Identical 16:9 viewing areas keep the raw and annotated tray at the same scale.
+        left, right, width, height = 24, 608, 568, 320
+        label(left, 43, "Fastener kit inspection", 1.0, weight=2)
+        label(900, 40, "Next order: " + codes[state["kit"]], .76, white, 2)
+        cv2.line(img, (left, 61), (1176, 61), (91, 82, 65))
+        label(left, 93, "PHOTO REPLAY" if current.get("replay") else "LIVE CAMERA", .62, muted)
+        caption = "LAST INSPECTION"
+        if last:
+            caption += f"    /    Cycle {last['cycle']}    /    {last['kit']}"
+        label(right, 93, caption, .62, muted)
+        photo(live, left, 109, width, height)
+        photo(self.last.image, right, 109, width, height)
         result = last.get("result")
         colors = {"PASS": green, "FAIL": red, "REVIEW": amber}
-        if last:
-            label(24,146,result,1.12,colors[result],3)
-            reasons = " / ".join(last["reasons"])
-            reasons = reasons[:1].upper() + reasons[1:]
-            if len(reasons) <= 42:
-                label(176,146,reasons,.86,white,2)
-            else:
-                for i,line in enumerate(textwrap.wrap(reasons, width=65)[:3]):
-                    label(176,125+i*23,line,.63,white,2 if i==0 else 1)
-        else:
-            label(24,148,"Press SPACE to inspect the selected kit.",.78,white)
-        photo(self.last.image if last else live, 24, 185, 820, 461)
-        if not last and live is None:
-            label(226, 354, "Waiting for a camera frame", .8, muted)
+        if not last:
+            label(right + 118, 278, "Waiting for first inspection", .74, muted)
 
-        x = 870
-        label(x, 101, "MAY THE TRAY MOVE ON?", .64, muted)
         permit = state["released"]
-        fault = state["fault"] or not state["heartbeat_ok"] or not state.get("connected")
-        hold_color = red if fault or result == "FAIL" else amber if result == "REVIEW" else muted
-        cv2.rectangle(img,(x,118),(1176,201), green if permit else hold_color,-1)
-        label(x+17,177,"RELEASE" if permit else "HOLD",1.55,(38,36,26),3)
         self.had_heartbeat |= state["heartbeat_ok"]
         if not state.get("connected"):
             health = "PLC disconnected"
@@ -114,40 +103,54 @@ class DemoView:
             health = "Heartbeat lost" if self.had_heartbeat else "Starting vision..."
         else:
             health = "Heartbeat healthy"
-        label(x,234,health,.68,green if health=="Heartbeat healthy" else red,2)
-        label(x,271,"Next order: " + codes[state["kit"]],.70,white,2)
-
-        expected = last.get("expected", {})
-        label(x,319,"INSPECTED TRAY" + ("   /   " + last["kit"] if last else ""),.61,muted)
-        if expected:
-            for dx, heading in [(0,"Part"),(110,"Found"),(178,"Unsure"),(265,"Need")]:
-                label(x+dx,350,heading,.51,muted)
-            for i,(part,need) in enumerate(expected.items()):
-                y = 380 + 29*i
-                found = last["confirmed"].get(part,0)
-                possible = last["uncertain"].get(part,0)
-                wrong = found > need or found + possible < need
-                color = red if wrong else amber if possible else white
-                if wrong or possible:
-                    cv2.rectangle(img,(x-4,y-20),(1176,y+5),(56,44,48),-1)
-                    cv2.rectangle(img,(x-4,y-20),(x-1,y+5),color,-1)
-                label(x+4,y,"Foreign" if part=="other" else part.capitalize(),.61,color,2)
-                for dx,value in [(127,found),(199,possible),(276,need)]:
-                    label(x+dx,y,str(value),.65,color,2)
-        elif last:
-            label(x,353,"Part count skipped",.68,muted)
-            tag = last.get("tag")
-            if tag:
-                label(x,386,"Tag on tray: " + tag["text"],.70,red if result=="FAIL" else white,2)
-        else:
-            label(x,353,"Awaiting first inspection",.61,muted)
-
-        label(x,511,"PHOTO REPLAY" if current.get("replay") else "LIVE CAMERA",.55,muted)
-        photo(live,x,524,306,150)
         if live is None:
-            label(x+23,606,"No current frame",.66,muted)
+            message = health if health in ("Camera lost", "Heartbeat lost", "Vision fault") else "Waiting for a frame"
+            label(left + 38, 278, message, .90, red if fresh and current.get("error") else muted, 2)
+
+        label(left, 467, "TRAY MOVEMENT   /   SIMULATED PLC", .61, muted)
+        fault = state["fault"] or not state["heartbeat_ok"] or not state.get("connected")
+        hold_color = red if fault or result == "FAIL" else amber if result == "REVIEW" else muted
+        cv2.rectangle(img, (left, 486), (left + width, 565), green if permit else hold_color, -1)
+        label(left + 16, 541, "RELEASE" if permit else "HOLD", 1.53, (38, 36, 26), 3)
+        label(left, 608, health, .81, green if health == "Heartbeat healthy" else red, 2)
         if state["busy"]:
-            label(24,677,"Inspecting...",.62,amber)
-        cv2.line(img,(24,690),(1176,690),(91,82,65))
-        label(24,720,"SPACE  inspect     1  KIT-A     2  KIT-B     A  auto: " + ("ON" if state["auto"] else "OFF") + "     Q  quit",.62)
+            label(left, 644, "Inspection in progress", .68, amber)
+
+        if last:
+            label(right, 469, result, 1.04, colors[result], 3)
+            reasons = " / ".join(last["reasons"])
+            lines = textwrap.wrap(reasons[:1].upper() + reasons[1:], width=54)
+            for i, line in enumerate(lines[:3]):
+                label(right, 501 + 21*i, line, .66 if len(lines)==1 else .57, white, 2 if i==0 else 1)
+            expected = last.get("expected", {})
+            if expected:
+                columns = [right + offset for offset in (8, 204, 331, 460)]
+                for x, heading in zip(columns, ("Part", "Found", "Unsure", "Required")):
+                    label(x, 565, heading, .57, muted)
+                for i, (part, need) in enumerate(expected.items()):
+                    y = 592 + 27*i
+                    found = last["confirmed"].get(part, 0)
+                    possible = last["uncertain"].get(part, 0)
+                    wrong = found > need or found + possible < need
+                    color = red if wrong else amber if possible else white
+                    if wrong or possible:
+                        cv2.rectangle(img, (right, y-20), (1176, y+5), (56, 44, 48), -1)
+                        cv2.rectangle(img, (right, y-20), (right+3, y+5), color, -1)
+                    for x, value in zip(columns, ("Foreign object" if part=="other" else part.capitalize(), found, possible, need)):
+                        label(x, y, str(value), .64, color, 2)
+            else:
+                label(right, 578, "Part count skipped", .68, muted)
+                tag = last.get("tag")
+                if tag:
+                    label(right, 612, "Printed tag: " + tag["text"], .74, colors[result], 2)
+        else:
+            label(right, 503, "Press SPACE to inspect the selected kit.", .69, white)
+
+        cv2.line(img, (24, 690), (1176, 690), (91, 82, 65))
+        for x, shortcut, action in [(24,"SPACE","Inspect"), (235,"1 / 2","Select kit"),
+                                    (495,"A","Auto " + ("on" if state["auto"] else "off")), (1010,"Q","Quit")]:
+            key_width = cv2.getTextSize(shortcut, cv2.FONT_HERSHEY_SIMPLEX, .53, 1)[0][0] + 18
+            cv2.rectangle(img, (x,700), (x+key_width,728), (84,72,57), -1)
+            label(x+9,720,shortcut,.53)
+            label(x+key_width+10,721,action,.60,muted)
         return img

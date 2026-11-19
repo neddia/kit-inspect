@@ -44,7 +44,7 @@ uv run kit demo                  # one recording window for the station and simu
 ```
 
 In the **PLC panel**: `1` / `2` picks the kit the line is building, `SPACE` sends a kit, `a` sends one every 4 s.
-The lamp reads the simulated PLC’s `Release_Permit` signal. When it is on, this tray may move to the next station. When it is off, the tray must stay put. The large image shows the last inspection, with its verdict and reason below. The smaller live view shows the tray as you change it.
+The lamp reads the simulated PLC’s `Release_Permit` signal. When it is on, this tray may move to the next station. When it is off, the tray must stay put. The two images are the same size. The left shows the current tray and PLC state. The right shows the last inspection with its verdict, reason and part counts.
 
 Things to try:
 - A correct kit → **RELEASE**. Take a nut out → **HOLD**, "missing 1 nut".
