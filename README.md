@@ -2,28 +2,28 @@
 
 A fixed-camera inspection station for fastener kits. It counts the bolts, nuts and screws on a tray, spots foreign objects, reads the kit label, decides **PASS / FAIL / REVIEW**, and hands the result to a **simulated** Allen-Bradley PLC. The PLC releases the kit only on a PASS for the current cycle; anything else, including silence, holds it.
 
-[![Three photographed kits replayed through the station, followed by the simulated PLC withdrawing release when the vision heartbeat stops](docs/station-demo.gif)](https://neddia.github.io/kit-inspect/)
+[![Selected photos replayed through frozen v3, followed by the simulated PLC withdrawing release when the vision heartbeat stops](docs/station-demo.gif)](https://neddia.github.io/kit-inspect/)
 
 **[Explore recorded inspections](https://neddia.github.io/kit-inspect/)** · [How the PLC handshake works](#how-it-works) · [Evaluation results](#inspection-results)
 
-Cycle 10 shows why counting parts alone is insufficient. The PLC ordered KIT-B, but the camera read KIT-A on the tray. Open the viewer to see the frame and the station’s recorded reason for failing that kit. The animation above replays saved photos through the vision station and PLC simulator, then stops vision so you can see the watchdog withdraw release permission.
+The viewer opens on a KIT-A tray containing a red foreign object. Compare it with [an object covering the printed tag](https://neddia.github.io/kit-inspect/#inspection-5), which went to REVIEW because OCR could not read the label. The seven replay cycles use original photos from the final test, the tag challenge and two earlier bench cycles. Those bench photos show a KIT-A tag on a KIT-B order and a correctly labeled KIT-B. The animation ends with the simulated PLC withdrawing release when the heartbeat stops.
 
 ## Inspection results
 
-**Final test**: 48 trays photographed under normal conditions (kit tag in view, parts dropped in by hand), shot blind and scored once with the frozen model and settings:
+**Final test**: 48 KIT-A trays photographed under normal conditions (kit tag in view, parts dropped in by hand), shot blind and scored once with the frozen model and settings:
 
 | | Trays | PASS | REVIEW | FAIL |
 | --- | --- | --- | --- | --- |
 | Faulty kits (missing, extra or wrong parts, foreign objects) | 24 | **0** | 1 | 23 |
 | Good kits | 24 | 18 | 5 | 1 |
 
-No faulty kit was released. One good kit failed because a screw lay almost entirely under a bolt; five went to an operator, mostly nuts tucked against other parts. Median 120 ms per tray. [Per-tray results](reports/stage6/v3_test01/per_image.csv) · [Every experiment and model comparison](experiments.md)
+All 24 faulty trays received a hold verdict. One good kit failed because a screw lay almost entirely under a bolt; five went to an operator, mostly nuts tucked against other parts. Median inspection time on the test PC was 120 ms per tray. [Per-tray results](reports/stage6/v3_test01/per_image.csv) · [Every experiment and model comparison](experiments.md)
 
 On a harder 20-tray challenge set used for model selection (odd poses, stacked parts, junk never seen in training), the station also passed 0 of 14 faulty kits.
 
 ## Run the demo
 
-To explore the 16 cycles from the recorded bench run in a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
+To explore the seven selected v3 replay cycles in a fresh clone, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory docs` and open <http://localhost:8000>. This uses only Python’s standard library.
 
 To browse the latest 100 records on a station with local history, run `uv run kit dashboard` and open <http://localhost:8010>. Refresh to load new cycles. The station saves a photo, vision verdict and timing under each history ID. Its SQLite rows do not store the PLC release tag.
 
@@ -92,7 +92,7 @@ A candidate becomes the station's model only when you set `inspection.model` in 
 
 ## Known limits
 
-- The kit tag sits on the bowl's rim, and the model has learned to ignore it. Junk lying **on** the tag is barely seen: in a 6-tray check it was held only because it hid the printed letters. The fix is physical: a flat tag outside the bowl.
+- The kit tag sits on the bowl's rim, and the model has learned to ignore it. In the [six-tray tag challenge](reports/stage6/v3_labelval/per_image.csv), two objects touching the tag produced FAIL. All four objects covering its lettering produced REVIEW with an unreadable tag. Debris on a blank margin could escape that check. The fix is physical: a flat tag outside the bowl.
 - 0 of 24 is a small sample: the true false-pass rate could still be a few percent. Laptop timing is pending.
 - The PLC is simulated (cpppo + pylogix). No real controller was used.
 - Junk the model has never seen relies on the OpenCV check, which can't see objects inside a part's box.

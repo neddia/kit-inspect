@@ -124,7 +124,9 @@ function display() {
     filterList();
   }
   el('cycle').textContent = cycle(row);
-  el('stamp').textContent = row.time.slice(0,19).replace('T',' ');
+  el('stamp').textContent = row.source_photo || row.time.slice(0,19).replace('T',' ');
+  el('truth').hidden = !row.truth;
+  el('truth').textContent = row.truth ? 'On the tray: ' + row.truth : '';
   badge(el('verdict'),row.result);
   el('reason').textContent = reason(row);
   const frame = el('frame');
@@ -168,7 +170,7 @@ function summarize() {
   const totals = new Map();
   for (const row of records) totals.set(row.result, (totals.get(row.result) || 0) + 1);
   const times = records.map(r => r.ms_total).filter(Number.isFinite).sort((a,b) => a-b);
-  const metrics = [['Records', records.length]];
+  const metrics = [[records[0].source_photo ? 'Replay cycles' : 'Records', records.length]];
   for (const verdict of ['PASS','FAIL','REVIEW','FAULT']) {
     if (verdict !== 'FAULT' || totals.has(verdict)) metrics.push([verdict, totals.get(verdict) || 0]);
     if (totals.has(verdict)) el('filter').add(new Option(verdict,verdict));
@@ -193,8 +195,9 @@ async function start() {
     records = data.records;
     initialId = data.initial_id;
     band = data.band || band;
-    el('intro').textContent = initialId ? 'One recorded bench run. Select a cycle to see what the station found.'
-      : 'Latest saved station records. Refresh to load new cycles.';
+    el('evaluation').hidden = !data.description;
+    el('intro').textContent = data.description || (initialId ? 'One recorded bench run. Select a cycle to see what the station found.'
+      : 'Latest saved station records. Refresh to load new cycles.');
     if (!records.length) { el('status').textContent = 'No inspections saved yet. Run a station cycle, then refresh.'; return; }
     summarize();
     for (const row of records) {
