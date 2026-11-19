@@ -1,7 +1,7 @@
 """`kit`: one command for the whole project. Each subcommand runs an existing module; nothing new underneath.
 
-Run the line (two apps, like a real cell):
-    kit demo                      PLC operator panel + vision station together
+Run the line:
+    kit demo                      one operator window, independent PLC and vision processes
     kit plc                       just the simulated PLC with its operator panel
     kit station [--show]          just the vision station
     kit dashboard                 browse the latest 100 saved inspections

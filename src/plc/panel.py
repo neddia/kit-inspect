@@ -21,6 +21,7 @@ Run:
 """
 
 import argparse
+from pathlib import Path
 import queue
 import threading
 import time
@@ -83,11 +84,18 @@ def draw_panel(st, codes, specs):
     return img
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description="Simulated PLC with an operator panel")
     parser.add_argument("--kit", default="KIT-A", help="kit the line starts with")
     parser.add_argument("--every", type=float, default=4.0, help="seconds between kits in auto mode (a)")
-    args = parser.parse_args()
+    parser.add_argument("--preview-dir", type=Path, help=argparse.SUPPRESS)
+    args = parser.parse_args(argv)
+    view = None
+    window = WINDOW
+    if args.preview_dir:
+        from src.station.demo_view import DemoView
+        view = DemoView(args.preview_dir)
+        window = "Fastener kit inspection"
 
     cfg, codes = load_config()
     specs = kit_specs()
@@ -111,7 +119,7 @@ def main():
             try:
                 scan_once()
             except Exception as e:
-                st.update(released=False, heartbeat_ok=False, busy=False)
+                st.update(released=False, heartbeat_ok=False, busy=False, connected=False)
                 st["log"].append((f"PLC connection error: {type(e).__name__}: {str(e)[:50]} (retrying)", False))
                 print(st["log"][-1][0])
                 time.sleep(1.0)
@@ -130,7 +138,7 @@ def main():
                         send = st["kit"]
                 if send is not None:
                     next_auto = time.monotonic() + args.every
-                    st["busy"] = True
+                    st.update(busy=True, released=False)
                     out = line.cycle(send)
                     st["busy"] = False
                     text = (f"cycle {out['cycle_id']}  {codes.get(send)}  {'RELEASE' if out['released'] else 'HOLD'}"
@@ -141,18 +149,20 @@ def main():
                 if w["dropped"]:
                     st["log"].append((f"release dropped: {w['dropped']}", False))
                     print(st["log"][-1][0])
-                st.update(released=w["released"], heartbeat_ok=w["heartbeat_ok"], fault=w["fault"])
+                st.update(connected=True, released=w["released"], heartbeat_ok=w["heartbeat_ok"], fault=w["fault"])
                 time.sleep(line.poll_s)
 
     worker = threading.Thread(target=scan, daemon=True)
     worker.start()
-    cv2.namedWindow(WINDOW, cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
+    cv2.namedWindow(window, (cv2.WINDOW_NORMAL if view else cv2.WINDOW_AUTOSIZE) | cv2.WINDOW_GUI_NORMAL)
+    if view:
+        cv2.resizeWindow(window, 1200, 690)
     try:
         while True:
-            cv2.imshow(WINDOW, draw_panel(st, codes, specs))
+            cv2.imshow(window, view.render(st, codes) if view else draw_panel(st, codes, specs))
             key = cv2.waitKey(50) & 0xFF
             try:
-                closed = cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1
+                closed = cv2.getWindowProperty(window, cv2.WND_PROP_VISIBLE) < 1
             except cv2.error:
                 closed = True
             if key == ord("q") or closed:

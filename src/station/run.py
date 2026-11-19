@@ -136,6 +136,7 @@ def main():
     parser.add_argument("--images", help="use photos from this folder instead of the camera")
     parser.add_argument("--show", action="store_true", help="window with the live view and the last result")
     parser.add_argument("--no-history", action="store_true", help="don't record inspections")
+    parser.add_argument("--preview-dir", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     sys.stdout.reconfigure(line_buffering=True)
     quiet_jpeg_warnings()
@@ -175,8 +176,13 @@ def main():
         print(f"{tag} {who}  {frames.name:<16} {r['kit_id'] or '-':<7} {d.result:<7} "
               f"photo {r['ms_frame']:>4.0f} ms  total {r['ms']:>4.0f} ms  {'; '.join(d.reasons)}")
         state["last"] = f"cycle {r['cycle_id']}: {r['kit_id']} -> {d.result}   ({r['ms']:.0f} ms, history {tag.strip()})"
-        if args.show:
-            last["img"] = draw(r["frame"], r["out"], high)
+        if args.show or args.preview_dir:
+            annotated = draw(r["frame"], r["out"], high)
+            if args.preview_dir:
+                from src.station.demo_view import publish
+                publish(args.preview_dir / "inspection", annotated[-r["frame"].shape[0]:], cycle=r["cycle_id"],
+                        kit=r["kit_id"], result=d.result, reasons=d.reasons)
+            last["img"] = annotated
 
     station = VisionSide(inspector.inspect, frames.get, on_result=on_result, health=frames.health)
 
@@ -189,7 +195,16 @@ def main():
     print(f"Station ready. Model {model}, photos from {source}"
           f"{', history in data/history/' if history else ''}. Answering the PLC; Ctrl+C to stop.")
     try:
-        if not args.show:
+        if args.preview_dir:
+            from src.station.demo_view import publish
+            threading.Thread(target=station.serve, kwargs={"on_status": plc_status}, daemon=True).start()
+            while True:
+                frame, _ = frames.latest()
+                error = frames.health()
+                publish(args.preview_dir / "preview", None if error else frame, time=time.monotonic(),
+                        error=error, replay=bool(args.images))
+                time.sleep(.15)
+        elif not args.show:
             station.serve(on_status=plc_status)
         else:
             threading.Thread(target=station.serve, kwargs={"on_status": plc_status}, daemon=True).start()
