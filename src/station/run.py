@@ -177,7 +177,7 @@ def main():
               f"photo {r['ms_frame']:>4.0f} ms  total {r['ms']:>4.0f} ms  {'; '.join(d.reasons)}")
         state["last"] = f"cycle {r['cycle_id']}: {r['kit_id']} -> {d.result}   ({r['ms']:.0f} ms, history {tag.strip()})"
         if args.show or args.preview_dir:
-            annotated = draw(r["frame"], r["out"], high)
+            annotated = draw(r["frame"], r["out"], high, operator=bool(args.preview_dir))
             if args.preview_dir:
                 from src.station.demo_view import publish
                 publish(args.preview_dir / "inspection", annotated[-r["frame"].shape[0]:], cycle=r["cycle_id"],

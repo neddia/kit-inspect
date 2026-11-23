@@ -1,0 +1,13 @@
+kit: KIT-A
+sessions:
+  - name: short_screw01
+    split: test
+    setup: "Use the usual tagged KIT-A tray and light. Load 3 regular bolts, 3 regular nuts, 1 regular screw and 1 slightly shorter screw. Keep that same mix for all six shots. Keep both screws flat and fully visible."
+    mix: {swap_screw: 6}
+    instructions:
+      - "Place the shorter screw horizontally near the center, head left."
+      - "Turn the shorter screw vertical, head up."
+      - "Turn the shorter screw diagonal, head toward the upper left."
+      - "Turn the shorter screw to the opposite diagonal, head toward the upper right."
+      - "Move the shorter screw near the rim on the flat floor, horizontal, head right."
+      - "Move the shorter screw to the opposite side of the floor, vertical, head down."

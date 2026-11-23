@@ -1,0 +1,34 @@
+Full decision on val01, hardval, hardval2 (80 trays). Model: models/kit_yolo26n_640_v3_openvino_model. Settings: configs/station.yaml
+
+False passes:    0 of 49 faulty trays   <- the headline number
+False rejects:   2 of 31 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 8 of 31
+Review rate:     11 of 80 trays (14%)   target: under 5%
+Time per tray:   median 57 ms (this PC; laptop measured in Stage 7)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete            31    21     2       8
+empty                1     0     1       0
+extra_part           4     0     4       0
+foreign_object      20     0    18       2
+lookalike_nut        5     0     5       0
+missing_bolt         4     0     4       0
+missing_nut          5     0     5       0
+missing_screw        4     0     4       0
+stacked              4     0     3       1
+two_faults           2     0     2       0
+
+Every REVIEW and every wrong answer, with reasons:
+  val01/val01_0013.jpg       complete        REVIEW  review       1 unknown object on the tray
+  val01/val01_0034.jpg       foreign_object  REVIEW  right        maybe 2 foreign objects (0.25, 0.21)
+  hardval/hardval_0001.jpg   complete        FAIL    false reject 1 extra nut
+  hardval/hardval_0002.jpg   complete        REVIEW  review       unsure about 1 bolt (0.54); unsure about 1 nut (0.70)
+  hardval/hardval_0004.jpg   complete        REVIEW  review       unsure about 1 nut (0.43)
+  hardval/hardval_0005.jpg   complete        REVIEW  review       unsure about 1 bolt (0.69); unsure about 1 nut (0.41)
+  hardval/hardval_0006.jpg   complete        REVIEW  review       unsure about 1 nut (0.50)
+  hardval/hardval_0014.jpg   stacked         REVIEW  right        tray off position (33% of the floor is outside the photo)
+  hardval2/hardval2_0001.jpg complete        REVIEW  review       check screw size: box diagonal 108.9 px (minimum 160 px); unsure about 1 screw (0.64)
+  hardval2/hardval2_0002.jpg complete        FAIL    false reject missing 1 nut
+  hardval2/hardval2_0005.jpg complete        REVIEW  review       unsure about 1 nut (0.33); unsure about 1 screw (0.65)
+  hardval2/hardval2_0006.jpg complete        REVIEW  review       unsure about 2 nuts (0.63, 0.46)
+  hardval2/hardval2_0009.jpg foreign_object  REVIEW  right        unsure about 1 bolt (0.60); unsure about 4 nuts (0.57, 0.44, 0.31, 0.22)

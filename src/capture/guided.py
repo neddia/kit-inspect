@@ -130,6 +130,29 @@ def build_shots(mix, spec, parts):
     return shots
 
 
+def session_shots(session, plan, spec, parts):
+    if "pairs" not in session:
+        shots = build_shots(session_mix(session, plan), spec, parts)
+        if "instructions" in session:
+            for shot, instruction in zip(shots, session["instructions"], strict=True):
+                shot["instruction"] = instruction
+        return shots
+
+    shots = []
+    for i, pair in enumerate(session["pairs"], start=1):
+        part = pair["part"]
+        control, swap = build_shots({"complete": 1, f"swap_{part}": 1}, spec, parts)
+        control["instruction"] = (
+            f"Pair {i} A: Use all standard parts. {pair['layout']}"
+        )
+        swap["instruction"] = (
+            f"Pair {i} B: {pair['layout']} Replace ONLY that {part} with its smaller "
+            "version in the same position and orientation. Keep the tray and other parts still."
+        )
+        shots.extend((control, swap))
+    return shots
+
+
 def change_text(before, after):
     """'bolt -1, nut +1' : what to add or take away since the last tray."""
     return ", ".join(f"{p} {after[p] - before[p]:+d}" for p in after if after[p] != before[p])
@@ -224,7 +247,7 @@ def main():
             raise SystemExit(f"No session {args.start!r} in the plan: {names}")
         k = names.index(args.start)
         order = order[k:] + order[:k]
-    shots = {s["name"]: build_shots(session_mix(s, plan), spec, parts) for s in order}
+    shots = {s["name"]: session_shots(s, plan, spec, parts) for s in order}
     done = done_by_session()
 
     if args.show:
@@ -240,6 +263,8 @@ def main():
                 print(f"     --- pause: {pause} ---")
             print(f"{k + 1:>4}  {shot['scenario']:<15} {tray_text(shot['counts'], parts):<42}"
                   f"{'stacked  ' if shot['stacked'] else ''}{('CHANGE: ' + change) if change else ''}")
+            if "instruction" in shot:
+                print(f"      {shot['instruction']}")
             before = shot["counts"]
         return
 
@@ -342,6 +367,8 @@ def main():
 
         if waiting:
             footer = banner(width, [f"SET UP: {waiting}", "then press ENTER"], CYAN)
+        elif "instruction" in plan_shot:
+            footer = banner(width, [plan_shot["instruction"], "Hands out, SPACE to save."], CYAN)
         else:
             before = shots[name][k - 1]["counts"] if k else {p: spec.get(p, 0) for p in parts} | {"other": 0}
             change = change_text(before, plan_shot["counts"])

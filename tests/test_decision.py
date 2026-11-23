@@ -113,3 +113,44 @@ def test_iou():
     assert iou([0, 0, 10, 10], [0, 0, 10, 10]) == 1.0
     assert iou([0, 0, 10, 10], [20, 20, 30, 30]) == 0.0
     assert abs(iou([0, 0, 10, 10], [5, 0, 15, 10]) - 1 / 3) < 1e-9
+
+
+def test_nut_size_uses_longest_side_and_preserves_a_missing_part_failure():
+    dets = tray()
+    limits = {"KIT-A": 60}
+    nuts = [d for d in dets if d.cls == "nut"]
+    for nut in nuts:
+        nut.box[3] = 60
+    assert decide("KIT-A", KITS, dets, min_nut_side_px=limits).result == PASS
+    nuts[0].box[3] = 44
+    decision = decide("KIT-A", KITS, dets, min_nut_side_px=limits)
+    assert decision.result == REVIEW
+    assert "50.0 px" in decision.reasons[0]
+    assert decide("KIT-A", KITS, dets[:-1], min_nut_side_px=limits).result == FAIL
+
+
+def test_screw_size_uses_box_diagonal_and_holds_short_detection():
+    dets = tray()
+    screws = [d for d in dets if d.cls == "screw"]
+    for d in screws:
+        x = d.box[0]
+        d.box = [x, 0, x + 96, 128]  # diagonal exactly 160
+    cfg = {"min_screw_diagonal_px": {"KIT-A": 160}}
+    assert decide("KIT-A", KITS, dets, **cfg).result == PASS
+    screws[0].box[3] = 50
+    decision = decide("KIT-A", KITS, dets, **cfg)
+    assert decision.result == REVIEW and "check screw size" in decision.reasons[0]
+
+
+def test_size_upper_bounds_allow_equality_and_report_both_oversize_parts():
+    dets = tray()
+    screw = next(d for d in dets if d.cls == "screw")
+    screw.box[3] = 120  # 50 x 120 gives a diagonal of 130
+    limits = dict(max_nut_side_px={"KIT-A": 50}, max_screw_diagonal_px={"KIT-A": 130})
+    assert decide("KIT-A", KITS, dets, **limits).result == PASS
+    next(d for d in dets if d.cls == "nut").box[3] += 1
+    screw.box[3] += 1
+    decision = decide("KIT-A", KITS, dets, **limits)
+    assert decision.result == REVIEW
+    assert decision.reasons == ["check nut size: box 51.0 px (maximum 50 px)",
+                                "check screw size: box diagonal 130.9 px (maximum 130 px)"]

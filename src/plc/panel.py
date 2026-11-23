@@ -140,7 +140,7 @@ def main(argv=None):
                     next_auto = time.monotonic() + args.every
                     st.update(busy=True, released=False)
                     out = line.cycle(send)
-                    st["busy"] = False
+                    st.update(busy=False, last_cycle=out)
                     text = (f"cycle {out['cycle_id']}  {codes.get(send)}  {'RELEASE' if out['released'] else 'HOLD'}"
                             f"  {out['ms']} ms  {out['why']}")
                     st["log"].append((text, out["released"]))

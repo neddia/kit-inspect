@@ -34,6 +34,7 @@ time) for the cases that need it. FAIL and REVIEW both stop the kit, so this
 never risks a false pass.
 """
 
+from math import hypot
 from dataclasses import dataclass, field
 
 PASS, FAIL, REVIEW = "PASS", "FAIL", "REVIEW"
@@ -50,6 +51,18 @@ class Detection:
     label_ambiguous: bool = False   # possible object at the label, requires review
 
 
+    @property
+    def longest_side_px(self):
+        x1, y1, x2, y2 = self.box
+        return max(x2 - x1, y2 - y1)
+
+
+    @property
+    def diagonal_px(self):
+        x1, y1, x2, y2 = self.box
+        return hypot(x2 - x1, y2 - y1)
+
+
 @dataclass
 class Decision:
     result: str
@@ -57,6 +70,7 @@ class Decision:
     sure: dict = field(default_factory=dict)     # part -> count of sure detections
     unsure: dict = field(default_factory=dict)   # part -> count of unsure detections
     spec: dict = field(default_factory=dict)
+    size_check_boxes: list = field(default_factory=list)
 
 
 def iou(a, b):
@@ -95,7 +109,8 @@ def unsure_about(n, part, confs):
 
 
 def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=0.25, high=0.6, overlap_iou=0.6,
-           label=None):
+           label=None, min_nut_side_px=None, min_screw_diagonal_px=None,
+           max_nut_side_px=None, max_screw_diagonal_px=None):
     """label: kit_label.check_label() output, or None when the label check is off."""
     if scene_problems:
         return Decision(REVIEW, list(scene_problems))
@@ -115,6 +130,26 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
     unsure = {p: sum(d.cls == p for d in unsure_list) for p in parts}
     want = {p: spec.get(p, 0) for p in parts}
 
+    size_reasons = []
+    size_check_boxes = []
+    for d in sure_list + unsure_list:
+        if d.cls == "nut":
+            size, metric = d.longest_side_px, "box"
+            lower, upper = min_nut_side_px, max_nut_side_px
+        elif d.cls == "screw":
+            size, metric = d.diagonal_px, "box diagonal"
+            lower, upper = min_screw_diagonal_px, max_screw_diagonal_px
+        else:
+            continue
+        if lower and kit_id in lower and size < lower[kit_id]:
+            limit = f"minimum {lower[kit_id]}"
+        elif upper and kit_id in upper and size > upper[kit_id]:
+            limit = f"maximum {upper[kit_id]}"
+        else:
+            continue
+        size_check_boxes.append(d.box)
+        size_reasons.append(f"check {d.cls} size: {metric} {size:.1f} px ({limit} px)")
+
     could_be_complete = all(sure[p] <= want[p] <= sure[p] + unsure[p] for p in parts)
     if not could_be_complete:
         reasons = []
@@ -128,9 +163,9 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
             reasons.append(f"also: {plural(len(unknown_objects), 'unknown object')} on the tray")
         if label_doubt:
             reasons.append(f"also: {label_doubt}")
-        return Decision(FAIL, reasons, sure, unsure, want)
+        return Decision(FAIL, reasons + size_reasons, sure, unsure, want, size_check_boxes)
 
-    reasons = []
+    reasons = size_reasons
     for p in parts:
         if unsure[p]:
             reasons.append(unsure_about(unsure[p], p, ", ".join(f"{d.conf:.2f}" for d in unsure_list if d.cls == p)))
@@ -139,5 +174,5 @@ def decide(kit_id, kits, detections, scene_problems=(), unknown_objects=(), low=
     if label_doubt:
         reasons.append(label_doubt)
     if reasons:
-        return Decision(REVIEW, reasons, sure, unsure, want)
-    return Decision(PASS, ["counts match " + kit_id], sure, unsure, want)
+        return Decision(REVIEW, reasons, sure, unsure, want, size_check_boxes)
+    return Decision(PASS, ["counts match " + kit_id], sure, unsure, want, size_check_boxes)

@@ -1,0 +1,7 @@
+image,scenario,expected,result,outcome,reasons
+short_screw01/short_screw01_0001.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 157.8 px (minimum 160 px)
+short_screw01/short_screw01_0002.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 142.4 px (minimum 160 px)
+short_screw01/short_screw01_0003.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 145.0 px (minimum 160 px)
+short_screw01/short_screw01_0004.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 149.8 px (minimum 160 px)
+short_screw01/short_screw01_0005.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 149.8 px (minimum 160 px)
+short_screw01/short_screw01_0006.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 148.5 px (minimum 160 px)

@@ -1,0 +1,18 @@
+Full decision on short_screw01 (6 trays). Model: models/kit_yolo26n_640_v3_openvino_model. Settings: configs/station.yaml
+
+False passes:    0 of 6 faulty trays   <- the headline number
+False rejects:   0 of 0 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 0 of 0
+Review rate:     6 of 6 trays (100%)   target: under 5%
+Time per tray:   median 154 ms (this PC; laptop measured in Stage 7)
+
+scenario         trays  PASS  FAIL  REVIEW
+swap_screw           6     0     0       6
+
+Every REVIEW and every wrong answer, with reasons:
+  short_screw01/short_screw01_0001.jpg swap_screw      REVIEW  right        check screw size: box diagonal 157.8 px (minimum 160 px)
+  short_screw01/short_screw01_0002.jpg swap_screw      REVIEW  right        check screw size: box diagonal 142.4 px (minimum 160 px)
+  short_screw01/short_screw01_0003.jpg swap_screw      REVIEW  right        check screw size: box diagonal 145.0 px (minimum 160 px)
+  short_screw01/short_screw01_0004.jpg swap_screw      REVIEW  right        check screw size: box diagonal 149.8 px (minimum 160 px)
+  short_screw01/short_screw01_0005.jpg swap_screw      REVIEW  right        check screw size: box diagonal 149.8 px (minimum 160 px)
+  short_screw01/short_screw01_0006.jpg swap_screw      REVIEW  right        check screw size: box diagonal 148.5 px (minimum 160 px)

@@ -1,0 +1,18 @@
+kit: KIT-A
+sessions:
+  - name: size_pairs01
+    split: val
+    setup: "Use the usual webcam, tray, light and visible KIT-A tag. Keep one small nut and one short screw beside the tray. If resuming on B, preserve or recreate the preceding A layout."
+    pairs:
+      - {part: screw, layout: "Target the horizontal screw at the center. Leave both ends clear."}
+      - {part: screw, layout: "Target the vertical screw on the left. Leave both ends clear."}
+      - {part: screw, layout: "Target the diagonal screw near the right rim, on the flat floor."}
+      - {part: screw, layout: "Target the horizontal screw near the top rim, head to the left."}
+      - {part: screw, layout: "Target the screw touching a nut at its side. Keep both ends visible."}
+      - {part: screw, layout: "Target the screw with its tip just under a bolt. Keep its head in place during the swap."}
+      - {part: nut, layout: "Target the flat nut centered in the tray, clear on all sides."}
+      - {part: nut, layout: "Target the flat nut on the left, with a corner pointing up in the image."}
+      - {part: nut, layout: "Target the flat nut near the right rim, on the flat floor."}
+      - {part: nut, layout: "Target the flat nut near the top rim, with a flat side facing up in the image."}
+      - {part: nut, layout: "Target the nut beside a screw head, with one edge touching."}
+      - {part: nut, layout: "Stand the target nut on one outer flat near the center, hole facing the KIT-A tag. Leave space around it."}

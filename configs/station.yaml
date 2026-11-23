@@ -47,6 +47,10 @@ inspection:                # Stage 6. Every number here is chosen on train/val d
                            # screw at 0.66), but on hard good kits a bolt head reads as "nut" at 0.60-0.78.
                            # high 0.75 turned 1 hardval false reject into a REVIEW, fixed none on hardval2
                            # (those are MISSED nuts: no threshold helps). Kept 0.7: one tray isn't a reason.
+    max_nut_side_px: {KIT-A: 92}  # Isolated regular nuts, excluding stacked trays: 98th percentile (87.234 px) + 5%, rounded.
+    max_screw_diagonal_px: {KIT-A: 206.22}  # Largest isolated regular screw diagonal + 5%.
+    min_screw_diagonal_px: {KIT-A: 160}  # 4% below the smallest isolated regular training screw (166.9 px).
+    min_nut_side_px: {KIT-A: 60}  # Fixed webcam rig. A smaller box may be occluded: request REVIEW.
     overlap_iou: 0.6       # a detection overlapping a more confident one this much counts as unsure
   scene:
     min_brightness: 140    # flat-floor median brightness; train/val range was 150-248
@@ -77,7 +81,7 @@ plc:
   simulated: true         # The PLC is a Python simulator, not real hardware.
   host: 127.0.0.1          # where the PLC (simulator) listens; EtherNet/IP port 44818
   port: 44818
-  timeout_s: 2.0           # No Insp_Done within this time = FAIL. Tune once latency is measured.
+  timeout_s: 2.0           # No Insp_Done within this time = hold (no result). Tune once latency is measured.
   heartbeat_ms: 500        # Vision_Heartbeat toggle period.
   heartbeat_timeout_s: 2.0 # PLC side: no heartbeat toggle for this long = vision fault, block release.
   poll_ms: 10              # how often each side checks the tags
