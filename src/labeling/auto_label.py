@@ -1,4 +1,4 @@
-"""Stage 4, step 1: SAM 3 draws the outlines, shape decides the class.
+"""Labelling step 1: SAM 3 draws the outlines, shape decides the class.
 
 What we learned exploring (Nov 16): SAM 3 finds WHERE every part is very well,
 but its words are unreliable (bolts called "screw", bolt heads called "nut",
@@ -24,7 +24,7 @@ Run from the repo root (train and val sessions; resumes, skips images already do
 
 Writes:
     data/labels/auto/<session>/<image>.json   outlines, boxes, classes, measurements
-    reports/stage4/auto_label.csv             per image: true vs auto counts, flagged or not
+    reports/labeling/auto_label.csv             per image: true vs auto counts, flagged or not
 """
 
 import argparse
@@ -43,7 +43,7 @@ from src.labeling.tray import find_tray
 
 PARTS = ["bolt", "nut", "screw"]
 AUTO = DATA / "labels" / "auto"
-REPORT = REPO / "reports" / "stage4" / "auto_label.csv"
+REPORT = REPO / "reports" / "labeling" / "auto_label.csv"
 
 SAM_CONF = 0.25      # SAM's own cutoff; low on purpose: missing a part is worse than an extra outline
 MIN_AREA = 200       # px; smaller outlines are specks, not parts

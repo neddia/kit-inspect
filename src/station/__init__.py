@@ -1,1 +1,1 @@
-"""Stage 7: FastAPI app, web dashboard, and SQLite history."""
+"""Vision station: camera loop, PLC handshake, operator window, FastAPI history dashboard and SQLite history."""

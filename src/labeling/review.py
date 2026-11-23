@@ -1,4 +1,4 @@
-"""Stage 4, step 2: review every auto-label by eye and fix what's wrong.
+"""Labelling step 2: review every auto-label by eye and fix what's wrong.
 
 Shows each image with its outlines (red bolt, green nut, blue screw; grey =
 outside the bowl, not counted) and a side panel comparing the manifest's

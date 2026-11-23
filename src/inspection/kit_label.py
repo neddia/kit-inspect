@@ -167,7 +167,7 @@ def main():
     parser = argparse.ArgumentParser(description="Read the kit label on the tray (camera snapshot or a photo)")
     parser.add_argument("--image", help="a photo instead of the camera")
     parser.add_argument("--kit", default="KIT-A", help="the kit the PLC would expect")
-    parser.add_argument("--out", default="reports/stage7/label_check.jpg")
+    parser.add_argument("--out", default="reports/kit_label/label_check.jpg")
     args = parser.parse_args()
     quiet_jpeg_warnings()
     cfg, kits = load_settings()

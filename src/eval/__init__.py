@@ -1,1 +1,1 @@
-"""Stages 2, 5, 8: metrics, failure gallery, and the report."""
+"""Evaluation: zero-shot baseline, tray counts, and the full PASS / FAIL / REVIEW decision against the truth."""

@@ -1,7 +1,4 @@
-# Station settings. Sections get filled in as stages need them:
-#   camera:     Stage 1 (below)
-#   thresholds: Stage 6 (confidence, REVIEW band)
-#   plc:        Stage 7 (below)
+# Station settings: camera, inspection (model, decision thresholds, scene, label, leftovers), plc.
 
 camera:
   usb_id: "046d:081d"      # live station rediscovers this webcam after unplug
@@ -29,7 +26,7 @@ camera:
     tilt_absolute: 0
   # No focus control: the C510 is fixed-focus. Set the camera height so the tray is sharp.
 
-inspection:                # Stage 6. Every number here is chosen on train/val data; freeze before the test sessions.
+inspection:                # Every number here is chosen on train/val data; freeze before the test sessions.
   model: models/kit_yolo26n_640_v3_openvino_model   # v3, 4 classes (bolt, nut, screw, other = junk), Nov 18-19.
                           # v2 + train06 (KIT tags in view, nuts touching parts, stacked nuts, bolts tip to tip).
                           # vs v2: boxes on the KIT tag in 92 station photos 215 -> 1; false passes 0 on hardval2,

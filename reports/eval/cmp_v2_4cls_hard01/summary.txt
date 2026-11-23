@@ -1,0 +1,17 @@
+Full decision on hard01 (50 trays). Model: runs/train/v2_4cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    0 of 50 faulty trays   <- the headline number
+False rejects:   0 of 0 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 0 of 0
+Review rate:     4 of 50 trays (8%)   target: under 5%
+Time per tray:   median 50 ms (this PC)
+
+scenario         trays  PASS  FAIL  REVIEW
+foreign_object      29     0    28       1
+two_faults          21     0    18       3
+
+Every REVIEW and every wrong answer, with reasons:
+  hard01/hard01_0029.jpg     two_faults      REVIEW  right        too dark (floor brightness 122, normal 140+)
+  hard01/hard01_0042.jpg     two_faults      REVIEW  right        too dark (floor brightness 74, normal 140+)
+  hard01/hard01_0043.jpg     two_faults      REVIEW  right        too dark (floor brightness 72, normal 140+)
+  hard01/hard01_0049.jpg     foreign_object  REVIEW  right        tray off position (14% of the floor is outside the photo)

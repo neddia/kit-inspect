@@ -122,7 +122,7 @@ sessions:
     mix: {foreign_object: 6}
 
   - name: test01
-    split: test           # THE headline set (Stage 8): normal conditions, frozen model + settings, shot blind, scored ONCE.
+    split: test           # THE headline set: normal conditions, frozen model + settings, shot blind, scored ONCE.
                           # Change nothing after seeing its score; a fix means a new set. Score: kit eval --session test01 --label
     setup: "FINAL TEST SET: normal light, KIT-A tag ONLY (a KIT-B tag would be a correct FAIL scored as wrong), fully in view. Drop the parts in from your hand like a packer, don't arrange them"
     loose: true

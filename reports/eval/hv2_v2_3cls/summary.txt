@@ -1,0 +1,28 @@
+Full decision on hardval2 (20 trays). Model: runs/train/v2_3cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    1 of 14 faulty trays   <- the headline number
+False rejects:   1 of 6 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 4 of 6
+Review rate:     12 of 20 trays (60%)   target: under 5%
+Time per tray:   median 50 ms (this PC)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete             6     1     1       4
+foreign_object      12     1     3       8
+lookalike_nut        2     0     2       0
+
+Every REVIEW and every wrong answer, with reasons:
+  hardval2/hardval2_0001.jpg complete        REVIEW  review       unsure about 2 nuts (0.54, 0.45)
+  hardval2/hardval2_0002.jpg complete        FAIL    false reject missing 1 nut
+  hardval2/hardval2_0004.jpg complete        REVIEW  review       unsure about 1 screw (0.67)
+  hardval2/hardval2_0005.jpg complete        REVIEW  review       unsure about 1 bolt (0.25); unsure about 2 screws (0.49, 0.48)
+  hardval2/hardval2_0006.jpg complete        REVIEW  review       unsure about 1 bolt (0.57); unsure about 2 nuts (0.69, 0.54)
+  hardval2/hardval2_0008.jpg foreign_object  REVIEW  right        unsure about 2 screws (0.62, 0.56); 1 unknown object on the tray
+  hardval2/hardval2_0009.jpg foreign_object  PASS    FALSE PASS   counts match KIT-A
+  hardval2/hardval2_0010.jpg foreign_object  REVIEW  right        unsure about 1 nut (0.56); 1 unknown object on the tray
+  hardval2/hardval2_0011.jpg foreign_object  REVIEW  right        6 unknown objects on the tray
+  hardval2/hardval2_0013.jpg foreign_object  REVIEW  right        unsure about 2 nuts (0.58, 0.33); 1 unknown object on the tray
+  hardval2/hardval2_0014.jpg foreign_object  REVIEW  right        unsure about 2 nuts (0.32, 0.27)
+  hardval2/hardval2_0015.jpg foreign_object  REVIEW  right        unsure about 1 nut (0.56); 1 unknown object on the tray
+  hardval2/hardval2_0016.jpg foreign_object  REVIEW  right        2 unknown objects on the tray
+  hardval2/hardval2_0018.jpg foreign_object  REVIEW  right        unsure about 1 nut (0.26); 2 unknown objects on the tray

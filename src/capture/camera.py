@@ -151,7 +151,7 @@ if __name__ == "__main__":
     cap = open_camera(cfg)
     ok, frame = cap.read()
     cap.release()
-    out = REPO / "reports" / "stage1" / "camera_test.jpg"
+    out = REPO / "reports" / "camera" / "camera_test.jpg"
     out.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out), frame)
     print(f"Camera OK: {frame.shape[1]}x{frame.shape[0]}, all {len(cfg['controls'])} settings locked and verified")

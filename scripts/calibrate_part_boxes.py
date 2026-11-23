@@ -22,7 +22,7 @@ def main():
         inputs.append((annotation["image"], annotation["objects"]))
     for path in sorted((images / "size_pairs01").glob("*.jpg")):
         inputs.append((str(path.relative_to(images)), None))
-    out = REPO / "reports/size_pairs01_geometry/part_box_calibration.csv"
+    out = REPO / "reports/eval/size_pairs01_geometry/part_box_calibration.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", newline="") as stream:
         writer = csv.writer(stream)

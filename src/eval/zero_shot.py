@@ -1,4 +1,4 @@
-"""Stage 2: zero-shot baseline. How well does YOLOE count parts with NO training?
+"""Zero-shot baseline. How well does YOLOE count parts with NO training?
 
 Runs YOLOE on every image of a session and compares its counts with the
 manifest (the true counts you entered while capturing).
@@ -11,7 +11,7 @@ Visual prompt (one reference photo with a box around one of each part;
 make it first with: uv run python -m src.eval.draw_reference):
     uv run python -m src.eval.zero_shot --session pilot --visual configs/visual_prompt.yaml
 
-Outputs, in reports/stage2/<run name>/:
+Outputs, in reports/zero_shot/<run name>/:
     summary.txt    the numbers for experiments.md
     per_image.csv  true vs predicted counts for every image, at the best cutoff
     wrong/         annotated images the counts got wrong (for the failure gallery)
@@ -148,7 +148,7 @@ def main():
     model, prompts = load_model(args, parts)
     mode = "visual" if args.visual else "text " + "/".join(prompts)
     name = args.name or f"{args.session}_{Path(args.model).stem}_{'visual' if args.visual else 'text'}"
-    out = REPO / "reports" / "stage2" / name
+    out = REPO / "reports" / "zero_shot" / name
     (out / "wrong").mkdir(parents=True, exist_ok=True)
 
     all_dets, results = predict_all(model, rows, args, parts)

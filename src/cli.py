@@ -68,8 +68,8 @@ def train(args):
     run("src.labeling.export_yolo", "train (export labels)", ["--classes", classes])
     data = "data/yolo_other/data.yaml" if classes == "4" else "data/yolo/data.yaml"
     run("src.train.train", "train", ["model=models/yolo26n.pt", f"data={data}", f"epochs={epochs}", "imgsz=640",
-                                     "batch=16", "seed=0", "project=runs/stage5", f"name={name}", "exist_ok=True"])
-    best = max(REPO.glob(f"runs/**/stage5/{name}/weights/best.pt"), key=lambda p: p.stat().st_mtime)
+                                     "batch=16", "seed=0", f"project={REPO / 'runs' / 'train'}", f"name={name}", "exist_ok=True"])
+    best = REPO / "runs" / "train" / name / "weights" / "best.pt"
     shutil.copy2(best, out)
     from ultralytics import YOLO
     YOLO(str(out)).export(format="openvino", imgsz=640, half=False)

@@ -1,0 +1,22 @@
+Full decision on val01 (40 trays). Model: runs/train/v2_4cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    0 of 24 faulty trays   <- the headline number
+False rejects:   0 of 16 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 1 of 16
+Review rate:     2 of 40 trays (5%)   target: under 5%
+Time per tray:   median 47 ms (this PC)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete            16    15     0       1
+empty                1     0     1       0
+extra_part           4     0     4       0
+foreign_object       4     0     3       1
+missing_bolt         4     0     4       0
+missing_nut          3     0     3       0
+missing_screw        4     0     4       0
+stacked              2     0     2       0
+two_faults           2     0     2       0
+
+Every REVIEW and every wrong answer, with reasons:
+  val01/val01_0013.jpg       complete        REVIEW  review       1 unknown object on the tray
+  val01/val01_0034.jpg       foreign_object  REVIEW  right        maybe 2 foreign objects (0.47, 0.28)

@@ -15,7 +15,7 @@ A machine vision station that decides whether a fastener kit may leave the stati
 | Faulty kits (missing, extra or wrong parts, foreign objects) | 24 | **0** | 1 | 23 |
 | Good kits | 24 | 18 | 5 | 1 |
 
-No faulty kit was released, including foreign objects never seen in training. Five good kits went to an operator, mostly a nut tucked against another part; one was failed wrongly because a screw lay almost entirely under a bolt ([it's tray 4 in the demo](https://neddia.github.io/kit-inspect/#inspection-3)). Median 120 ms per tray on a CPU. [Per-tray results](reports/stage6/v3_test01/per_image.csv)
+No faulty kit was released, including foreign objects never seen in training. Five good kits went to an operator, mostly a nut tucked against another part; one was failed wrongly because a screw lay almost entirely under a bolt ([it's tray 4 in the demo](https://neddia.github.io/kit-inspect/#inspection-3)). Median 120 ms per tray on a CPU. [Per-tray results](reports/eval/v3_test01/per_image.csv)
 
 On a harder 20-tray challenge set used for model selection (odd poses, stacked parts, junk never seen in training), the station also released 0 of 14 faulty kits.
 
@@ -101,7 +101,7 @@ A candidate becomes the station's model only when you set `inspection.model` in 
 
 ## Known limits
 
-- The kit tag sits on the bowl's rim, and the model has learned to ignore it. In the [six-tray tag challenge](reports/stage6/v3_labelval/per_image.csv), two objects touching the tag produced FAIL. All four objects covering its lettering produced REVIEW with an unreadable tag. Debris on a blank margin could escape that check. The fix is physical: a flat tag outside the bowl.
+- The kit tag sits on the bowl's rim, and the model has learned to ignore it. In the [six-tray tag challenge](reports/eval/v3_labelval/per_image.csv), two objects touching the tag produced FAIL. All four objects covering its lettering produced REVIEW with an unreadable tag. Debris on a blank margin could escape that check. The fix is physical: a flat tag outside the bowl.
 - 0 of 24 is a small sample: the true false-pass rate could still be a few percent. Laptop timing is pending.
 - The PLC is simulated (cpppo + pylogix). No real controller was used.
 - Junk the model has never seen relies on the OpenCV check, which can't see objects inside a part's box.

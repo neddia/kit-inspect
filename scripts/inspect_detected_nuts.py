@@ -26,7 +26,7 @@ def pair9_crop(frame, center, edges, axis, label):
 
 def main():
     inspector = Inspector()
-    out = ROOT / "reports" / "size_pairs01_geometry"
+    out = ROOT / "reports" / "eval" / "size_pairs01_geometry"
     out.mkdir(parents=True, exist_ok=True)
     panels = []
     with (out / "detected_nuts.csv").open("w", newline="") as table:

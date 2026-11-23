@@ -32,4 +32,4 @@ data/anomaly/
 data/history/
 
 # kit_label diagnostic output, overwritten on every run
-reports/stage7/label_check*.jpg
+reports/kit_label/label_check*.jpg

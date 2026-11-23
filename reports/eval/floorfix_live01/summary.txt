@@ -1,0 +1,14 @@
+Full decision on live01 (29 trays). Model: models/kit_yolo26n_640_v2_4cls_openvino_model. Settings: configs/station.yaml
+
+False passes:    0 of 29 faulty trays   <- the headline number
+False rejects:   0 of 0 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 0 of 0
+Review rate:     2 of 29 trays (7%)   target: under 5%
+Time per tray:   median 53 ms (this PC)
+
+scenario         trays  PASS  FAIL  REVIEW
+foreign_object      29     0    27       2
+
+Every REVIEW and every wrong answer, with reasons:
+  live01/live01_0024.jpg     foreign_object  REVIEW  right        too dark (floor brightness 139, normal 140+)
+  live01/live01_0025.jpg     foreign_object  REVIEW  right        too dark (floor brightness 131, normal 140+)

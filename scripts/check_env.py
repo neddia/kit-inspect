@@ -1,17 +1,17 @@
-"""Stage 0 check: is every library installed and working in its most basic form?
+"""Environment check: is every library installed and working in its most basic form?
 
 Run from the repo root:
     uv run python scripts/check_env.py
 
 Each check does one small real thing (not just an import) and prints PASS or FAIL.
-The Stage 0 "done when" from the build plan is checks 1 and 3:
+The checks that must pass are 1 and 3:
 CUDA works, and a pretrained YOLO26n saves an annotated image.
 """
 
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-OUT_DIR = REPO / "reports" / "stage0"
+OUT_DIR = REPO / "reports" / "setup"
 
 
 def check_torch_cuda():
@@ -49,7 +49,7 @@ def check_yolo26n():
     device = 0 if torch.cuda.is_available() else "cpu"  # 0 = the first GPU
 
     # Pretrained on COCO (80 everyday classes). It knows "person" and "bus",
-    # not "washer" - teaching it washers is Stage 5.
+    # not "washer" - teaching it washers takes fine-tuning.
     model = YOLO(str(REPO / "models" / "yolo26n.pt"))  # downloads (~5 MB) the first time
     result = model(ASSETS / "bus.jpg", device=device, verbose=False)[0]
 
@@ -73,9 +73,9 @@ def check_openvino():
 
 def check_transformers():
     import transformers
-    from transformers import Florence2ForConditionalGeneration  # noqa: F401  (Stage 6 OCR model class)
+    from transformers import Florence2ForConditionalGeneration  # noqa: F401  (OCR model class)
 
-    return f"transformers {transformers.__version__}, Florence-2 class available (weights download in Stage 6)"
+    return f"transformers {transformers.__version__}, Florence-2 class available (weights download on first use)"
 
 
 def check_fastapi():

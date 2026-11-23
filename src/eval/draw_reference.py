@@ -12,7 +12,7 @@ For each part it asks for in turn: drag a box tightly around ONE example,
 then press ENTER (or SPACE). Press c to cancel and redo that box.
 Pick clear examples: not touching anything, fully in view.
 
-Saves configs/visual_prompt.yaml and a picture of your boxes in reports/stage2/.
+Saves configs/visual_prompt.yaml and a picture of your boxes in reports/zero_shot/.
 """
 
 import argparse
@@ -52,7 +52,7 @@ def main():
 
     out = REPO / "configs" / "visual_prompt.yaml"
     out.write_text(yaml.safe_dump({"image": args.image, "boxes": boxes}, sort_keys=False))
-    pic = REPO / "reports" / "stage2" / "visual_prompt.jpg"
+    pic = REPO / "reports" / "zero_shot" / "visual_prompt.jpg"
     pic.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(pic), shown)
     print(f"Saved {out.relative_to(REPO)} and {pic.relative_to(REPO)}: {boxes}")

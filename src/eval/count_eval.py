@@ -1,4 +1,4 @@
-"""Stage 5: score a trained model the way the station uses it: whole trays.
+"""Score a trained model the way the station uses it: whole trays.
 
 The training table (precision, recall, mAP) grades single boxes. The station
 needs EVERY count on a tray right. This runs the model on every image of a
@@ -7,16 +7,16 @@ session and scores trays, with the same scoring as the zero-shot baseline
 
 Decision rule here is only "counts match the kit -> PASS, else FAIL" (rules 4
 and 5 of the plan). The REVIEW rules (uncertain confidence, uncovered objects,
-scene check) come in Stage 6, so foreign objects on a complete kit WILL show
+scene check) are scored by decision_eval, so foreign objects on a complete kit WILL show
 as false passes here; they're listed by scenario so you can see it.
 
 Only detections inside the bowl are counted (a spare on the desk isn't in the kit).
 
 Run from the repo root:
-    uv run python -m src.eval.count_eval --weights runs/detect/runs/stage5/baseline-2/weights/best.pt
+    uv run python -m src.eval.count_eval --weights runs/train/baseline-2/weights/best.pt
     uv run python -m src.eval.count_eval --weights ... --session val01 --name baseline
 
-Outputs, in reports/stage5/<name>/:
+Outputs, in reports/training/<name>/:
     summary.txt    numbers for experiments.md
     per_image.csv  true vs predicted counts at the chosen cutoff
     wrong/         annotated images whose counts were wrong (failure gallery)
@@ -53,7 +53,7 @@ def main():
         raise SystemExit(f"No manifest rows for session {args.session!r}")
     weights = Path(args.weights)
     name = args.name or f"{weights.parent.parent.name}_{args.session}"
-    out = REPO / "reports" / "stage5" / name
+    out = REPO / "reports" / "training" / name
     (out / "wrong").mkdir(parents=True, exist_ok=True)
 
     model = YOLO(str(weights))

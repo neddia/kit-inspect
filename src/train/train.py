@@ -1,4 +1,4 @@
-"""Stage 5: train YOLO, same as the `yolo detect train` command, minus the JPEG spam.
+"""Train YOLO, same as the `yolo detect train` command, minus the JPEG spam.
 
 The C510's JPEGs carry harmless padding that makes libjpeg print
 "Corrupt JPEG data" for every image it loads, hundreds per epoch. That's
@@ -8,7 +8,7 @@ processes inherit that) and keeps Python's own output and errors.
 
 Takes the same key=value arguments as the yolo command:
     uv run python -m src.train.train model=models/yolo26n.pt data=data/yolo/data.yaml \\
-        epochs=100 imgsz=640 batch=16 seed=0 project=runs/stage5 name=baseline
+        epochs=100 imgsz=640 batch=16 seed=0 project=$PWD/runs/train name=baseline
 """
 
 import sys

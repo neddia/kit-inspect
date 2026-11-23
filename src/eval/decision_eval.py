@@ -1,4 +1,4 @@
-"""Stage 6: score the full station decision (PASS / FAIL / REVIEW) against the manifest.
+"""Score the full station decision (PASS / FAIL / REVIEW) against the manifest.
 
 Unlike count_eval (counts only, PASS/FAIL), this runs the whole inspection:
 model + scene check + unknown-object check + decision rules, with the settings
@@ -16,7 +16,7 @@ Run from the repo root:
     uv run python -m src.eval.decision_eval --session val01 --name v1
     uv run python -m src.eval.decision_eval --name int8 --model models/kit_yolo26n_640_v1_int8_openvino_model
 
-Writes reports/stage6/<name>/: summary.txt, per_image.csv, and images/ with an
+Writes reports/eval/<name>/: summary.txt, per_image.csv, and images/ with an
 annotated picture of every tray that wasn't a clean right answer.
 """
 
@@ -52,7 +52,7 @@ def main():
     quiet_jpeg_warnings()
     with (DATA / "manifest.csv").open(newline="") as f:
         rows = [r for r in csv.DictReader(f) if r["session"] in args.session]
-    out_dir = REPO / "reports" / "stage6" / args.name
+    out_dir = REPO / "reports" / "eval" / args.name
     (out_dir / "images").mkdir(parents=True, exist_ok=True)
 
     model = None
@@ -86,7 +86,7 @@ def main():
              f"False rejects:   {tally['false reject']} of {len(good)} good trays (FAIL on a good kit)",
              f"Good kits sent to REVIEW: {tally['review']} of {len(good)}",
              f"Review rate:     {reviews} of {n} trays ({reviews / n:.0%})   target: under 5%",
-             f"Time per tray:   median {sorted(times)[n // 2]:.0f} ms (this PC; laptop measured in Stage 7)", "",
+             f"Time per tray:   median {sorted(times)[n // 2]:.0f} ms (this PC)", "",
              f"{'scenario':<16}{'trays':>6}{'PASS':>6}{'FAIL':>6}{'REVIEW':>8}"]
     for s, c in sorted(by_scenario.items()):
         lines.append(f"{s:<16}{sum(c.values()):>6}{c['PASS']:>6}{c['FAIL']:>6}{c['REVIEW']:>8}")

@@ -1,0 +1,25 @@
+Full decision on hard02 (30 trays). Model: runs/train/v2_4cls/weights/best.pt. Settings: configs/station.yaml
+
+False passes:    0 of 0 faulty trays   <- the headline number
+False rejects:   4 of 30 good trays (FAIL on a good kit)
+Good kits sent to REVIEW: 9 of 30
+Review rate:     9 of 30 trays (30%)   target: under 5%
+Time per tray:   median 45 ms (this PC)
+
+scenario         trays  PASS  FAIL  REVIEW
+complete            30    17     4       9
+
+Every REVIEW and every wrong answer, with reasons:
+  hard02/hard02_0001.jpg     complete        FAIL    false reject missing 1 nut
+  hard02/hard02_0002.jpg     complete        FAIL    false reject missing 1 nut
+  hard02/hard02_0003.jpg     complete        FAIL    false reject missing 1 nut
+  hard02/hard02_0004.jpg     complete        REVIEW  review       unsure about 1 nut (0.38)
+  hard02/hard02_0005.jpg     complete        REVIEW  review       unsure about 1 screw (0.49)
+  hard02/hard02_0008.jpg     complete        FAIL    false reject 1 extra bolt; missing 1 screw
+  hard02/hard02_0009.jpg     complete        REVIEW  review       unsure about 1 nut (0.24); unsure about 2 screws (0.60, 0.51)
+  hard02/hard02_0018.jpg     complete        REVIEW  review       unsure about 1 screw (0.24)
+  hard02/hard02_0026.jpg     complete        REVIEW  review       unsure about 1 screw (0.50)
+  hard02/hard02_0027.jpg     complete        REVIEW  review       unsure about 2 screws (0.44, 0.35)
+  hard02/hard02_0028.jpg     complete        REVIEW  review       unsure about 1 screw (0.55)
+  hard02/hard02_0029.jpg     complete        REVIEW  review       unsure about 1 screw (0.70)
+  hard02/hard02_0030.jpg     complete        REVIEW  review       unsure about 1 screw (0.38)

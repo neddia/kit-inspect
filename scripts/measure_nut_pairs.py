@@ -40,7 +40,7 @@ def measure(frame, center):
 
 
 def main():
-    out = ROOT / "reports" / "size_pairs01_geometry"
+    out = ROOT / "reports" / "eval" / "size_pairs01_geometry"
     out.mkdir(parents=True, exist_ok=True)
     panels = []
     with (out / "nut_widths.csv").open("w", newline="") as table:

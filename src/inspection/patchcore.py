@@ -1,4 +1,4 @@
-"""PatchCore unknown-object check. Stage 6 experiment, NOT used by the station.
+"""PatchCore unknown-object check. An experiment, NOT used by the station.
 
 Decided Nov 17: the station uses the OpenCV check (leftovers.py). PatchCore caught
 more on val (25/26 vs 23/26) but takes ~2 s per tray on 2 CPU cores (OpenCV: 9 ms)
@@ -164,7 +164,7 @@ def main():
     parser = argparse.ArgumentParser(description="PatchCore unknown-object check (experiment)")
     parser.add_argument("command", choices=["prep", "fit", "score", "heatmap"])
     parser.add_argument("images", nargs="*", help="tray photos or bowl crops (score/heatmap)")
-    parser.add_argument("--out", default=str(REPO / "reports" / "stage6" / "patchcore" / "heatmaps.jpg"))
+    parser.add_argument("--out", default=str(REPO / "reports" / "eval" / "patchcore" / "heatmaps.jpg"))
     args = parser.parse_args()
 
     if args.command == "prep":

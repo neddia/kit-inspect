@@ -1,4 +1,4 @@
-# What each kit should contain. The decision logic (Stage 6) compares
+# What each kit should contain. The decision logic compares
 # detected counts against these numbers.
 kits:
   KIT-A:

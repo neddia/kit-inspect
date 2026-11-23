@@ -1,4 +1,4 @@
-"""Stage 4 -> 5 bridge: write the reviewed labels in YOLO's training format.
+"""Labelling -> training: write the reviewed labels in YOLO's training format.
 
 YOLO wants, for every image, a .txt file with one line per part:
     class x_center y_center width height        (all four as fractions of the image size)
@@ -94,7 +94,7 @@ def main():
 
     if args.check:
         # Round trip: read the .txt back and draw it. If the boxes sit on the parts, the maths is right.
-        out_dir = DATA.parent / "reports" / "stage5" / "label_check"
+        out_dir = DATA.parent / "reports" / "training" / "label_check"
         out_dir.mkdir(parents=True, exist_ok=True)
         colors = [(40, 40, 255), (40, 200, 40), (255, 140, 0), (255, 0, 255)]
         for img in random.Random(0).sample(sorted((YOLO / "images" / "train").glob("*.jpg")), args.check):
