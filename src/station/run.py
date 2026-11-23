@@ -57,7 +57,8 @@ class FolderFrames:
         self.paths = sorted(Path(folder).glob("*.jpg"))
         if not self.paths:
             raise SystemExit(f"no .jpg files in {folder}")
-        self.i, self.name, self.frame = 0, "-", None
+        # Show the first photo before any trigger, like a camera already looking at the tray.
+        self.i, self.name, self.frame = 0, "-", cv2.imread(str(self.paths[0]))
 
     def get(self, after=None):
         path = self.paths[self.i % len(self.paths)]

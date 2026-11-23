@@ -1,0 +1,31 @@
+image,scenario,expected,result,outcome,reasons
+size_pairs01/size_pairs01_0001.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0002.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 72.6 px (minimum 160 px); unsure about 1 screw (0.55)
+size_pairs01/size_pairs01_0003.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0004.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 77.5 px (minimum 160 px)
+size_pairs01/size_pairs01_0005.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0006.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 84.3 px (minimum 160 px)
+size_pairs01/size_pairs01_0007.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0008.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 74.8 px (minimum 160 px)
+size_pairs01/size_pairs01_0009.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0010.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 81.1 px (minimum 160 px); unsure about 1 screw (0.32)
+size_pairs01/size_pairs01_0011.jpg,complete,PASS,REVIEW,review,unsure about 1 screw (0.59)
+size_pairs01/size_pairs01_0012.jpg,swap_screw,NOT_PASS,FAIL,right,missing 1 screw
+size_pairs01/size_pairs01_0013.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0014.jpg,swap_nut,NOT_PASS,REVIEW,right,check nut size: box 49.6 px (minimum 60 px)
+size_pairs01/size_pairs01_0015.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0016.jpg,swap_nut,NOT_PASS,REVIEW,right,check nut size: box 49.5 px (minimum 60 px)
+size_pairs01/size_pairs01_0017.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0018.jpg,swap_nut,NOT_PASS,REVIEW,right,check nut size: box 52.8 px (minimum 60 px)
+size_pairs01/size_pairs01_0019.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0020.jpg,swap_nut,NOT_PASS,REVIEW,right,check nut size: box 54.1 px (minimum 60 px)
+size_pairs01/size_pairs01_0021.jpg,complete,PASS,PASS,right,counts match KIT-A
+size_pairs01/size_pairs01_0022.jpg,swap_nut,NOT_PASS,REVIEW,right,check nut size: box 49.0 px (minimum 60 px)
+size_pairs01/size_pairs01_0023.jpg,complete,PASS,FAIL,false reject,missing 1 screw
+size_pairs01/size_pairs01_0024.jpg,swap_nut,NOT_PASS,FAIL,right,missing 1 screw; check nut size: box 44.6 px (minimum 60 px)
+short_screw01/short_screw01_0001.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 157.8 px (minimum 160 px)
+short_screw01/short_screw01_0002.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 142.4 px (minimum 160 px)
+short_screw01/short_screw01_0003.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 145.0 px (minimum 160 px)
+short_screw01/short_screw01_0004.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 149.8 px (minimum 160 px)
+short_screw01/short_screw01_0005.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 149.8 px (minimum 160 px)
+short_screw01/short_screw01_0006.jpg,swap_screw,NOT_PASS,REVIEW,right,check screw size: box diagonal 148.5 px (minimum 160 px)
